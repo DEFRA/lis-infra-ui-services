@@ -1,0 +1,95 @@
+{% extends "govuk/template.njk" %}
+
+{# Import GOVUK components globally #}
+{% from "govuk/components/breadcrumbs/macro.njk" import govukBreadcrumbs %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{# Import custom components globally #}
+{% from "heading/macro.njk" import appHeading %}
+
+{% set mainClasses = "app-main-wrapper" %}
+
+{% block headIcons %}
+  <link rel="icon" sizes="48x48" href="{{ getAssetPath("node_modules/govuk-frontend/dist/govuk/assets/images/favicon.ico") }}">
+  <link rel="icon" sizes="any" href="{{ getAssetPath("node_modules/govuk-frontend/dist/govuk/assets/images/favicon.svg") }}" type="image/svg+xml" >
+  <link rel="mask-icon" href="{{ getAssetPath("node_modules/govuk-frontend/dist/govuk/assets/images/govuk-icon-mask.svg") }}" color="{{ themeColor }}">
+  <link rel="apple-touch-icon" href="{{ getAssetPath("node_modules/govuk-frontend/dist/govuk/assets/images/govuk-icon-180.png") }}">
+  <link rel="manifest" href="{{ getAssetPath("node_modules/govuk-frontend/dist/govuk/assets/manifest.json") }}">
+{% endblock %}
+
+{% block head %}
+  <link href="{{ getAssetPath('src/client/stylesheets/application.scss') }}" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({
+    homepageUrl: "https://www.gov.uk/",
+    classes: "app-header",
+    containerClasses: "govuk-width-container",
+    serviceName: serviceName,
+    serviceUrl: serviceUrl,
+    useTudorCrown: true
+  }) }}
+  {{ govukServiceNavigation({
+    navigation: navigation
+  }) }}
+
+  {{ govukPhaseBanner({
+    tag: {
+      html: "<b>Pre-Alpha</b>",
+      classes: "govuk-tag--red"
+    },
+    html: 'This is a proof of concept.'
+  }) }}
+{% endblock %}
+
+{% block pageTitle %}
+  {{ pageTitle }} | {{ serviceName }}
+{% endblock %}
+
+{% block beforeContent %}
+  {% if breadcrumbs.length > 1 %}
+    {{ govukBreadcrumbs({
+      items: breadcrumbs
+    }) }}
+  {% endif %}
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+  {{ govukFooter({
+    meta: {
+      items: [
+        {
+          href: "https://www.gov.uk/help/privacy-notice",
+          text: "Privacy"
+        },
+        {
+          href: "https://www.gov.uk/help/cookies",
+          text: "Cookies"
+        },
+        {
+          href: "https://www.gov.uk/help/accessibility-statement",
+          text: "Accessibility statement"
+        }
+      ]
+    }
+  }) }}
+{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" src="{{ getAssetPath('src/client/javascripts/application.js') }}"></script>
+{% endblock %}

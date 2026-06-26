@@ -1,0 +1,27 @@
+{% macro appHeading(params = {}) %}
+  {% set level = params.level or 1 %}
+  {% set tagName = "h" ~ level %}
+  {% set headingClasses = "govuk-heading-l" %}
+
+  {% if params.classes %}
+    {% set headingClasses = headingClasses ~ " " ~ params.classes %}
+  {% endif %}
+
+  {% if params.captionText or params.captionHtml %}
+    <span class="govuk-caption-l{% if params.captionClasses %} {{ params.captionClasses }}{% endif %}">
+      {% if params.captionHtml %}
+        {{ params.captionHtml | safe }}
+      {% else %}
+        {{ params.captionText }}
+      {% endif %}
+    </span>
+  {% endif %}
+
+  <{{ tagName }} class="{{ headingClasses }}">
+    {% if params.html %}
+      {{ params.html | safe }}
+    {% else %}
+      {{ params.text }}
+    {% endif %}
+  </{{ tagName }}>
+{% endmacro %}
