@@ -57,3 +57,20 @@ test('createProcessLogging builds a logger and request logger from process-style
   assert.equal(typeof logging.logger.info, 'function')
   assert.equal(typeof logging.requestLogger.options.ignoreFunc, 'function')
 })
+
+test('createLogConfigFromEnv preserves json log format when explicitly requested', () => {
+  assert.deepEqual(
+    createLogConfigFromEnv({
+      env: {
+        NODE_ENV: 'development',
+        LOG_FORMAT: 'json'
+      }
+    }),
+    {
+      enabled: true,
+      level: 'info',
+      format: 'json',
+      redact: []
+    }
+  )
+})

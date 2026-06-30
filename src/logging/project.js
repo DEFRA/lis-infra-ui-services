@@ -3,8 +3,16 @@ import { createLoggerOptions } from './logger-options.js'
 import { createRequestLoggerPlugin } from './request-logger.js'
 
 const loggingCache = new WeakMap()
-const logLevels = new Set(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
-const logFormats = new Set(['ecs', 'pino-pretty'])
+const logLevels = new Set([
+  'fatal',
+  'error',
+  'warn',
+  'info',
+  'debug',
+  'trace',
+  'silent'
+])
+const logFormats = new Set(['ecs', 'json', 'pino-pretty'])
 const productionRedactPaths = [
   'req.headers.authorization',
   'req.headers.cookie',
@@ -82,8 +90,7 @@ export function createProjectLogging({
 
   const resolvedLogConfig = logConfig ?? config?.get('log')
   const resolvedServiceName = serviceName ?? config?.get('serviceName')
-  const resolvedServiceVersion =
-    serviceVersion ?? config?.get('serviceVersion')
+  const resolvedServiceVersion = serviceVersion ?? config?.get('serviceVersion')
   const loggerOptions = createLoggerOptions({
     logConfig: resolvedLogConfig,
     serviceName: resolvedServiceName,

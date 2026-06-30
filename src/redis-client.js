@@ -12,8 +12,7 @@ export function buildRedisClient({
   const db = 0
   const keyPrefix = redisConfig.keyPrefix
   const host = redisConfig.host
-  const resolvedClasses =
-    ClusterClass && RedisClass ? null : require('ioredis')
+  const resolvedClasses = ClusterClass && RedisClass ? null : require('ioredis')
   const ResolvedClusterClass = ClusterClass ?? resolvedClasses.Cluster
   const ResolvedRedisClass = RedisClass ?? resolvedClasses.Redis
 

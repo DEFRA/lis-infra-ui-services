@@ -48,10 +48,35 @@ test('createNunjucksContextBuilder resolves built asset paths from the Vite mani
   assert.deepEqual(loggerMessages, [])
 })
 
-test('createNunjucksContextBuilder falls back to the source asset path when the Vite manifest is unavailable', () => {
+test('createNunjucksContextBuilder falls back to the source asset path without logging in development', () => {
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
+    buildNavigation: () => [],
+    getRequestBasePath: () => '',
+    logger: {
+      error(message) {
+        loggerMessages.push(message)
+      }
+    },
+    readFileSync() {
+      throw new Error('manifest missing')
+    }
+  })
+
+  const context = contextBuilder({ headers: {}, path: '/' })
+
+  assert.equal(
+    context.getAssetPath('src/client/stylesheets/application.scss'),
+    '/public/src/client/stylesheets/application.scss'
+  )
+  assert.deepEqual(loggerMessages, [])
+})
+
+test('createNunjucksContextBuilder logs once when the Vite manifest is unavailable in production', () => {
+  const loggerMessages = []
+  const contextBuilder = createNunjucksContextBuilder({
+    config: createConfig({ isProduction: true }),
     buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {

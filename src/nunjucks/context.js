@@ -21,7 +21,7 @@ export function createNunjucksContextBuilder({
         viteManifest = JSON.parse(readFileSync(manifestPath, 'utf-8'))
         hasLoggedManifestError = false
       } catch (error) {
-        if (!hasLoggedManifestError) {
+        if (config.get('isProduction') && !hasLoggedManifestError) {
           logger.error(`Vite ${path.basename(manifestPath)} not found`)
           hasLoggedManifestError = true
         }

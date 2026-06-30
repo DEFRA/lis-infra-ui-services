@@ -82,8 +82,14 @@ function buildPackageTemplatePaths(packageRoot) {
     return templatePaths
   }
 
-  addIfExists(templatePaths, path.resolve(packageRoot, 'src/nunjucks/templates'))
-  addIfExists(templatePaths, path.resolve(packageRoot, 'src/nunjucks/components'))
+  addIfExists(
+    templatePaths,
+    path.resolve(packageRoot, 'src/nunjucks/templates')
+  )
+  addIfExists(
+    templatePaths,
+    path.resolve(packageRoot, 'src/nunjucks/components')
+  )
 
   return templatePaths
 }
