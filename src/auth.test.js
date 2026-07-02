@@ -38,7 +38,10 @@ test('buildCurrentRequestUrl reapplies the forwarded prefix for mounted spokes',
     3206
   )
 
-  assert.equal(url.toString(), 'http://localhost:3000/chicken/move/about?step=1')
+  assert.equal(
+    url.toString(),
+    'http://localhost:3000/chicken/move/about?step=1'
+  )
 })
 
 test('createSpokeAuthToken returns a bearer token value', async () => {
@@ -50,7 +53,9 @@ test('createSpokeAuthToken returns a bearer token value', async () => {
         sub: 'test-user',
         email: 'test.user@example.com',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
+        roles: ['lis-role-caseworker'],
+        permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
       }
     },
     jwtConfig
@@ -68,7 +73,9 @@ test('createSpokeAuthToken signs a JWT with the expected hub service claims', as
         sub: 'test-user',
         email: 'test.user@example.com',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
+        roles: ['lis-role-caseworker'],
+        permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
       }
     },
     jwtConfig
@@ -79,8 +86,13 @@ test('createSpokeAuthToken signs a JWT with the expected hub service claims', as
 
   assert.equal(payload.sub, 'hub-service')
   assert.equal(payload.taxonomy, 'status')
-  assert.equal(payload.spokeId, 'status-cattle')
+  assert.equal(payload.spokeId, 'cattle-status')
   assert.equal(payload.actorEmail, 'test.user@example.com')
+  assert.deepEqual(payload.actorRoles, ['lis-role-caseworker'])
+  assert.deepEqual(payload.actorPermissions, [
+    'lis-perm-front-office',
+    'lis-perm-cattle-read'
+  ])
 })
 
 test('getHubJwtPayloadFromRequest only accepts the hub session cookie', async () => {
@@ -111,7 +123,9 @@ test('getHubServiceJwtPayloadFromRequest accepts bearer tokens for fetch-based r
         sub: 'test-user',
         email: 'test.user@example.com',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
+        roles: ['lis-role-caseworker'],
+        permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
       }
     },
     jwtConfig
@@ -134,6 +148,80 @@ test('getHubServiceJwtPayloadFromRequest accepts bearer tokens for fetch-based r
 
   assert.equal(payload.sub, 'hub-service')
   assert.equal(payload.actorEmail, 'test.user@example.com')
+  assert.deepEqual(payload.actorPermissions, [
+    'lis-perm-front-office',
+    'lis-perm-cattle-read'
+  ])
+})
+
+test('createSpokeGuard hydrates hub auth permissions from hub-service JWTs', async () => {
+  const guard = createSpokeGuard({
+    spokeId: 'cattle-status',
+    hubOrigin: 'http://localhost:3000',
+    cookieName: 'livestock_hub_jwt',
+    cookieOptions: getHubJwtCookieOptions({
+      ttlSeconds: jwtConfig.ttlSeconds,
+      isSecure: false
+    }),
+    assetPath: '/public',
+    port: 3210,
+    secret: jwtConfig.secret,
+    issuer: jwtConfig.issuer,
+    audience: jwtConfig.audience
+  })
+
+  const bearerToken = await createSpokeAuthToken(
+    {
+      taxonomyId: 'status',
+      spokeId: 'cattle-status',
+      user: {
+        sub: 'test-user',
+        email: 'test.user@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        roles: ['lis-role-caseworker'],
+        permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
+      }
+    },
+    jwtConfig
+  )
+
+  let onPreAuthHandler
+  await guard.plugin.register(
+    {
+      ext(event, handler) {
+        assert.equal(event, 'onPreAuth')
+        onPreAuthHandler = handler
+      }
+    },
+    {}
+  )
+
+  const request = {
+    path: '/',
+    headers: {
+      authorization: bearerToken
+    },
+    app: {}
+  }
+  const h = {
+    continue: Symbol('continue'),
+    response() {
+      throw new Error('response should not be called')
+    }
+  }
+
+  const result = await onPreAuthHandler(request, h)
+
+  assert.equal(result, h.continue)
+  assert.deepEqual(request.app.hubAuth, {
+    sub: 'test-user',
+    email: 'test.user@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    roles: ['lis-role-caseworker'],
+    permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
+  })
 })
 
 test('resolveAccessMode returns the most restrictive mode', () => {
@@ -161,8 +249,8 @@ test('resolveAccessMode returns the most restrictive mode', () => {
 })
 
 test('getCurrentSpokeAccessMode resolves the current status spoke to hub-service', () => {
-  assert.equal(getCurrentSpokeAccessMode('status-cattle'), 'hub-service')
-  assert.equal(getCurrentSpokeAccessMode('move-cattle'), 'user-session')
+  assert.equal(getCurrentSpokeAccessMode('cattle-status'), 'hub-service')
+  assert.equal(getCurrentSpokeAccessMode('cattle-move'), 'user-session')
 })
 
 test('createSpokeGuard returns a hub-service guard for status spokes', () => {

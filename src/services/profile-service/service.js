@@ -1,6 +1,8 @@
 export function createProfileService({ config, fetchImpl = globalThis.fetch }) {
   if (!config?.get) {
-    throw new Error('Profile service requires a config object with a get method')
+    throw new Error(
+      'Profile service requires a config object with a get method'
+    )
   }
 
   if (typeof fetchImpl !== 'function') {
@@ -53,19 +55,27 @@ export function createProfileService({ config, fetchImpl = globalThis.fetch }) {
 }
 
 function buildProfileResponse(profile = {}) {
-  const permissions = Array.isArray(profile.permissions) ? profile.permissions : []
+  const roles = normalizeStringArray(profile.roles)
+  const permissions = normalizeStringArray(profile.permissions)
   const holdings = Array.isArray(profile.holdings) ? profile.holdings : []
-  const groups = [...new Set(
-    permissions
-      .filter((permission) => typeof permission === 'string' && permission.length > 0)
-      .map((permission) => permission.split('.')[0])
-  )]
 
   return {
-    groups,
+    roles,
     permissions,
     holdings
   }
+}
+
+function normalizeStringArray(values) {
+  if (!Array.isArray(values)) {
+    return []
+  }
+
+  return [
+    ...new Set(
+      values.filter((value) => typeof value === 'string' && value.length > 0)
+    )
+  ]
 }
 
 function getProfileServiceConfig(config) {

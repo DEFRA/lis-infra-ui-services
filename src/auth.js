@@ -115,7 +115,10 @@ export function isPublicRequest(request, assetPath) {
   )
 }
 
-export async function issueHubJwt(user, { secret, issuer, audience, ttlSeconds }) {
+export async function issueHubJwt(
+  user,
+  { secret, issuer, audience, ttlSeconds }
+) {
   return new SignJWT({
     email: user.email ?? '',
     firstName: user.firstName ?? '',
@@ -145,7 +148,9 @@ export async function createSpokeAuthToken(
     actorSub: user?.sub ?? '',
     actorEmail: user?.email ?? '',
     actorFirstName: user?.firstName ?? '',
-    actorLastName: user?.lastName ?? ''
+    actorLastName: user?.lastName ?? '',
+    actorRoles: Array.isArray(user?.roles) ? user.roles : [],
+    actorPermissions: Array.isArray(user?.permissions) ? user.permissions : []
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject('hub-service')
@@ -211,7 +216,7 @@ function getAuthorizationBearerToken(request) {
     return null
   }
 
-  const match = authorizationHeader.match(/^Bearer\s+(.+)$/i)
+  const match = /^Bearer\s+(.+)$/i.exec(authorizationHeader)
 
   return match?.[1] ?? null
 }
@@ -370,7 +375,13 @@ export function createHubServiceGuard({
         sub: hubServiceJwtPayload.actorSub,
         email: hubServiceJwtPayload.actorEmail,
         firstName: hubServiceJwtPayload.actorFirstName,
-        lastName: hubServiceJwtPayload.actorLastName
+        lastName: hubServiceJwtPayload.actorLastName,
+        roles: Array.isArray(hubServiceJwtPayload.actorRoles)
+          ? hubServiceJwtPayload.actorRoles
+          : [],
+        permissions: Array.isArray(hubServiceJwtPayload.actorPermissions)
+          ? hubServiceJwtPayload.actorPermissions
+          : []
       }
 
       return h.continue
