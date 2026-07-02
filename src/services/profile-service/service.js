@@ -13,7 +13,11 @@ export function createProfileService({ config, fetchImpl = globalThis.fetch }) {
     const profileService = getProfileServiceConfig(config)
 
     if (!profileService.url) {
-      throw new Error('Profile service is enabled but not configured')
+      // TODO: no profile service exists yet, so return an empty profile to let
+      // the hubs run locally. Once the profile service exists, an unconfigured
+      // URL should be an error again:
+      // throw new Error('Profile service is enabled but not configured')
+      return buildProfileResponse()
     }
 
     const headers = {
