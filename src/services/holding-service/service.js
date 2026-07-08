@@ -1,5 +1,9 @@
 import { getLoggerForConfig } from '../../logging/index.js'
 
+/**
+ * @param {{ config: object, fetchImpl?: Function }} options
+ * @returns {Function}
+ */
 export function createHoldingService({ config, fetchImpl = globalThis.fetch }) {
     const logger = getLoggerForConfig(config)
 

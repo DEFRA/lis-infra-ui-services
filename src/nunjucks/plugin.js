@@ -10,9 +10,11 @@ import { buildPrimaryNavigation } from './build-navigation.js'
 import * as filters from './filters.js'
 import * as globals from './globals.js'
 
+const PACKAGE_JSON_FILENAME = 'package.json'
+
 function findDependentPackageName(projectRoot, prefix) {
   const packageJson = JSON.parse(
-    readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
+    readFileSync(path.join(projectRoot, PACKAGE_JSON_FILENAME), 'utf8')
   )
   const dependencyNames = Object.keys({
     ...packageJson.dependencies,
@@ -38,7 +40,7 @@ function resolvePackageRoot(require, packageName) {
   }
 
   while (true) {
-    const packageJsonPath = path.join(currentPath, 'package.json')
+    const packageJsonPath = path.join(currentPath, PACKAGE_JSON_FILENAME)
 
     if (existsSync(packageJsonPath)) {
       return currentPath
@@ -106,25 +108,34 @@ function buildRoutePaths(packageRoot) {
   return routePaths
 }
 
-export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
-  const projectRoot = config.get('root')
-  const infrastructureRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '../..'
+function resolveTemplateRoots(projectRoot) {
+  const packageRequire = createRequire(
+    path.join(projectRoot, PACKAGE_JSON_FILENAME)
   )
-  const require = createRequire(path.join(projectRoot, 'package.json'))
   const speciesRoot = resolvePackageRoot(
-    require,
+    packageRequire,
     findDependentPackageName(projectRoot, '@livestock/species-')
   )
   const taxonomyRoot = resolvePackageRoot(
-    require,
+    packageRequire,
     findDependentPackageName(projectRoot, '@livestock/taxonomy-')
   )
   const govukFrontendRoot = path.dirname(
-    require.resolve('govuk-frontend/package.json')
+    packageRequire.resolve('govuk-frontend/package.json')
   )
-  const nunjucksEnvironment = nunjucks.configure(
+
+  return { speciesRoot, taxonomyRoot, govukFrontendRoot }
+}
+
+function buildNunjucksEnvironment({
+  config,
+  projectRoot,
+  infrastructureRoot,
+  speciesRoot,
+  taxonomyRoot,
+  govukFrontendRoot
+}) {
+  return nunjucks.configure(
     [
       path.join(govukFrontendRoot, 'dist'),
       ...buildProjectTemplatePaths(projectRoot),
@@ -141,6 +152,28 @@ export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
       noCache: config.get('nunjucks.noCache')
     }
   )
+}
+
+/**
+ * @param {{ config: object, logger: object, getRequestBasePath: Function }} options
+ * @returns {object}
+ */
+export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
+  const projectRoot = config.get('root')
+  const infrastructureRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../..'
+  )
+  const { speciesRoot, taxonomyRoot, govukFrontendRoot } =
+    resolveTemplateRoots(projectRoot)
+  const nunjucksEnvironment = buildNunjucksEnvironment({
+    config,
+    projectRoot,
+    infrastructureRoot,
+    speciesRoot,
+    taxonomyRoot,
+    govukFrontendRoot
+  })
 
   const buildNavigation = (request) =>
     buildPrimaryNavigation({

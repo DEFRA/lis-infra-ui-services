@@ -1,3 +1,7 @@
+/**
+ * @param {{ config: object, fetchImpl?: Function }} options
+ * @returns {Function}
+ */
 export function createProfileService({ config, fetchImpl = globalThis.fetch }) {
   if (!config?.get) {
     throw new Error(
