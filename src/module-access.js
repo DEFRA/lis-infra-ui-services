@@ -150,7 +150,7 @@ function getModuleSpecies(module) {
   }
 
   if (typeof module?.path === 'string') {
-    const [species] = module.path.split('/').find(Boolean)
+    const species = module.path.split('/')[1]
 
     if (species) {
       return species.toLowerCase()
