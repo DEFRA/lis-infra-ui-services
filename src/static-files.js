@@ -1,3 +1,7 @@
+/**
+ * @param {{ assetPaths: string[], staticCacheTimeout: number, noContentStatusCode: number }} options
+ * @returns {object}
+ */
 export function createStaticFilesPlugin({
   assetPaths,
   staticCacheTimeout,

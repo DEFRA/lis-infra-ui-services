@@ -1,3 +1,5 @@
+/** @import { Request } from '@hapi/hapi' */
+
 function normalizePath(path) {
   if (!path || path === '/') {
     return '/'
@@ -26,6 +28,10 @@ function getForwardedPrefix(request) {
   return normalizeBasePath(forwardedPrefix.trim())
 }
 
+/**
+ * @param {{ request: Request, basePath: string }} options
+ * @returns {boolean}
+ */
 export function isPrefixedRequest({ request, basePath }) {
   const normalizedBasePath = normalizeBasePath(basePath)
 
@@ -45,6 +51,10 @@ export function isPrefixedRequest({ request, basePath }) {
   )
 }
 
+/**
+ * @param {{ request: Request, basePath: string }} options
+ * @returns {string}
+ */
 export function getRequestBasePath({ request, basePath }) {
   const normalizedBasePath = normalizeBasePath(basePath)
 
@@ -53,6 +63,10 @@ export function getRequestBasePath({ request, basePath }) {
     : ''
 }
 
+/**
+ * @param {{ request: Request, routePath?: string, basePath?: string }} options
+ * @returns {string}
+ */
 export function buildAppPath({ request, routePath = '/', basePath = '' }) {
   const requestBasePath = getRequestBasePath({ request, basePath })
   const normalizedPath = normalizePath(routePath)
@@ -64,15 +78,27 @@ export function buildAppPath({ request, routePath = '/', basePath = '' }) {
   return `${requestBasePath}${normalizedPath}`
 }
 
-export function getRouteVariants({ routePath = '/', basePath = '' }) {
+/**
+ * @param {{ routePath?: string, basePath?: string }} options
+ * @returns {string[]}
+ */
+export function getRouteVariants({ routePath = '/', basePath: _basePath = '' }) {
   const normalizedPath = normalizePath(routePath)
   return [normalizedPath]
 }
 
-export function getAssetPaths({ basePath = '', assetPath }) {
+/**
+ * @param {{ basePath?: string, assetPath: string }} options
+ * @returns {string[]}
+ */
+export function getAssetPaths({ basePath: _basePath = '', assetPath }) {
   return [assetPath]
 }
 
+/**
+ * @param {object} config
+ * @returns {object}
+ */
 export function createBasePathHelpersForConfig(config) {
   function getBasePath() {
     return config.get('basePath')

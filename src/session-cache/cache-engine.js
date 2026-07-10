@@ -3,6 +3,10 @@ import { Engine as CatboxMemory } from '@hapi/catbox-memory'
 
 import { buildRedisClient } from '../redis-client.js'
 
+/**
+ * @param {{ engine: string, config: object, logger: object, buildRedisClientFn?: Function, CatboxRedisClass?: Function, CatboxMemoryClass?: Function }} options
+ * @returns {CatboxRedis | CatboxMemory}
+ */
 export function getCacheEngine({
   engine,
   config,

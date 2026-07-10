@@ -1,3 +1,4 @@
+/** @import { Logger } from 'pino' */
 import { createLogger } from './logger.js'
 import { createLoggerOptions } from './logger-options.js'
 import { createRequestLoggerPlugin } from './request-logger.js'
@@ -70,6 +71,10 @@ function parseEnum(value, supportedValues, defaultValue) {
   return supportedValues.has(value) ? value : defaultValue
 }
 
+/**
+ * @param {{ config?: object, logConfig?: object, serviceName?: string, serviceVersion?: string }} options
+ * @returns {{ loggerOptions: object, logger: Logger, requestLogger: object }}
+ */
 export function createProjectLogging({
   config,
   logConfig,
@@ -109,6 +114,10 @@ export function createProjectLogging({
   return logging
 }
 
+/**
+ * @param {{ env?: object }} [options]
+ * @returns {object}
+ */
 export function createLogConfigFromEnv({ env = process.env } = {}) {
   const isProduction = env.NODE_ENV === 'production'
 
@@ -127,6 +136,10 @@ export function createLogConfigFromEnv({ env = process.env } = {}) {
   }
 }
 
+/**
+ * @param {{ env?: object, serviceName?: string, serviceVersion?: string }} options
+ * @returns {{ loggerOptions: object, logger: Logger, requestLogger: object }}
+ */
 export function createProcessLogging({
   env = process.env,
   serviceName,
@@ -139,14 +152,26 @@ export function createProcessLogging({
   })
 }
 
+/**
+ * @param {object} config
+ * @returns {object}
+ */
 export function getLoggerOptionsForConfig(config) {
   return createProjectLogging({ config }).loggerOptions
 }
 
+/**
+ * @param {object} config
+ * @returns {Logger}
+ */
 export function getLoggerForConfig(config) {
   return createProjectLogging({ config }).logger
 }
 
+/**
+ * @param {object} config
+ * @returns {object}
+ */
 export function getRequestLoggerPluginForConfig(config) {
   return createProjectLogging({ config }).requestLogger
 }

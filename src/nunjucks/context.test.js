@@ -5,7 +5,7 @@ import { createNunjucksContextBuilder } from './context.js'
 
 function createConfig(overrides = {}) {
   const values = {
-    root: '/tmp/example-app',
+    root: '/workspace/example-app',
     assetPath: '/public',
     serviceName: 'Example service',
     isProduction: false,
@@ -26,7 +26,7 @@ test('createNunjucksContextBuilder resolves built asset paths from the Vite mani
     buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
-      error(message) {
+      error(loggedError, message) {
         loggerMessages.push(message)
       }
     },
@@ -55,7 +55,7 @@ test('createNunjucksContextBuilder falls back to the source asset path without l
     buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
-      error(message) {
+      error(loggedError, message) {
         loggerMessages.push(message)
       }
     },
@@ -80,7 +80,7 @@ test('createNunjucksContextBuilder logs once when the Vite manifest is unavailab
     buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
-      error(message) {
+      error(loggedError, message) {
         loggerMessages.push(message)
       }
     },
