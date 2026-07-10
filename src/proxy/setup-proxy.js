@@ -6,6 +6,14 @@ const require = createRequire(import.meta.url)
  * If HTTP_PROXY is set setupProxy() will enable it globally
  * for a number of http clients.
  * Node Fetch will still need to pass a ProxyAgent in on each call.
+ * @param {object} options
+ * @param {string} options.proxyUrl
+ * @param {object} [options.logger]
+ * @param {Function} [options.createProxyAgentFn]
+ * @param {Function} [options.setGlobalDispatcherFn]
+ * @param {Function} [options.bootstrapFn]
+ * @param {object} [options.globalObject]
+ * @returns {void}
  */
 export function setupProxy({
   proxyUrl,

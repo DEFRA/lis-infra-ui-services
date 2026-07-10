@@ -1,5 +1,9 @@
 import path from 'node:path'
 
+/**
+ * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function }} options
+ * @returns {Function}
+ */
 export function createNunjucksContextBuilder({
   config,
   buildNavigation,
@@ -22,7 +26,7 @@ export function createNunjucksContextBuilder({
         hasLoggedManifestError = false
       } catch (error) {
         if (config.get('isProduction') && !hasLoggedManifestError) {
-          logger.error(`Vite ${path.basename(manifestPath)} not found`)
+          logger.error(error, `Vite ${path.basename(manifestPath)} not found`)
           hasLoggedManifestError = true
         }
       }

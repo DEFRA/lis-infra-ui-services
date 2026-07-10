@@ -5,6 +5,10 @@ const defaultIgnorePath = (_, request) =>
   request.path === '/health' ||
   request.path === '/favicon.ico'
 
+/**
+ * @param {{ loggerOptions: object, ignoreFunc?: Function }} options
+ * @returns {object}
+ */
 export function createRequestLoggerPlugin({
   loggerOptions,
   ignoreFunc = defaultIgnorePath

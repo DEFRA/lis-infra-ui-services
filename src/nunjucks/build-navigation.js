@@ -1,8 +1,15 @@
 import { SPOKES, SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
 
+/** @import { Request } from '@hapi/hapi' */
+
 const PERMISSION_PREFIX = 'lis-perm-'
 const ACCESS_LEVELS = new Set(['read', 'write', 'admin'])
+const MIN_PERMISSION_PARTS = 2
 
+/**
+ * @param {{ request: Request, basePath?: string, hubOrigin?: string }} options
+ * @returns {object[]}
+ */
 export function buildPrimaryNavigation({
   request,
   basePath = '',
@@ -84,7 +91,7 @@ function parsePermission(permission) {
     .split('-')
     .filter(Boolean)
 
-  if (parts.length < 2 || !ACCESS_LEVELS.has(parts.at(-1))) {
+  if (parts.length < MIN_PERMISSION_PARTS || !ACCESS_LEVELS.has(parts.at(-1))) {
     return null
   }
 
@@ -122,14 +129,14 @@ function getCurrentSpecies({ request, basePath }) {
 
     const [speciesSlug, taxonomySlug] = path.split('/').filter(Boolean)
 
-    const taxonomy = SUPPORTED_TAXONOMIES.find(
+    const matchingTaxonomy = SUPPORTED_TAXONOMIES.find(
       (taxonomy) => taxonomy.slug === taxonomySlug
     )
-    const species = SUPPORTED_SPECIES.find(
+    const matchingSpecies = SUPPORTED_SPECIES.find(
       (species) => species.slug === speciesSlug
     )
-    if (taxonomy && species) {
-      return species
+    if (matchingTaxonomy && matchingSpecies) {
+      return matchingSpecies
     }
   }
 

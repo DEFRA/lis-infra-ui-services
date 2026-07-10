@@ -1,3 +1,4 @@
+/** @import { Request, ResponseToolkit, Lifecycle } from '@hapi/hapi' */
 import { statusCodes } from '../status-codes.js'
 
 function statusCodeMessage(statusCode) {
@@ -29,6 +30,11 @@ function getLogMessage(response, statusCode) {
   )
 }
 
+/**
+ * @param {Request} request
+ * @param {ResponseToolkit} h
+ * @returns {Lifecycle.ReturnValue}
+ */
 export function catchAll(request, h) {
   const { response } = request
   const statusCode = getStatusCode(response)

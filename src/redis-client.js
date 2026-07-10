@@ -1,7 +1,13 @@
 import { createRequire } from 'node:module'
 
+import { milliseconds } from './duration.js'
+
 const require = createRequire(import.meta.url)
 
+/**
+ * @param {{ redisConfig: object, logger?: object, ClusterClass?: Function, RedisClass?: Function }} options
+ * @returns {object}
+ */
 export function buildRedisClient({
   redisConfig,
   logger,
@@ -43,7 +49,7 @@ export function buildRedisClient({
         ],
         {
           keyPrefix,
-          slotsRefreshTimeout: 10000,
+          slotsRefreshTimeout: milliseconds.tenSeconds,
           dnsLookup: (address, callback) => callback(null, address),
           redisOptions: {
             db,

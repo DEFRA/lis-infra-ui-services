@@ -1,4 +1,5 @@
 import { isPublicRequest } from './auth.js'
+import { statusCodes } from './status-codes.js'
 
 const ACCESS_LEVEL_RANKS = {
   read: 1,
@@ -8,7 +9,12 @@ const ACCESS_LEVEL_RANKS = {
 
 const PERMISSION_PREFIX = 'lis-perm-'
 const SPECIES_SCOPED_TAXONOMIES = new Set(['home', 'status', 'events'])
+const MIN_PERMISSION_PARTS = 2
 
+/**
+ * @param {{ assetPath: string, moduleAccess: object }} options
+ * @returns {object}
+ */
 export function createModuleAccessGuard({ assetPath, moduleAccess }) {
   const resolvedModuleAccess = normalizeModuleAccess(moduleAccess)
 
@@ -31,7 +37,7 @@ export function createModuleAccessGuard({ assetPath, moduleAccess }) {
 
           return h
             .response({ message: 'Module access denied' })
-            .code(403)
+            .code(statusCodes.forbidden)
             .takeover()
         })
       }
@@ -39,6 +45,10 @@ export function createModuleAccessGuard({ assetPath, moduleAccess }) {
   }
 }
 
+/**
+ * @param {{ hubId: string, user: object, modules?: object[], taxonomy?: string }} options
+ * @returns {object[]}
+ */
 export function getAccessibleModulesForHub({
   hubId,
   user,
@@ -62,6 +72,11 @@ export function getAccessibleModulesForHub({
   })
 }
 
+/**
+ * @param {object} user
+ * @param {object} moduleAccess
+ * @returns {boolean}
+ */
 export function hasModuleAccess(user, moduleAccess) {
   if (!moduleAccess?.minLevel) {
     return false
@@ -97,6 +112,10 @@ export function hasModuleAccess(user, moduleAccess) {
   })
 }
 
+/**
+ * @param {object} module
+ * @returns {object | null}
+ */
 export function resolveModuleAccess(module) {
   if (module?.access) {
     return module.access
@@ -160,6 +179,22 @@ function getModuleSpecies(module) {
   return null
 }
 
+function resolvePermissionScope(scopeParts) {
+  if (scopeParts.length === 1 && scopeParts[0] === 'user') {
+    return { scope: 'user' }
+  }
+
+  if (scopeParts.length === 1) {
+    return { scope: 'species', species: scopeParts[0] }
+  }
+
+  return {
+    scope: 'app',
+    species: scopeParts[0],
+    app: scopeParts.slice(1).join('-')
+  }
+}
+
 function parsePermission(permission) {
   if (typeof permission !== 'string' || permission.length === 0) {
     return null
@@ -181,7 +216,7 @@ function parsePermission(permission) {
 
   const parts = body.split('-').filter(Boolean)
 
-  if (parts.length < 2) {
+  if (parts.length < MIN_PERMISSION_PARTS) {
     return null
   }
 
@@ -192,29 +227,8 @@ function parsePermission(permission) {
     return null
   }
 
-  const scopeParts = parts.slice(0, -1)
-
-  if (scopeParts.length === 1 && scopeParts[0] === 'user') {
-    return {
-      scope: 'user',
-      level,
-      levelRank
-    }
-  }
-
-  if (scopeParts.length === 1) {
-    return {
-      scope: 'species',
-      species: scopeParts[0],
-      level,
-      levelRank
-    }
-  }
-
   return {
-    scope: 'app',
-    species: scopeParts[0],
-    app: scopeParts.slice(1).join('-'),
+    ...resolvePermissionScope(parts.slice(0, -1)),
     level,
     levelRank
   }

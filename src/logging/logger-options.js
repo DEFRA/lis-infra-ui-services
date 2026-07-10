@@ -6,6 +6,10 @@ import { getTraceId } from '@defra/hapi-tracing'
 const require = createRequire(import.meta.url)
 const pinoPrettyTarget = require.resolve('pino-pretty')
 
+/**
+ * @param {{ logConfig: object, serviceName: string, serviceVersion: string }} options
+ * @returns {object}
+ */
 export function createLoggerOptions({
   logConfig,
   serviceName,

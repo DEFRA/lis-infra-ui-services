@@ -1,3 +1,9 @@
+/**
+ * @param {number} value
+ * @param {string} [locale]
+ * @param {string} [currency]
+ * @returns {string}
+ */
 export function formatCurrency(value, locale = 'en-GB', currency = 'GBP') {
   const formatter = new Intl.NumberFormat(locale, {
     style: 'currency',
