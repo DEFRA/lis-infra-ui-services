@@ -74,3 +74,17 @@ test('createLogConfigFromEnv preserves json log format when explicitly requested
     }
   )
 })
+
+test('createProcessLogging uses a direct stream for pino-pretty formatting', () => {
+  const logging = createProcessLogging({
+    env: {
+      NODE_ENV: 'development',
+      LOG_ENABLED: 'true',
+      LOG_FORMAT: 'pino-pretty'
+    },
+    serviceName: 'test-service'
+  })
+
+  assert.equal('transport' in logging.loggerOptions, false)
+  assert.equal(typeof logging.loggerOptions.stream?.write, 'function')
+})

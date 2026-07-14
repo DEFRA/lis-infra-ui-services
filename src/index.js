@@ -427,6 +427,4 @@ export function buildMicrositePath(taxonomy, species) {
   return `/${species}/${taxonomy}`
 }
 
-export { createModuleAccessGuard, hasModuleAccess } from './module-access.js'
-export { createProfileService } from './services/profile-service/service.js'
 export { createHoldingService } from './services/holding-service/service.js'
