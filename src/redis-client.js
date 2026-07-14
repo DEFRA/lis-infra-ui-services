@@ -14,7 +14,7 @@ export function buildRedisClient({
   ClusterClass,
   RedisClass
 }) {
-  const port = 6379
+  const port = redisConfig.port ?? 6379
   const db = 0
   const keyPrefix = redisConfig.keyPrefix
   const host = redisConfig.host

@@ -4,7 +4,7 @@ import { ecsFormat } from '@elastic/ecs-pino-format'
 import { getTraceId } from '@defra/hapi-tracing'
 
 const require = createRequire(import.meta.url)
-const pinoPrettyTarget = require.resolve('pino-pretty')
+const pinoPretty = require('pino-pretty')
 
 /**
  * @param {{ logConfig: object, serviceName: string, serviceVersion: string }} options
@@ -23,7 +23,11 @@ export function createLoggerOptions({
       })
     },
     json: {},
-    'pino-pretty': { transport: { target: pinoPrettyTarget } }
+    'pino-pretty': {
+      stream: pinoPretty({
+        sync: true
+      })
+    }
   }
 
   return {

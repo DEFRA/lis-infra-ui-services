@@ -6,5 +6,6 @@ import { pino } from 'pino'
  * @returns {Logger}
  */
 export function createLogger({ loggerOptions }) {
-  return pino(loggerOptions)
+  const { stream, ...options } = loggerOptions
+  return pino(options, stream)
 }

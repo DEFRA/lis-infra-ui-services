@@ -3,19 +3,15 @@ import test from 'node:test'
 
 import { buildPrimaryNavigation } from './build-navigation.js'
 
-test('buildPrimaryNavigation derives species tabs from lis-perm permissions', () => {
+test('buildPrimaryNavigation renders species already authorized by the host', () => {
   const navigation = buildPrimaryNavigation({
     request: {
       path: '/',
       app: {
-        hubAuth: {
-          permissions: [
-            'lis-perm-front-office',
-            'lis-perm-cattle-read',
-            'lis-perm-sheep-register-admin',
-            'lis-perm-user-write'
-          ]
-        }
+        authorizedSpecies: [
+          { id: 'cattle', label: 'Cattle' },
+          { id: 'sheep', label: 'Sheep' }
+        ]
       }
     }
   })
@@ -31,9 +27,7 @@ test('buildPrimaryNavigation marks the profile item as current on the profile ro
     request: {
       path: '/profile',
       app: {
-        hubAuth: {
-          permissions: ['lis-perm-front-office', 'lis-perm-cattle-read']
-        }
+        authorizedSpecies: [{ id: 'cattle', label: 'Cattle' }]
       }
     }
   })

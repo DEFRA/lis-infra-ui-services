@@ -34,6 +34,7 @@ test('createSessionCachePlugin builds the expected yar plugin options', () => {
       password: 'password',
       ttl: 5678,
       isSecure: true,
+      isSameSite: 'Lax',
       clearInvalid: true
     }
   })
@@ -72,4 +73,5 @@ test('createSessionCachePluginForConfig maps config values into the plugin', () 
   assert.equal(plugin.options.cookieOptions.password, 'secret')
   assert.equal(plugin.options.cookieOptions.ttl, 2000)
   assert.equal(plugin.options.cookieOptions.isSecure, false)
+  assert.equal(plugin.options.cookieOptions.isSameSite, 'Lax')
 })

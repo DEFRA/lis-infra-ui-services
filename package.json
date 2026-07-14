@@ -6,7 +6,6 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./auth": "./src/auth.js",
     "./base-path": "./src/base-path.js",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
@@ -15,7 +14,6 @@
     "./logging/logger-options": "./src/logging/logger-options.js",
     "./logging/project": "./src/logging/project.js",
     "./logging/request-logger": "./src/logging/request-logger.js",
-    "./module-access": "./src/module-access.js",
     "./navigation": "./src/navigation.js",
     "./nunjucks/build-navigation": "./src/nunjucks/build-navigation.js",
     "./nunjucks/context": "./src/nunjucks/context.js",
@@ -44,7 +42,6 @@
     "global-agent": "3.0.0",
     "hapi-pino": "13.0.0",
     "ioredis": "5.8.2",
-    "jose": "6.2.3",
     "lodash": "4.18.1",
     "nunjucks": "3.2.4",
     "pino": "10.1.0",

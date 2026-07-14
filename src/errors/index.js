@@ -46,14 +46,20 @@ export function catchAll(request, h) {
   if (!('isBoom' in response)) {
     return h.continue
   }
+  const genericMessage = statusCodeMessage(statusCode)
+  const detailedMessage =
+    response?.message ??
+    response?.source?.message ??
+    genericMessage
 
-  const errorMessage = statusCodeMessage(statusCode)
+  const message =
+    process.env.NODE_ENV === 'development' ? detailedMessage : genericMessage
 
   return h
     .view('error/index', {
-      pageTitle: errorMessage,
+      pageTitle: genericMessage,
       heading: statusCode,
-      message: errorMessage
+      message
     })
     .code(statusCode)
 }

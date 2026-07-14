@@ -19,6 +19,7 @@ export function createSessionCachePlugin({ sessionConfig, isSecure }) {
         password: sessionConfig.cookie.password,
         ttl: sessionConfig.cookie.ttl,
         isSecure,
+        isSameSite: 'Lax',
         clearInvalid: true
       }
     }
