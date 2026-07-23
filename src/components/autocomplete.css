@@ -1,0 +1,6 @@
+@import 'accessible-autocomplete/dist/accessible-autocomplete.min.css';
+
+.app-autocomplete .autocomplete__input.govuk-input--error,
+.app-autocomplete .autocomplete__hint.govuk-input--error {
+  border-color: #d4351c;
+}

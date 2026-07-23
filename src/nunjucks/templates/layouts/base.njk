@@ -7,6 +7,7 @@
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 {% from "govuk/components/radios/macro.njk" import govukRadios %}
@@ -14,11 +15,13 @@
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/tabs/macro.njk" import govukTabs %}
 {% from "govuk/components/tag/macro.njk" import govukTag %}
 {% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
 
 {# Import custom components globally #}
 {% from "heading/macro.njk" import appHeading %}
+{% from "autocomplete/macro.njk" import appAutocomplete %}
 
 {% set mainClasses = "app-main-wrapper" %}
 
@@ -49,10 +52,10 @@
 
   {{ govukPhaseBanner({
     tag: {
-      html: "<b>Pre-Alpha</b>",
-      classes: "govuk-tag--red"
+      html: "<b>Alpha</b>",
+      classes: "govuk-tag--orange"
     },
-    html: 'This is a proof of concept.'
+    html: 'This is migrating from proof of concept to steel thread.'
   }) }}
 {% endblock %}
 

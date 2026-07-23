@@ -1,0 +1,8 @@
+{% macro govukInput(params) %}
+  <div class="govuk-form-group{% if params.errorMessage %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="{{ params.id or params.name }}">{{ params.label.text }}</label>
+    {% if params.hint %}<div id="{{ params.id or params.name }}-hint">{{ params.hint.text }}</div>{% endif %}
+    {% if params.errorMessage %}<p id="{{ params.id or params.name }}-error">{{ params.errorMessage.text }}</p>{% endif %}
+    <input class="govuk-input{% if params.errorMessage %} govuk-input--error{% endif %}" id="{{ params.id or params.name }}" name="{{ params.name }}" value="{{ params.value }}">
+  </div>
+{% endmacro %}
