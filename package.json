@@ -7,6 +7,8 @@
   "exports": {
     ".": "./src/index.js",
     "./base-path": "./src/base-path.js",
+    "./components/autocomplete": "./src/components/autocomplete.js",
+    "./components/autocomplete.css": "./src/components/autocomplete.css",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
     "./logging": "./src/logging/index.js",
@@ -32,11 +34,12 @@
   },
   "dependencies": {
     "@defra/hapi-tracing": "1.30.0",
+    "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/catbox-memory": "6.0.2",
     "@hapi/catbox-redis": "7.0.2",
-    "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/vision": "7.0.3",
     "@hapi/yar": "11.0.3",
+    "accessible-autocomplete": "3.0.1",
     "chokidar": "3.6.0",
     "date-fns": "4.1.0",
     "global-agent": "3.0.0",

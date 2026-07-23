@@ -1,0 +1,25 @@
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{% macro appAutocomplete(params = {}) %}
+  <div
+    class="app-autocomplete{% if params.containerClasses %} {{ params.containerClasses }}{% endif %}"
+    data-module="app-autocomplete"
+    {% if params.autoselect %}data-autoselect="true"{% endif %}
+    {% if params.confirmOnBlur === false %}data-confirm-on-blur="false"{% endif %}
+    {% if params.displayMenu %}data-display-menu="{{ params.displayMenu }}"{% endif %}
+    {% if params.minLength %}data-min-length="{{ params.minLength }}"{% endif %}
+    {% if params.showAllValues %}data-show-all-values="true"{% endif %}
+  >
+    {#
+      Keep GOV.UK's input macro as the source of labels, hints, errors and the
+      no-JavaScript control. The client module progressively enhances its input.
+    #}
+    {{ govukInput(params) }}
+
+    <ul class="app-autocomplete__source" hidden>
+      {% for item in params.items %}
+        <li>{% if item.text %}{{ item.text }}{% else %}{{ item }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
