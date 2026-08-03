@@ -18,8 +18,16 @@ test('buildPrimaryNavigation renders species already authorized by the host', ()
 
   assert.deepEqual(
     navigation.map((item) => item.text),
-    ['Home', 'Cattle', 'Sheep', 'Profile']
+    ['Cattle', 'Sheep', 'Profile']
   )
+})
+
+test('buildPrimaryNavigation renders no items when the user has no authorized species', () => {
+  const navigation = buildPrimaryNavigation({
+    request: { path: '/', app: {} }
+  })
+
+  assert.deepEqual(navigation, [])
 })
 
 test('buildPrimaryNavigation marks the profile item as current on the profile route', () => {

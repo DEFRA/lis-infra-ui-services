@@ -12,11 +12,6 @@ export function buildPrimaryNavigation({
   hubOrigin = ''
 }) {
   const currentSpecies = getCurrentSpecies({ request, basePath })
-  const homeItem = {
-    text: 'Home',
-    href: buildHubHref(hubOrigin, '/'),
-    current: request?.path === '/' && !currentSpecies?.id
-  }
   const profileItem = {
     text: 'Profile',
     href: buildHubHref(hubOrigin, '/profile'),
@@ -25,11 +20,10 @@ export function buildPrimaryNavigation({
   const permittedSpecies = request?.app?.authorizedSpecies
 
   if (!Array.isArray(permittedSpecies) || permittedSpecies.length === 0) {
-    return [homeItem]
+    return []
   }
 
   return [
-    homeItem,
     ...permittedSpecies.map((species) => ({
       text: species.label,
       href: buildHubHref(hubOrigin, getSpeciesHomePath(species)),
