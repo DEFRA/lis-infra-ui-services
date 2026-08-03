@@ -46,8 +46,18 @@
     serviceUrl: serviceUrl,
     useTudorCrown: true
   }) }}
+  {% if isSignedIn %}
+    {% set signOutNavigationEnd %}
+      <li class="govuk-service-navigation__item app-service-navigation__item--right">
+        <a class="govuk-service-navigation__link" href="{{ logoutUrl }}">Sign out</a>
+      </li>
+    {% endset %}
+  {% endif %}
   {{ govukServiceNavigation({
-    navigation: navigation
+    navigation: navigation,
+    slots: {
+      navigationEnd: signOutNavigationEnd
+    }
   }) }}
 
   {{ govukPhaseBanner({
