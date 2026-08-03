@@ -179,7 +179,7 @@ export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
     buildPrimaryNavigation({
       request,
       basePath: config.get('basePath'),
-      hubOrigin: config.get('auth.hubOrigin')
+      hubOrigin: request?.app?.hubOrigin ?? ''
     })
 
   const context = createNunjucksContextBuilder({
