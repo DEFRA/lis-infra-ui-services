@@ -1,0 +1,9 @@
+<nav class="lis-sub-navigation{% if params.classes %} {{ params.classes }}{% endif %}" aria-label="{{ params.label or "Secondary navigation region" }}">
+  <ul class="lis-sub-navigation__list">
+    {% for item in params.items %}
+      <li class="lis-sub-navigation__item{% if item.classes %} {{ item.classes }}{% endif %}">
+        <a class="lis-sub-navigation__link"{% if item.active %} aria-current="page"{% endif %} href="{{ item.href }}">{% if item.html %}{{ item.html | safe }}{% else %}{{ item.text }}{% endif %}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
