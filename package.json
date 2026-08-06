@@ -9,6 +9,7 @@
     "./base-path": "./src/base-path.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
     "./components/autocomplete.css": "./src/components/autocomplete.css",
+    "./components/sub-navigation.css": "./src/components/sub-navigation.css",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
     "./logging": "./src/logging/index.js",
