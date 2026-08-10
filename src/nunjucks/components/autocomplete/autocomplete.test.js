@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import path from 'node:path'
-import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import nunjucks from 'nunjucks'
+import { test } from 'vitest'
 
 const componentRoot = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(componentRoot, '../../../..')
@@ -33,7 +33,10 @@ test('renders the autocomplete using the GOV.UK input macro', () => {
 
   assert.match(html, /data-module="app-autocomplete"/)
   assert.match(html, /data-min-length="2"/)
-  assert.match(html, /<label class="govuk-label" for="species">Choose a species<\/label>/)
+  assert.match(
+    html,
+    /<label class="govuk-label" for="species">Choose a species<\/label>/
+  )
   assert.match(html, /class="govuk-input govuk-input--error"/)
   assert.match(html, /<li>Cattle<\/li>/)
   assert.match(html, /<li>Sheep<\/li>/)
