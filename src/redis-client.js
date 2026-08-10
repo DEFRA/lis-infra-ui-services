@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import { milliseconds } from './duration.js'
 
 const require = createRequire(import.meta.url)
+const defaultPort = 6379
 
 /**
  * @param {{ redisConfig: object, logger?: object, ClusterClass?: Function, RedisClass?: Function }} options
@@ -14,7 +15,7 @@ export function buildRedisClient({
   ClusterClass,
   RedisClass
 }) {
-  const port = redisConfig.port ?? 6379
+  const port = redisConfig.port ?? defaultPort
   const db = 0
   const keyPrefix = redisConfig.keyPrefix
   const host = redisConfig.host

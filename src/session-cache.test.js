@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
 import yar from '@hapi/yar'
+import { test } from 'vitest'
 
 import {
   createSessionCachePlugin,

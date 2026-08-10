@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import { test } from 'vitest'
 
 import { buildRedisClient } from './redis-client.js'
 
 function createRedisClientDouble() {
   return {
-    on() {}
+    on() {
+      return null
+    }
   }
 }
 
