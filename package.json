@@ -54,7 +54,6 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "dependencies": {
-    "@defra/hapi-tracing": "1.30.0",
     "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/catbox-memory": "6.0.2",
     "@hapi/catbox-redis": "7.0.2",
@@ -73,9 +72,11 @@
     "undici": "7.24.8"
   },
   "peerDependencies": {
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "@defra/lis-hubs-infra-core": "^0.2.0"
   },
   "devDependencies": {
+    "@defra/lis-hubs-infra-core": "^0.2.0",
     "@defra/lis-infra-eslint-config": "^0.6.0",
     "@vitest/coverage-istanbul": "^4.1.10",
     "audit-ci": "^7.1.0",
