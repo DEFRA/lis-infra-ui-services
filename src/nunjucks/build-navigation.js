@@ -1,4 +1,4 @@
-import { MODULES, SPECIES } from '@defra/lis-hubs-infra-registry'
+import { MODULES } from '@defra/lis-hubs-infra-registry'
 import { SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
 
 /** @import { Request } from '@hapi/hapi' */
@@ -35,14 +35,10 @@ export function buildPrimaryNavigation({
 }
 
 function getSpeciesHomePath(species) {
-  const speciesCode = SPECIES.find(
-    ({ id }) => id === species.id || id === species.slug
-  )?.code
-  const homeModule = MODULES.find(
-    (module) => module.taxonomy === 'home' && module.species === speciesCode
-  )
+  const speciesId = species.slug ?? species.id
+  const homeModule = MODULES.find((module) => module.id === `${speciesId}-home`)
 
-  return homeModule?.path ?? `/${species.slug ?? species.id}/home`
+  return homeModule?.path ?? `/${speciesId}/home`
 }
 
 function getCurrentSpecies({ request, basePath }) {
