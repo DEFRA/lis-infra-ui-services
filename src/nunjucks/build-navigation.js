@@ -1,4 +1,5 @@
-import { SPOKES, SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
+import { MODULES, SPECIES } from '@defra/lis-hubs-infra-registry'
+import { SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
 
 /** @import { Request } from '@hapi/hapi' */
 
@@ -34,13 +35,14 @@ export function buildPrimaryNavigation({
 }
 
 function getSpeciesHomePath(species) {
-  return (
-    SPOKES.find(
-      (spoke) =>
-        spoke.taxonomy.id === 'home' &&
-        (spoke.species.id === species.id || spoke.species.id === species.slug)
-    )?.path ?? `/${species.slug ?? species.id}/home`
+  const speciesCode = SPECIES.find(
+    ({ id }) => id === species.id || id === species.slug
+  )?.code
+  const homeModule = MODULES.find(
+    (module) => module.taxonomy === 'home' && module.species === speciesCode
   )
+
+  return homeModule?.path ?? `/${species.slug ?? species.id}/home`
 }
 
 function getCurrentSpecies({ request, basePath }) {
