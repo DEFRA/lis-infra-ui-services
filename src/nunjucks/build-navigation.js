@@ -35,7 +35,7 @@ function getSpeciesHomePath(species) {
     (module) => module.id === `${species.id}-home`
   )
 
-  return homeModule?.path ?? `/${species.id}/home`
+  return homeModule?.path ?? `/${species.id}`
 }
 
 function getCurrentSpecies({ request, basePath }) {
