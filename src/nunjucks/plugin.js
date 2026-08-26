@@ -186,8 +186,7 @@ export function createNunjucksConfig({
   const buildNavigation = (request) =>
     buildPrimaryNavigation({
       request,
-      basePath,
-      hubOrigin: request?.app?.hubOrigin ?? ''
+      basePath
     })
 
   const context = createNunjucksContextBuilder({

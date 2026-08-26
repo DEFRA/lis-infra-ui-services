@@ -1,20 +1,17 @@
-import { SPOKES, SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
+import { MODULES } from '@defra/lis-hubs-infra-registry'
+import { SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
 
 /** @import { Request } from '@hapi/hapi' */
 
 /**
- * @param {{ request: Request, basePath?: string, hubOrigin?: string }} options
+ * @param {{ request: Request, basePath?: string }} options
  * @returns {object[]}
  */
-export function buildPrimaryNavigation({
-  request,
-  basePath = '',
-  hubOrigin = ''
-}) {
+export function buildPrimaryNavigation({ request, basePath = '' }) {
   const currentSpecies = getCurrentSpecies({ request, basePath })
   const profileItem = {
     text: 'Profile',
-    href: buildHubHref(hubOrigin, '/profile'),
+    href: '/profile',
     current: request?.path === '/profile' && !currentSpecies?.id
   }
   const permittedSpecies = request?.app?.authorizedSpecies
@@ -26,7 +23,7 @@ export function buildPrimaryNavigation({
   return [
     ...permittedSpecies.map((species) => ({
       text: species.label,
-      href: buildHubHref(hubOrigin, getSpeciesHomePath(species)),
+      href: getSpeciesHomePath(species),
       current: species.id === currentSpecies?.id
     })),
     profileItem
@@ -34,13 +31,11 @@ export function buildPrimaryNavigation({
 }
 
 function getSpeciesHomePath(species) {
-  return (
-    SPOKES.find(
-      (spoke) =>
-        spoke.taxonomy.id === 'home' &&
-        (spoke.species.id === species.id || spoke.species.id === species.slug)
-    )?.path ?? `/${species.slug ?? species.id}/home`
+  const homeModule = MODULES.find(
+    (module) => module.id === `${species.id}-home`
   )
+
+  return homeModule?.path ?? `/${species.id}`
 }
 
 function getCurrentSpecies({ request, basePath }) {
@@ -63,12 +58,4 @@ function getCurrentSpecies({ request, basePath }) {
   }
 
   return null
-}
-
-function buildHubHref(hubOrigin, routePath) {
-  if (!hubOrigin) {
-    return routePath
-  }
-
-  return new URL(routePath, hubOrigin).toString()
 }
