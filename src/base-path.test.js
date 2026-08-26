@@ -89,32 +89,26 @@ test('getAssetPaths only returns the internal asset path', () => {
   )
 })
 
-test('createBasePathHelpersForConfig binds config for request and asset helpers', () => {
-  const calls = []
-  const config = {
-    get(key) {
-      calls.push(key)
-
-      if (key === 'basePath') {
-        return '/chicken/move'
-      }
-
-      if (key === 'assetPath') {
-        return '/public'
-      }
-    }
-  }
-  const helpers = createBasePathHelpersForConfig(config)
+test('createBasePathHelpersForConfig resolves the base path from the module registry', () => {
+  const helpers = createBasePathHelpersForConfig({
+    moduleId: 'cattle-register',
+    assetPath: '/public'
+  })
 
   assert.equal(
     helpers.getRequestBasePath({
       path: '/about',
       headers: {
-        'x-forwarded-prefix': '/chicken/move'
+        'x-forwarded-prefix': '/cattle/register'
       }
     }),
-    '/chicken/move'
+    '/cattle/register'
   )
   assert.deepEqual(helpers.getAssetPaths(), ['/public'])
-  assert.deepEqual(calls, ['basePath', 'basePath', 'assetPath'])
+})
+
+test('createBasePathHelpersForConfig defaults to an empty base path when no moduleId is given', () => {
+  const helpers = createBasePathHelpersForConfig({ assetPath: '/public' })
+
+  assert.equal(helpers.getBasePath(), '')
 })

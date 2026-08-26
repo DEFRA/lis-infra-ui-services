@@ -1,5 +1,7 @@
 /** @import { Request } from '@hapi/hapi' */
 
+import { getBasePathForModule } from '@defra/lis-hubs-infra-registry'
+
 function normalizePath(path) {
   if (!path || path === '/') {
     return '/'
@@ -96,12 +98,14 @@ export function getAssetPaths({ basePath: _basePath = '', assetPath }) {
 }
 
 /**
- * @param {object} config
+ * @param {{ moduleId?: string, assetPath: string }} options
  * @returns {object}
  */
-export function createBasePathHelpersForConfig(config) {
+export function createBasePathHelpersForConfig({ moduleId, assetPath }) {
+  const basePath = moduleId ? getBasePathForModule(moduleId) : ''
+
   function getBasePath() {
-    return config.get('basePath')
+    return basePath
   }
 
   return {
@@ -134,7 +138,7 @@ export function createBasePathHelpersForConfig(config) {
     getAssetPaths() {
       return getAssetPaths({
         basePath: getBasePath(),
-        assetPath: config.get('assetPath')
+        assetPath
       })
     }
   }

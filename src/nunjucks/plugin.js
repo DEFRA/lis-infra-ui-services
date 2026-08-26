@@ -5,6 +5,8 @@ import hapiVision from '@hapi/vision'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
+import { getBasePathForModule } from '@defra/lis-hubs-infra-registry'
+
 import { createNunjucksContextBuilder } from './context.js'
 import { buildPrimaryNavigation } from './build-navigation.js'
 import * as filters from './filters.js'
@@ -155,10 +157,16 @@ function buildNunjucksEnvironment({
 }
 
 /**
- * @param {{ config: object, logger: object, getRequestBasePath: Function }} options
+ * @param {{ config: object, logger: object, getRequestBasePath: Function, moduleId?: string }} options
  * @returns {object}
  */
-export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
+export function createNunjucksConfig({
+  config,
+  logger,
+  getRequestBasePath,
+  moduleId
+}) {
+  const basePath = moduleId ? getBasePathForModule(moduleId) : ''
   const projectRoot = config.get('root')
   const infrastructureRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -178,7 +186,7 @@ export function createNunjucksConfig({ config, logger, getRequestBasePath }) {
   const buildNavigation = (request) =>
     buildPrimaryNavigation({
       request,
-      basePath: config.get('basePath'),
+      basePath,
       hubOrigin: request?.app?.hubOrigin ?? ''
     })
 
