@@ -31,10 +31,11 @@ export function buildPrimaryNavigation({ request, basePath = '' }) {
 }
 
 function getSpeciesHomePath(species) {
-  const speciesId = species.slug ?? species.id
-  const homeModule = MODULES.find((module) => module.id === `${speciesId}-home`)
+  const homeModule = MODULES.find(
+    (module) => module.id === `${species.id}-home`
+  )
 
-  return homeModule?.path ?? `/${speciesId}/home`
+  return homeModule?.path ?? `/${species.id}/home`
 }
 
 function getCurrentSpecies({ request, basePath }) {
