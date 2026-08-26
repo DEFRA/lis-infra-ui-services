@@ -4,18 +4,14 @@ import { SUPPORTED_SPECIES, SUPPORTED_TAXONOMIES } from '../index.js'
 /** @import { Request } from '@hapi/hapi' */
 
 /**
- * @param {{ request: Request, basePath?: string, hubOrigin?: string }} options
+ * @param {{ request: Request, basePath?: string }} options
  * @returns {object[]}
  */
-export function buildPrimaryNavigation({
-  request,
-  basePath = '',
-  hubOrigin = ''
-}) {
+export function buildPrimaryNavigation({ request, basePath = '' }) {
   const currentSpecies = getCurrentSpecies({ request, basePath })
   const profileItem = {
     text: 'Profile',
-    href: buildHubHref(hubOrigin, '/profile'),
+    href: '/profile',
     current: request?.path === '/profile' && !currentSpecies?.id
   }
   const permittedSpecies = request?.app?.authorizedSpecies
@@ -27,7 +23,7 @@ export function buildPrimaryNavigation({
   return [
     ...permittedSpecies.map((species) => ({
       text: species.label,
-      href: buildHubHref(hubOrigin, getSpeciesHomePath(species)),
+      href: getSpeciesHomePath(species),
       current: species.id === currentSpecies?.id
     })),
     profileItem
@@ -61,12 +57,4 @@ function getCurrentSpecies({ request, basePath }) {
   }
 
   return null
-}
-
-function buildHubHref(hubOrigin, routePath) {
-  if (!hubOrigin) {
-    return routePath
-  }
-
-  return new URL(routePath, hubOrigin).toString()
 }
