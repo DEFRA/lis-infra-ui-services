@@ -5,8 +5,8 @@ const { logger } = vi.hoisted(() => ({
   logger: { info: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../../logging/index.js', () => ({
-  getLoggerForConfig: () => logger
+vi.mock('@defra/lis-hubs-infra-core', () => ({
+  logger
 }))
 
 import { createHoldingService } from './service.js'

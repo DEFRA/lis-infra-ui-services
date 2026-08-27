@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict'
-import { test, vi } from 'vitest'
+import { afterEach, test, vi } from 'vitest'
 
 import { statusCodes } from '../status-codes.js'
+
+const { logger } = vi.hoisted(() => ({
+  logger: { error: vi.fn() }
+}))
+
+vi.mock('@defra/lis-hubs-infra-core', () => ({ logger }))
+
 import { catchAll } from './index.js'
 
 function createToolkit() {
@@ -22,12 +29,13 @@ function createBoomRequest(statusCode) {
       isBoom: true,
       stack: 'Mock error stack',
       output: { statusCode }
-    },
-    logger: {
-      error: vi.fn()
     }
   }
 }
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
 
 test('catchAll continues when the response is not Boom', () => {
   const toolkit = createToolkit()
@@ -52,7 +60,7 @@ test('catchAll renders the expected not found page', () => {
     }
   ])
   assert.deepEqual(toolkit.code.mock.calls[0], [statusCodes.notFound])
-  assert.equal(request.logger.error.mock.calls.length, 0)
+  assert.equal(logger.error.mock.calls.length, 0)
 })
 
 test('catchAll logs and renders generic content for server errors', () => {
@@ -72,7 +80,7 @@ test('catchAll logs and renders generic content for server errors', () => {
   assert.deepEqual(toolkit.code.mock.calls[0], [
     statusCodes.internalServerError
   ])
-  assert.deepEqual(request.logger.error.mock.calls[0], ['Mock error stack'])
+  assert.deepEqual(logger.error.mock.calls[0], ['Mock error stack'])
 })
 
 test('catchAll logs plain 500 responses before continuing', () => {
@@ -83,15 +91,12 @@ test('catchAll logs plain 500 responses before continuing', () => {
       source: {
         message: 'Plain 500 response'
       }
-    },
-    logger: {
-      error: vi.fn()
     }
   }
 
   const result = catchAll(request, toolkit)
 
   assert.equal(result, toolkit.continue)
-  assert.deepEqual(request.logger.error.mock.calls[0], ['Plain 500 response'])
+  assert.deepEqual(logger.error.mock.calls[0], ['Plain 500 response'])
   assert.equal(toolkit.view.mock.calls.length, 0)
 })
