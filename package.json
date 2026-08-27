@@ -1,6 +1,6 @@
 {
   "name": "@defra/lis-infra-ui-services",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "UI-Services shared definitions for the livestock taxonomy topology.",
   "main": "src/index.js",
   "repository": {
@@ -15,11 +15,6 @@
     "./components/sub-navigation.css": "./src/components/sub-navigation.css",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
-    "./logging": "./src/logging/index.js",
-    "./logging/logger": "./src/logging/logger.js",
-    "./logging/logger-options": "./src/logging/logger-options.js",
-    "./logging/project": "./src/logging/project.js",
-    "./logging/request-logger": "./src/logging/request-logger.js",
     "./navigation": "./src/navigation.js",
     "./nunjucks/build-navigation": "./src/nunjucks/build-navigation.js",
     "./nunjucks/context": "./src/nunjucks/context.js",
@@ -55,7 +50,6 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@defra/lis-hubs-infra-registry": "^0.3.0",
-    "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/catbox-memory": "6.0.2",
     "@hapi/catbox-redis": "7.0.2",
     "@hapi/vision": "7.0.3",
@@ -64,20 +58,17 @@
     "chokidar": "3.6.0",
     "date-fns": "4.1.0",
     "global-agent": "3.0.0",
-    "hapi-pino": "13.0.0",
     "ioredis": "5.8.2",
     "lodash": "4.18.1",
     "nunjucks": "3.2.4",
-    "pino": "10.1.0",
-    "pino-pretty": "13.1.3",
     "undici": "7.24.8"
   },
   "peerDependencies": {
     "eslint": "^9.0.0",
-    "@defra/lis-hubs-infra-core": "^0.3.0"
+    "@defra/lis-hubs-infra-core": "^0.4.0"
   },
   "devDependencies": {
-    "@defra/lis-hubs-infra-core": "^0.3.0",
+    "@defra/lis-hubs-infra-core": "^0.4.0",
     "@defra/lis-infra-eslint-config": "^0.6.0",
     "@vitest/coverage-istanbul": "^4.1.10",
     "audit-ci": "^7.1.0",

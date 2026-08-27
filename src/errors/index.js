@@ -1,4 +1,6 @@
 /** @import { Request, ResponseToolkit, Lifecycle } from '@hapi/hapi' */
+import { logger } from '@defra/lis-hubs-infra-core'
+
 import { statusCodes } from '../status-codes.js'
 
 function statusCodeMessage(statusCode) {
@@ -40,7 +42,7 @@ export function catchAll(request, h) {
   const statusCode = getStatusCode(response)
 
   if (statusCode >= statusCodes.internalServerError) {
-    request.logger.error(getLogMessage(response, statusCode))
+    logger.error(getLogMessage(response, statusCode))
   }
 
   if (!('isBoom' in response)) {
@@ -48,9 +50,7 @@ export function catchAll(request, h) {
   }
   const genericMessage = statusCodeMessage(statusCode)
   const detailedMessage =
-    response?.message ??
-    response?.source?.message ??
-    genericMessage
+    response?.message ?? response?.source?.message ?? genericMessage
 
   const message =
     process.env.NODE_ENV === 'development' ? detailedMessage : genericMessage
