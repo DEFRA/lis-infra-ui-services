@@ -66,7 +66,6 @@
 .lis-sub-navigation__link[aria-current="page"] {
   position: relative;
   color: #0b0c0c;
-  font-weight: 700;
   text-decoration: none;
 }
 
