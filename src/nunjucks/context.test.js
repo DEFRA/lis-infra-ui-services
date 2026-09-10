@@ -73,6 +73,47 @@ test('createNunjucksContextBuilder falls back to the source asset path without l
   assert.deepEqual(loggerMessages, [])
 })
 
+test('createNunjucksContextBuilder resolves sectionName from the module registry when a moduleId is given', () => {
+  const loggerMessages = []
+  const contextBuilder = createNunjucksContextBuilder({
+    config: createConfig(),
+    buildNavigation: () => [],
+    getRequestBasePath: () => '',
+    logger: {
+      error(loggedError, message) {
+        loggerMessages.push(message)
+      }
+    },
+    readFileSync: () => '{}',
+    moduleId: 'cattle-home'
+  })
+
+  const context = contextBuilder({ headers: {}, path: '/' })
+
+  assert.equal(context.sectionName, 'Cattle')
+  assert.deepEqual(loggerMessages, [])
+})
+
+test('createNunjucksContextBuilder leaves sectionName null when no moduleId is given', () => {
+  const loggerMessages = []
+  const contextBuilder = createNunjucksContextBuilder({
+    config: createConfig(),
+    buildNavigation: () => [],
+    getRequestBasePath: () => '',
+    logger: {
+      error(loggedError, message) {
+        loggerMessages.push(message)
+      }
+    },
+    readFileSync: () => '{}'
+  })
+
+  const context = contextBuilder({ headers: {}, path: '/' })
+
+  assert.equal(context.sectionName, null)
+  assert.deepEqual(loggerMessages, [])
+})
+
 test('createNunjucksContextBuilder logs once when the Vite manifest is unavailable in production', () => {
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({

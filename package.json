@@ -12,6 +12,7 @@
     "./base-path": "./src/base-path.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
     "./components/autocomplete.css": "./src/components/autocomplete.css",
+    "./components/service-navigation.css": "./src/components/service-navigation.css",
     "./components/sub-navigation.css": "./src/components/sub-navigation.css",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
@@ -49,7 +50,7 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "dependencies": {
-    "@defra/lis-hubs-infra-registry": "^0.3.0",
+    "@defra/lis-hubs-infra-registry": "^0.4.0",
     "@hapi/catbox-memory": "6.0.2",
     "@hapi/catbox-redis": "7.0.2",
     "@hapi/vision": "7.0.3",
@@ -64,8 +65,8 @@
     "undici": "7.24.8"
   },
   "peerDependencies": {
-    "eslint": "^9.0.0",
-    "@defra/lis-hubs-infra-core": ">=0.4.0 <1.0.0"
+    "@defra/lis-hubs-infra-core": ">=0.4.0 <1.0.0",
+    "eslint": "^9.0.0"
   },
   "devDependencies": {
     "@defra/lis-hubs-infra-core": "^0.6.0",
