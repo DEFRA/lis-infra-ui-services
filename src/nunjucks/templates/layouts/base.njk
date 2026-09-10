@@ -53,7 +53,7 @@
     {% endset %}
   {% endif %}
   {{ govukServiceNavigation({
-    serviceName: serviceName,
+    serviceName: "Livestock Information",
     serviceUrl: serviceUrl,
     navigation: navigation,
     slots: {
@@ -71,7 +71,7 @@
 {% endblock %}
 
 {% block pageTitle %}
-  {{ pageTitle }} | {{ serviceName }}
+  {{ pageTitle }} - {{ serviceName }} - Livestock Information
 {% endblock %}
 
 {% block beforeContent %}
