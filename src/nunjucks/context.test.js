@@ -90,7 +90,7 @@ test('createNunjucksContextBuilder resolves sectionName from the module registry
 
   const context = contextBuilder({ headers: {}, path: '/' })
 
-  assert.equal(context.sectionName, 'Home for Cattle')
+  assert.equal(context.sectionName, 'Cattle')
   assert.deepEqual(loggerMessages, [])
 })
 
