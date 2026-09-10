@@ -1,7 +1,9 @@
 import path from 'node:path'
 
+import { getModuleById } from '@defra/lis-hubs-infra-registry'
+
 /**
- * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function }} options
+ * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string }} options
  * @returns {Function}
  */
 export function createNunjucksContextBuilder({
@@ -9,8 +11,10 @@ export function createNunjucksContextBuilder({
   buildNavigation,
   getRequestBasePath,
   logger,
-  readFileSync
+  readFileSync,
+  moduleId
 }) {
+  const sectionName = moduleId ? (getModuleById(moduleId)?.label ?? null) : null
   const manifestPath = path.join(
     config.get('root'),
     '.public/.vite/manifest.json'
@@ -38,6 +42,7 @@ export function createNunjucksContextBuilder({
     return {
       assetPath: `${assetRoot}/assets`,
       serviceName: config.get('serviceName'),
+      sectionName,
       serviceUrl: requestBasePath || '/',
       breadcrumbs: [],
       navigation: buildNavigation(request),

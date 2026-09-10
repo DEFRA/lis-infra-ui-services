@@ -71,7 +71,7 @@
 {% endblock %}
 
 {% block pageTitle %}
-  {{ pageTitle }} - {{ serviceName }} - Livestock Information
+  {{ pageTitle }}{% if sectionName %} - {{ sectionName }}{% endif %} - Livestock Information
 {% endblock %}
 
 {% block beforeContent %}

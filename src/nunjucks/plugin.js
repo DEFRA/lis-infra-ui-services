@@ -194,7 +194,8 @@ export function createNunjucksConfig({
     buildNavigation,
     getRequestBasePath,
     logger,
-    readFileSync
+    readFileSync,
+    moduleId
   })
 
   const nunjucksConfig = {
