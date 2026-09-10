@@ -1,0 +1,5 @@
+/* Pushes the Sign out item to the end of the service navigation bar.
+   base.njk renders it with the app-service-navigation__item--right class. */
+.app-service-navigation__item--right {
+  margin-left: auto;
+}
