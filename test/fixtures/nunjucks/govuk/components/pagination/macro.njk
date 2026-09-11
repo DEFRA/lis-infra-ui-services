@@ -1,0 +1,19 @@
+{% macro govukPagination(params) %}
+  <nav class="govuk-pagination" aria-label="Pagination">
+    {% if params.previous and params.previous.href %}
+      <div class="govuk-pagination__prev"><a class="govuk-link govuk-pagination__link" href="{{ params.previous.href }}" rel="prev">Previous</a></div>
+    {% endif %}
+    {% if params.items %}
+      <ul class="govuk-pagination__list">
+        {% for item in params.items %}
+          <li class="govuk-pagination__item{% if item.current %} govuk-pagination__item--current{% endif %}">
+            <a class="govuk-link govuk-pagination__link" href="{{ item.href }}" aria-label="Page {{ item.number }}"{% if item.current %} aria-current="page"{% endif %}>{{ item.number }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if params.next and params.next.href %}
+      <div class="govuk-pagination__next"><a class="govuk-link govuk-pagination__link" href="{{ params.next.href }}" rel="next">Next</a></div>
+    {% endif %}
+  </nav>
+{% endmacro %}

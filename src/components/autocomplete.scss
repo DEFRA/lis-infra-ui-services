@@ -1,4 +1,4 @@
-@import 'accessible-autocomplete/dist/accessible-autocomplete.min.css';
+@use "accessible-autocomplete/dist/accessible-autocomplete.min.css";
 
 .app-autocomplete .autocomplete__input.govuk-input--error,
 .app-autocomplete .autocomplete__hint.govuk-input--error {
