@@ -378,3 +378,4 @@ export function buildMicrositePath(taxonomy, species) {
 }
 
 export { createHoldingService } from './services/holding-service/service.js'
+export { BaseClient, BaseClientError } from './services/be4fe-client.js'
