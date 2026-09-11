@@ -28,7 +28,7 @@ point, and include its stylesheet:
 
 ```js
 import { initAllAutocompletes } from '@livestock/ui-services/components/autocomplete'
-import '@livestock/ui-services/components/autocomplete.css'
+import '@livestock/ui-services/components/autocomplete.scss'
 
 initAllAutocompletes()
 ```

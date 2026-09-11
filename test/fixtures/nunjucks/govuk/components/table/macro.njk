@@ -1,0 +1,23 @@
+{% macro govukTable(params) %}
+  <table class="govuk-table{% if params.classes %} {{ params.classes }}{% endif %}">
+    {% if params.caption %}<caption class="govuk-table__caption{% if params.captionClasses %} {{ params.captionClasses }}{% endif %}">{{ params.caption }}</caption>{% endif %}
+    {% if params.head %}
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          {% for item in params.head %}
+            <th scope="col" class="govuk-table__header{% if item.classes %} {{ item.classes }}{% endif %}"{% if item.attributes %}{% for name, value in item.attributes %} {{ name }}="{{ value }}"{% endfor %}{% endif %}>{{ item.html | safe if item.html else item.text }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+    {% endif %}
+    <tbody class="govuk-table__body">
+      {% for row in params.rows %}
+        <tr class="govuk-table__row">
+          {% for cell in row %}
+            <td class="govuk-table__cell{% if cell.classes %} {{ cell.classes }}{% endif %}">{{ cell.html | safe if cell.html else cell.text }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}

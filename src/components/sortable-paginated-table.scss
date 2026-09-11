@@ -1,0 +1,27 @@
+@use "govuk-frontend" as *;
+
+.lis-sortable-table__link {
+  display: inline-flex;
+  align-items: center;
+  color: govuk-functional-colour("brand");
+  text-decoration: none;
+
+  &:visited,
+  &:hover {
+    color: govuk-functional-colour("brand");
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
+    color: govuk-functional-colour("focus-text");
+    background-color: govuk-functional-colour("focus");
+    box-shadow:
+      0 -2px govuk-functional-colour("focus"),
+      0 4px govuk-functional-colour("focus-text");
+  }
+}
+
+.lis-sortable-table__icon {
+  flex-shrink: 0;
+}

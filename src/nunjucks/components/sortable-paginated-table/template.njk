@@ -1,0 +1,82 @@
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "govuk/components/pagination/macro.njk" import govukPagination %}
+
+{%- set query = params.query or {} -%}
+
+{%- set upArrow -%}
+  <svg width="22" height="22" focusable="false" aria-hidden="true" role="img" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="lis-sortable-table__icon">
+    <path d="M6.5625 15.5L11 6.63125L15.4375 15.5H6.5625Z" fill="currentColor"></path>
+  </svg>
+{%- endset -%}
+
+{%- set downArrow -%}
+  <svg width="22" height="22" focusable="false" aria-hidden="true" role="img" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="lis-sortable-table__icon">
+    <path d="M15.4375 7L11 15.8687L6.5625 7L15.4375 7Z" fill="currentColor"></path>
+  </svg>
+{%- endset -%}
+
+{%- set upDownArrow -%}
+  <svg width="22" height="22" focusable="false" aria-hidden="true" role="img" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" class="lis-sortable-table__icon">
+    <path d="M8.1875 9.5L10.9609 3.95703L13.7344 9.5H8.1875Z" fill="currentColor"></path>
+    <path d="M13.7344 12.0781L10.9609 17.6211L8.1875 12.0781H13.7344Z" fill="currentColor"></path>
+  </svg>
+{%- endset -%}
+
+{%- set head = [] -%}
+{%- for column in params.columns -%}
+  {%- if column.sortKey -%}
+    {%- set isActive = params.sort == column.sortKey -%}
+    {%- set ariaSort = "ascending" if (isActive and params.direction == "asc") else ("descending" if (isActive and params.direction == "desc") else "none") -%}
+    {%- set nextDirection = "desc" if ariaSort == "ascending" else "asc" -%}
+    {%- set icon = upArrow if ariaSort == "ascending" else (downArrow if ariaSort == "descending" else upDownArrow) -%}
+    {%- set href = params.baseHref ~ "?" ~ (query | assign({ sort: column.sortKey, direction: nextDirection, page: 1 }) | queryString) -%}
+    {%- set headHtml -%}
+      <a class="lis-sortable-table__link" href="{{ href }}">{{ column.text }}{{ icon | safe }}</a>
+    {%- endset -%}
+    {%- set _ = head.push({ html: headHtml, classes: column.classes, format: column.format, attributes: { "aria-sort": ariaSort } }) -%}
+  {%- else -%}
+    {%- set _ = head.push({ text: column.text, classes: column.classes, format: column.format }) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{{ govukTable({
+  caption: params.caption,
+  captionClasses: params.captionClasses or "govuk-visually-hidden",
+  classes: params.classes,
+  firstCellIsHeader: params.firstCellIsHeader,
+  head: head,
+  rows: params.rows
+}) }}
+
+{%- if params.pagination -%}
+  {%- set currentPage = params.pagination.currentPage -%}
+  {%- set totalPages = params.pagination.totalPages -%}
+  {%- set totalItems = params.pagination.totalItems -%}
+  {%- set itemsPerPage = params.pagination.itemsPerPage -%}
+  {%- set startItem = ((currentPage - 1) * itemsPerPage) + 1 -%}
+  {%- set lastItemOnPage = currentPage * itemsPerPage -%}
+  {%- set endItem = totalItems if lastItemOnPage > totalItems else lastItemOnPage -%}
+
+  {%- if totalPages > 1 -%}
+    <p class="govuk-body">Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} results</p>
+  {%- else -%}
+    <p class="govuk-body">Showing {{ totalItems }} result{{ "s" if totalItems != 1 else "" }}</p>
+  {%- endif -%}
+
+  {%- if totalPages > 1 -%}
+    {%- set items = [] -%}
+    {%- for pageNumber in range(1, totalPages + 1) -%}
+      {%- set pageHref = params.baseHref ~ "?" ~ (query | assign({ sort: params.sort, direction: params.direction, page: pageNumber }) | queryString) -%}
+      {%- set _ = items.push({ number: pageNumber, href: pageHref, current: pageNumber == currentPage }) -%}
+    {%- endfor -%}
+
+    {%- set previousHref = params.baseHref ~ "?" ~ (query | assign({ sort: params.sort, direction: params.direction, page: currentPage - 1 }) | queryString) -%}
+    {%- set nextHref = params.baseHref ~ "?" ~ (query | assign({ sort: params.sort, direction: params.direction, page: currentPage + 1 }) | queryString) -%}
+
+    {{ govukPagination({
+      items: items,
+      previous: { href: previousHref } if currentPage > 1 else undefined,
+      next: { href: nextHref } if currentPage < totalPages else undefined
+    }) }}
+  {%- endif -%}
+{%- endif -%}
