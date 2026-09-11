@@ -137,7 +137,7 @@ test('renders the results summary but no pagination nav when there is only one p
     }
   })
 
-  assert.match(html, /Showing 1 to 7 of 7 results/)
+  assert.match(html, /Showing 7 results/)
   assert.doesNotMatch(html, /govuk-pagination/)
 })
 
@@ -155,7 +155,7 @@ test('renders a singular "result" when there is exactly one', () => {
     }
   })
 
-  assert.match(html, /Showing 1 to 1 of 1 result[^s]/)
+  assert.match(html, /Showing 1 result[^s]/)
 })
 
 test('shows the results range for the current page', () => {

@@ -57,7 +57,11 @@
   {%- set lastItemOnPage = currentPage * itemsPerPage -%}
   {%- set endItem = totalItems if lastItemOnPage > totalItems else lastItemOnPage -%}
 
-  <p class="govuk-body">Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} result{{ "s" if totalItems != 1 else "" }}</p>
+  {%- if totalPages > 1 -%}
+    <p class="govuk-body">Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} results</p>
+  {%- else -%}
+    <p class="govuk-body">Showing {{ totalItems }} result{{ "s" if totalItems != 1 else "" }}</p>
+  {%- endif -%}
 
   {%- if totalPages > 1 -%}
     {%- set items = [] -%}
