@@ -12,6 +12,7 @@
     "./base-path": "./src/base-path.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
     "./components/autocomplete.scss": "./src/components/autocomplete.scss",
+    "./components/search-form.scss": "./src/components/search-form.scss",
     "./components/service-navigation.scss": "./src/components/service-navigation.scss",
     "./components/sortable-paginated-table.scss": "./src/components/sortable-paginated-table.scss",
     "./components/sub-navigation.scss": "./src/components/sub-navigation.scss",

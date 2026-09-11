@@ -1,0 +1,79 @@
+// Modelled on govuk_publishing_components' gem-c-search (large, on-white
+// variant): https://github.com/alphagov/govuk_publishing_components
+@use "govuk-frontend" as *;
+
+$lis-search-form-input-size: 50px;
+
+.lis-search-form {
+  margin: 0;
+}
+
+.lis-search-form__wrapper {
+  display: table;
+  width: 100%;
+  background: govuk-colour("white");
+}
+
+.lis-search-form__input {
+  display: table-cell;
+  vertical-align: top;
+  box-sizing: border-box;
+  width: 100%;
+  height: $lis-search-form-input-size;
+  margin: 0;
+  padding: govuk-em(6, 19);
+  border: $govuk-border-width-form-element solid govuk-functional-colour("input-border");
+  border-right-width: 0;
+  @include govuk-font($size: 19);
+
+  &:focus {
+    outline: $govuk-focus-width solid govuk-functional-colour("focus");
+    outline-offset: 0;
+    box-shadow: inset 0 0 0 $govuk-border-width-form-element;
+    border-right-width: $govuk-border-width-form-element;
+  }
+}
+
+.lis-search-form__submit-wrapper {
+  display: table-cell;
+  vertical-align: top;
+  width: 1%;
+}
+
+.lis-search-form__submit {
+  position: relative;
+  box-sizing: border-box;
+  width: $lis-search-form-input-size;
+  height: $lis-search-form-input-size;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: govuk-colour("blue");
+  color: govuk-colour("white");
+  text-indent: -5000px;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:hover {
+    background-color: govuk-colour("blue", $variant: "shade-25");
+  }
+
+  &:focus {
+    outline: $govuk-focus-width solid govuk-functional-colour("focus");
+    outline-offset: 0;
+    box-shadow: inset 0 0 0 ($govuk-border-width-form-element * 2) govuk-colour("black");
+  }
+}
+
+.lis-search-form__icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // gem-c-search scales the icon down further in its large-mode variant
+  // (50px button) than its default 40px button - matched here since our
+  // button is always the 50px size.
+  transform: scale(0.4);
+  pointer-events: none;
+}
