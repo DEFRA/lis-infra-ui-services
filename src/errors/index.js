@@ -19,7 +19,7 @@ function statusCodeMessage(statusCode) {
 }
 
 function getStatusCode(response) {
-  return response?.output?.statusCode ?? response?.statusCode
+  return response?.statusCode ?? response?.output?.statusCode
 }
 
 function getLogMessage(response, statusCode) {
