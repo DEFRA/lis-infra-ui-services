@@ -83,6 +83,31 @@ test('catchAll logs and renders generic content for server errors', () => {
   assert.deepEqual(logger.error.mock.calls[0], ['Mock error stack'])
 })
 
+test('catchAll prefers a client-attached statusCode over a boomified 500', () => {
+  const request = {
+    response: {
+      isBoom: true,
+      statusCode: statusCodes.notFound,
+      stack: 'Mock error stack',
+      output: { statusCode: statusCodes.internalServerError }
+    }
+  }
+  const toolkit = createToolkit()
+
+  catchAll(request, toolkit)
+
+  assert.deepEqual(toolkit.view.mock.calls[0], [
+    'error/index',
+    {
+      pageTitle: 'Page not found',
+      heading: statusCodes.notFound,
+      message: 'Page not found'
+    }
+  ])
+  assert.deepEqual(toolkit.code.mock.calls[0], [statusCodes.notFound])
+  assert.equal(logger.error.mock.calls.length, 0)
+})
+
 test('catchAll logs plain 500 responses before continuing', () => {
   const toolkit = createToolkit()
   const request = {
