@@ -29,10 +29,17 @@
 // A focusable region so keyboard users can scroll a table that's wider than
 // the viewport.
 .lis-sortable-table__wrapper {
+  // Contains the table's absolutely positioned visually-hidden text, which
+  // would otherwise escape the overflow and make the whole page scroll.
+  position: relative;
   overflow-x: auto;
 
+  // The GOV.UK non-text focus state - yellow alone has too little contrast
+  // against a white page. Both rings sit outside the box, clear of the text.
   &:focus {
     outline: $govuk-focus-width solid govuk-functional-colour("focus");
+    outline-offset: $govuk-focus-width;
+    box-shadow: 0 0 0 $govuk-focus-width govuk-functional-colour("focus-text");
   }
 
   // A header never wraps - on a narrow screen the table scrolls inside the
