@@ -36,6 +36,11 @@
   }
 }
 
-.lis-sortable-table__cell--no-wrap {
-  white-space: nowrap;
+// Keeps every header and cell on one line, so a wide table scrolls inside
+// its wrapper on a narrow screen rather than wrapping. Pass as `classes`.
+.lis-sortable-table--no-wrap {
+  .govuk-table__header,
+  .govuk-table__cell {
+    white-space: nowrap;
+  }
 }
