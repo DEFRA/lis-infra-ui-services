@@ -98,4 +98,40 @@ describe('formatAge()', () => {
     // Assert
     expect(age).toBe('3 years, 6 months')
   })
+
+  test('it returns an empty string when there is no date of birth', () => {
+    // Arrange
+    const dateOfBirth = null
+    const now = new Date('2026-09-10')
+
+    // Act
+    const age = formatAge(dateOfBirth, now)
+
+    // Assert
+    expect(age).toBe('')
+  })
+
+  test('it returns an empty string for an unparseable date of birth', () => {
+    // Arrange
+    const dateOfBirth = 'not-a-date'
+    const now = new Date('2026-09-10')
+
+    // Act
+    const age = formatAge(dateOfBirth, now)
+
+    // Assert
+    expect(age).toBe('')
+  })
+
+  test('it returns an empty string for a date of birth in the future', () => {
+    // Arrange
+    const dateOfBirth = '2028-01-01'
+    const now = new Date('2026-09-10')
+
+    // Act
+    const age = formatAge(dateOfBirth, now)
+
+    // Assert
+    expect(age).toBe('')
+  })
 })

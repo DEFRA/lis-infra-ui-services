@@ -14,8 +14,13 @@ function earTagGroups(earTag) {
 /**
  * @param {string} earTag e.g. "UK324537113236"
  * @returns {string} e.g. "UK 324537 113236" - the country code, herd mark
- *   and animal number. An ear tag in any other format is returned as-is.
+ *   and animal number. Anything else - an ear tag in another format, or a
+ *   value that isn't a string - is returned as-is.
  */
 export function formatEarTag(earTag) {
+  if (typeof earTag !== 'string') {
+    return earTag
+  }
+
   return earTagGroups(earTag)?.join(' ') ?? earTag
 }

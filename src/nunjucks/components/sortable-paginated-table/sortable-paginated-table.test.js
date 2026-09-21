@@ -148,6 +148,17 @@ test('omits the sortable hint when no column has a sortKey', () => {
   assert.doesNotMatch(html, /are sortable/)
 })
 
+test('renders no caption, and a generic region label, when no caption is given', () => {
+  const html = render({
+    columns,
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.doesNotMatch(html, /<caption/)
+  assert.match(html, /role="region" aria-label="Table">/)
+})
+
 test('wraps the table in a focusable, labelled region so it can be scrolled by keyboard', () => {
   const html = render({
     caption: 'Animals',

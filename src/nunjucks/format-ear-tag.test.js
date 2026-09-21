@@ -68,4 +68,15 @@ describe('formatEarTag()', () => {
     // Assert
     expect(formatted).toBe('ab 1234/x')
   })
+
+  test('it returns a missing ear tag as-is', () => {
+    // Arrange
+    const earTag = null
+
+    // Act
+    const formatted = formatEarTag(earTag)
+
+    // Assert
+    expect(formatted).toBeNull()
+  })
 })

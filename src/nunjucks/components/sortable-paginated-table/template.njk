@@ -46,9 +46,9 @@
   {{ params.caption }}{% if sortableColumns | length %}<span class="govuk-visually-hidden"> (column headers with links are sortable).</span>{% endif %}
 {%- endset -%}
 
-<div class="lis-sortable-table__wrapper" tabindex="0" role="region" aria-label="{{ params.caption }} table">
+<div class="lis-sortable-table__wrapper" tabindex="0" role="region" aria-label="{{ (params.caption ~ ' table') if params.caption else 'Table' }}">
   {{ govukTable({
-    caption: captionHtml | safe,
+    caption: (captionHtml | safe) if params.caption else undefined,
     captionClasses: params.captionClasses or "govuk-visually-hidden",
     classes: params.classes,
     firstCellIsHeader: params.firstCellIsHeader,
