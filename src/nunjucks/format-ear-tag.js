@@ -1,6 +1,6 @@
-// A two-letter country code, then a six-digit herd mark and a six-digit
-// animal number - e.g. "UK324537113236".
-const earTagPattern = /^([A-Z]{2})(\d{6})(\d{6})$/
+// The UK country code, then a six-digit herd mark and a six-digit animal
+// number - e.g. "UK324537113236".
+const earTagPattern = /^(UK)(\d{6})(\d{6})$/
 
 /**
  * @param {string} earTag

@@ -36,7 +36,7 @@ describe('formatEarTag()', () => {
     expect(formatted).toBe('UK 324537 113236')
   })
 
-  test('it splits an ear tag with another country code the same way', () => {
+  test('it returns an ear tag with another country code as-is', () => {
     // Arrange
     const earTag = 'IE151234567890'
 
@@ -44,7 +44,7 @@ describe('formatEarTag()', () => {
     const formatted = formatEarTag(earTag)
 
     // Assert
-    expect(formatted).toBe('IE 151234 567890')
+    expect(formatted).toBe('IE151234567890')
   })
 
   test('it returns an ear tag of the wrong length as-is', () => {
@@ -93,7 +93,7 @@ describe('formatEarTagSpoken()', () => {
     expect(spoken).toBe('U K, 3 2 4 5 3 7, 1 1 3 2 3 6')
   })
 
-  test('it spells out an ear tag with another country code the same way', () => {
+  test('it just spaces out each character of an ear tag with another country code', () => {
     // Arrange
     const earTag = 'IE151234567890'
 
@@ -101,7 +101,7 @@ describe('formatEarTagSpoken()', () => {
     const spoken = formatEarTagSpoken(earTag)
 
     // Assert
-    expect(spoken).toBe('I E, 1 5 1 2 3 4, 5 6 7 8 9 0')
+    expect(spoken).toBe('I E 1 5 1 2 3 4 5 6 7 8 9 0')
   })
 
   test('it just spaces out each character of an ear tag of the wrong length', () => {
