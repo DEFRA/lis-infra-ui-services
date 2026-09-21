@@ -34,12 +34,17 @@
   &:focus {
     outline: $govuk-focus-width solid govuk-functional-colour("focus");
   }
+
+  // A header never wraps - on a narrow screen the table scrolls inside the
+  // wrapper instead.
+  .govuk-table__header {
+    white-space: nowrap;
+  }
 }
 
-// Keeps every header and cell on one line, so a wide table scrolls inside
-// its wrapper on a narrow screen rather than wrapping. Pass as `classes`.
+// Also keeps every cell on one line. Opt-in, since it suits tables of short
+// values but not ones with free text. Pass as `classes`.
 .lis-sortable-table--no-wrap {
-  .govuk-table__header,
   .govuk-table__cell {
     white-space: nowrap;
   }
