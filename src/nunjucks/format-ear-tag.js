@@ -19,21 +19,3 @@ function earTagGroups(earTag) {
 export function formatEarTag(earTag) {
   return earTagGroups(earTag)?.join(' ') ?? earTag
 }
-
-/**
- * For an aria-label, so a screen reader reads an ear tag character by
- * character rather than as "two hundred thousand".
- * @param {string} earTag e.g. "UK324537113236"
- * @returns {string} e.g. "U K, 3 2 4 5 3 7, 1 1 3 2 3 6" - the commas give a
- *   pause between the country code, herd mark and animal number. An ear tag
- *   in any other format is just spaced out, e.g. "A B 1 2 3".
- */
-export function formatEarTagSpoken(earTag) {
-  const groups = earTagGroups(earTag)
-
-  if (!groups) {
-    return [...earTag.replace(/\s+/g, '')].join(' ')
-  }
-
-  return groups.map((group) => [...group].join(' ')).join(', ')
-}
