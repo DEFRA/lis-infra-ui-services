@@ -23,8 +23,11 @@
 {%- endset -%}
 
 {%- set head = [] -%}
+{#- a list, since a set inside the loop wouldn't be visible outside it -#}
+{%- set sortableColumns = [] -%}
 {%- for column in params.columns -%}
   {%- if column.sortKey -%}
+    {%- set _ = sortableColumns.push(column.sortKey) -%}
     {%- set isActive = params.sort == column.sortKey -%}
     {%- set ariaSort = "ascending" if (isActive and params.direction == "asc") else ("descending" if (isActive and params.direction == "desc") else "none") -%}
     {%- set nextDirection = "desc" if ariaSort == "ascending" else "asc" -%}
@@ -39,14 +42,20 @@
   {%- endif -%}
 {%- endfor -%}
 
-{{ govukTable({
-  caption: params.caption,
-  captionClasses: params.captionClasses or "govuk-visually-hidden",
-  classes: params.classes,
-  firstCellIsHeader: params.firstCellIsHeader,
-  head: head,
-  rows: params.rows
-}) }}
+{%- set captionHtml -%}
+  {{ params.caption }}{% if sortableColumns | length %}<span class="govuk-visually-hidden"> (column headers with links are sortable).</span>{% endif %}
+{%- endset -%}
+
+<div class="lis-sortable-table__wrapper" tabindex="0" role="region" aria-label="{{ params.caption }} table">
+  {{ govukTable({
+    caption: captionHtml | safe,
+    captionClasses: params.captionClasses or "govuk-visually-hidden",
+    classes: params.classes,
+    firstCellIsHeader: params.firstCellIsHeader,
+    head: head,
+    rows: params.rows
+  }) }}
+</div>
 
 {%- if params.pagination -%}
   {%- set currentPage = params.pagination.currentPage -%}

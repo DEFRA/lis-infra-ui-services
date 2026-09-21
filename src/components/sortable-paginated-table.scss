@@ -25,3 +25,17 @@
 .lis-sortable-table__icon {
   flex-shrink: 0;
 }
+
+// A focusable region so keyboard users can scroll a table that's wider than
+// the viewport.
+.lis-sortable-table__wrapper {
+  overflow-x: auto;
+
+  &:focus {
+    outline: $govuk-focus-width solid govuk-functional-colour("focus");
+  }
+}
+
+.lis-sortable-table__cell--no-wrap {
+  white-space: nowrap;
+}
