@@ -51,16 +51,40 @@ describe('formatAge()', () => {
     expect(age).toBe('1 year')
   })
 
-  test('it shows 0 years for an animal under a year old', () => {
+  test('it shows only the months for an animal under a year old', () => {
     // Arrange
-    const dateOfBirth = '2026-06-01'
+    const dateOfBirth = '2026-03-10'
     const now = new Date('2026-09-10')
 
     // Act
     const age = formatAge(dateOfBirth, now)
 
     // Assert
-    expect(age).toBe('0 years, 3 months')
+    expect(age).toBe('6 months')
+  })
+
+  test('it uses the singular "month" for an animal exactly 1 month old', () => {
+    // Arrange
+    const dateOfBirth = '2026-08-10'
+    const now = new Date('2026-09-10')
+
+    // Act
+    const age = formatAge(dateOfBirth, now)
+
+    // Assert
+    expect(age).toBe('1 month')
+  })
+
+  test('it shows "Less than 1 month" for an animal under a month old', () => {
+    // Arrange
+    const dateOfBirth = '2026-09-01'
+    const now = new Date('2026-09-10')
+
+    // Act
+    const age = formatAge(dateOfBirth, now)
+
+    // Assert
+    expect(age).toBe('Less than 1 month')
   })
 
   test('it accepts a Date value', () => {
