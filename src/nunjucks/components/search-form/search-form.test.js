@@ -36,6 +36,25 @@ describe('searchForm()', () => {
     expect(html).toContain('name="search"')
   })
 
+  test('links the hint to the input so it is read out with the label', () => {
+    // Act
+    const html = render({ label: 'Search', hint: 'Search by ear tag' })
+
+    // Assert
+    expect(html).toContain(
+      '<p class="govuk-body" id="search-hint">Search by ear tag</p>'
+    )
+    expect(html).toContain('aria-describedby="search-hint"')
+  })
+
+  test('does not describe the input by a hint when none is given', () => {
+    // Act
+    const html = render({ label: 'Search' })
+
+    // Assert
+    expect(html).not.toContain('aria-describedby')
+  })
+
   test('defaults the input name and id to "search"', () => {
     // Act
     const html = render({ label: 'Search' })

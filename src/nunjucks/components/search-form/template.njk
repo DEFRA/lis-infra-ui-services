@@ -8,7 +8,7 @@
   </h2>
 
   {%- if params.hint -%}
-    <p class="govuk-body">{{ params.hint }}</p>
+    <p class="govuk-body" id="{{ id }}-hint">{{ params.hint }}</p>
   {%- endif -%}
 
   <form method="GET" class="lis-search-form">
@@ -19,6 +19,7 @@
         id="{{ id }}"
         name="{{ params.name or 'search' }}"
         value="{{ params.value }}"
+        {% if params.hint %}aria-describedby="{{ id }}-hint"{% endif %}
       >
       <div class="lis-search-form__submit-wrapper">
         <button class="lis-search-form__submit" type="submit">

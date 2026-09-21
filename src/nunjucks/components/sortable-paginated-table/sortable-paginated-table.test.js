@@ -123,6 +123,56 @@ test('passes rows straight through to the table', () => {
   assert.match(html, /<td class="govuk-table__cell">UK 324537 113234<\/td>/)
 })
 
+test('tells screen reader users that the column headers are sortable', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.match(
+    html,
+    /<caption class="govuk-table__caption govuk-visually-hidden">\s*Animals<span class="govuk-visually-hidden"> \(column headers with links are sortable\)\.<\/span>\s*<\/caption>/
+  )
+})
+
+test('omits the sortable hint when no column has a sortKey', () => {
+  const html = render({
+    caption: 'Animals',
+    columns: [{ text: 'Ear tag number' }, { text: 'Age' }, { text: 'Breed' }],
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.doesNotMatch(html, /are sortable/)
+})
+
+test('renders no caption, and a generic region label, when no caption is given', () => {
+  const html = render({
+    columns,
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.doesNotMatch(html, /<caption/)
+  assert.match(html, /role="region" aria-label="Table">/)
+})
+
+test('wraps the table in a focusable, labelled region so it can be scrolled by keyboard', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.match(
+    html,
+    /<div class="lis-sortable-table__wrapper" tabindex="0" role="region" aria-label="Animals table">\s*<table/
+  )
+})
+
 test('renders the results summary but no pagination nav when there is only one page', () => {
   const html = render({
     caption: 'Animals',

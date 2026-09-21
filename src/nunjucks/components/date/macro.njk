@@ -1,0 +1,3 @@
+{% macro lisDate(value) -%}
+  {%- if value %}{{ value | formatDate("d MMM yyyy") }}{% endif -%}
+{%- endmacro %}
