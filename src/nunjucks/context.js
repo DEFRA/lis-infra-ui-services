@@ -43,7 +43,7 @@ export function createNunjucksContextBuilder({
       assetPath: `${assetRoot}/assets`,
       serviceName: config.get('serviceName'),
       sectionName,
-      serviceUrl: requestBasePath || '/',
+      serviceUrl: '/',
       breadcrumbs: [],
       navigation: buildNavigation(request),
       isSignedIn: Boolean(request?.app?.hubAuth),
