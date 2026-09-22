@@ -138,3 +138,30 @@ test('createNunjucksContextBuilder logs once when the Vite manifest is unavailab
   )
   assert.deepEqual(loggerMessages, ['Vite manifest.json not found'])
 })
+
+test('createNunjucksContextBuilder always sets serviceUrl to the hub root even when rendered under a spoke base path', () => {
+  const loggerMessages = []
+  const contextBuilder = createNunjucksContextBuilder({
+    config: createConfig(),
+    buildNavigation: () => [],
+    getRequestBasePath: () => '/cattle/register',
+    logger: {
+      error(loggedError, message) {
+        loggerMessages.push(message)
+      }
+    },
+    readFileSync() {
+      return JSON.stringify({
+        'src/client/stylesheets/application.scss': {
+          file: 'assets/application-123.css'
+        }
+      })
+    }
+  })
+
+  const context = contextBuilder({ headers: {}, path: '/' })
+
+  assert.equal(context.serviceUrl, '/')
+  assert.equal(context.assetPath, '/cattle/register/public/assets')
+  assert.deepEqual(loggerMessages, [])
+})
