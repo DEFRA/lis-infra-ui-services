@@ -27,7 +27,7 @@ describe('formatAge()', () => {
     expect(age).toBe('1 year, 1 month')
   })
 
-  test('it omits the months when the age is a whole number of years', () => {
+  test('it shows 0 months when the age is a whole number of years', () => {
     // Arrange
     const dateOfBirth = '2023-08-19'
     const now = new Date('2026-09-11')
@@ -36,10 +36,10 @@ describe('formatAge()', () => {
     const age = formatAge(dateOfBirth, now)
 
     // Assert
-    expect(age).toBe('3 years')
+    expect(age).toBe('3 years, 0 months')
   })
 
-  test('it uses the singular "year" for a whole number of exactly 1 year', () => {
+  test('it uses the singular "year" for exactly 1 year and 0 months', () => {
     // Arrange
     const dateOfBirth = '2025-08-19'
     const now = new Date('2026-09-11')
@@ -48,10 +48,10 @@ describe('formatAge()', () => {
     const age = formatAge(dateOfBirth, now)
 
     // Assert
-    expect(age).toBe('1 year')
+    expect(age).toBe('1 year, 0 months')
   })
 
-  test('it shows only the months for an animal under a year old', () => {
+  test('it shows 0 years for an animal under a year old', () => {
     // Arrange
     const dateOfBirth = '2026-03-10'
     const now = new Date('2026-09-10')
@@ -60,7 +60,7 @@ describe('formatAge()', () => {
     const age = formatAge(dateOfBirth, now)
 
     // Assert
-    expect(age).toBe('6 months')
+    expect(age).toBe('0 years, 6 months')
   })
 
   test('it uses the singular "month" for an animal exactly 1 month old', () => {
@@ -72,7 +72,7 @@ describe('formatAge()', () => {
     const age = formatAge(dateOfBirth, now)
 
     // Assert
-    expect(age).toBe('1 month')
+    expect(age).toBe('0 years, 1 month')
   })
 
   test('it shows "Less than 1 month" for an animal under a month old', () => {
