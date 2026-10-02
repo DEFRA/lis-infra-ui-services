@@ -14,7 +14,7 @@ export function buildPrimaryNavigation({ request, basePath = '' }) {
     href: '/profile',
     current: request?.path === '/profile' && !currentSpecies?.id
   }
-  const permittedSpecies = request?.app?.authorizedSpecies
+  const permittedSpecies = request?.auth?.credentials?.authorizedSpecies
 
   if (!Array.isArray(permittedSpecies) || permittedSpecies.length === 0) {
     return []

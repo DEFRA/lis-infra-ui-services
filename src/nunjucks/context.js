@@ -46,7 +46,7 @@ export function createNunjucksContextBuilder({
       serviceUrl: '/',
       breadcrumbs: [],
       navigation: buildNavigation(request),
-      isSignedIn: Boolean(request?.app?.hubAuth),
+      isSignedIn: Boolean(request?.auth?.credentials?.user),
       logoutUrl: '/signout',
       getAssetPath(asset) {
         const viteAssetPath = viteManifest?.[asset]?.file
