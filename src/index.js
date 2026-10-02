@@ -21,8 +21,7 @@ export const SUPPORTED_TAXONOMIES = [
     id: 'status',
     slug: 'status',
     label: 'Status',
-    summary: 'Surface status information and lifecycle checks for livestock.',
-    accessMode: 'hub-service'
+    summary: 'Surface status information and lifecycle checks for livestock.'
   },
   {
     id: 'home',

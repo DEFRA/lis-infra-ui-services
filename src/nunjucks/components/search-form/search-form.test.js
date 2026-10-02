@@ -85,7 +85,10 @@ describe('searchForm()', () => {
 
   test('escapes a search term containing markup', () => {
     // Act
-    const html = render({ label: 'Search', value: '"><script>alert(1)</script>' })
+    const html = render({
+      label: 'Search',
+      value: '"><script>alert(1)</script>'
+    })
 
     // Assert
     expect(html).not.toContain('<script>alert(1)</script>')

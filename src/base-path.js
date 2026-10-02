@@ -84,7 +84,10 @@ export function buildAppPath({ request, routePath = '/', basePath = '' }) {
  * @param {{ routePath?: string, basePath?: string }} options
  * @returns {string[]}
  */
-export function getRouteVariants({ routePath = '/', basePath: _basePath = '' }) {
+export function getRouteVariants({
+  routePath = '/',
+  basePath: _basePath = ''
+}) {
   const normalizedPath = normalizePath(routePath)
   return [normalizedPath]
 }
