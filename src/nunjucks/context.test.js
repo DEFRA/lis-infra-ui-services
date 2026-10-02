@@ -165,3 +165,45 @@ test('createNunjucksContextBuilder always sets serviceUrl to the hub root even w
   assert.equal(context.assetPath, '/cattle/register/public/assets')
   assert.deepEqual(loggerMessages, [])
 })
+
+function createSignedInContextBuilder() {
+  return createNunjucksContextBuilder({
+    config: createConfig(),
+    buildNavigation: () => [],
+    getRequestBasePath: () => '',
+    logger: { error: () => undefined },
+    readFileSync: () => '{}'
+  })
+}
+
+test('createNunjucksContextBuilder marks the user signed in from the auth credentials', () => {
+  const context = createSignedInContextBuilder()({
+    headers: {},
+    path: '/',
+    auth: { credentials: { user: { sub: 'user-1' } } },
+    app: {}
+  })
+
+  assert.equal(context.isSignedIn, true)
+})
+
+test('createNunjucksContextBuilder ignores the legacy request.app.hubAuth', () => {
+  const context = createSignedInContextBuilder()({
+    headers: {},
+    path: '/',
+    app: { hubAuth: { sub: 'user-1' } }
+  })
+
+  assert.equal(context.isSignedIn, false)
+})
+
+test('createNunjucksContextBuilder marks the user signed out without credentials', () => {
+  const context = createSignedInContextBuilder()({
+    headers: {},
+    path: '/',
+    auth: { credentials: null },
+    app: {}
+  })
+
+  assert.equal(context.isSignedIn, false)
+})

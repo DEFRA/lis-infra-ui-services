@@ -7,11 +7,13 @@ test('buildPrimaryNavigation renders species already authorized by the host', ()
   const navigation = buildPrimaryNavigation({
     request: {
       path: '/',
-      app: {
-        authorizedSpecies: [
-          { id: 'cattle', label: 'Cattle' },
-          { id: 'sheep', label: 'Sheep' }
-        ]
+      auth: {
+        credentials: {
+          authorizedSpecies: [
+            { id: 'cattle', label: 'Cattle' },
+            { id: 'sheep', label: 'Sheep' }
+          ]
+        }
       }
     }
   })
@@ -34,12 +36,27 @@ test('buildPrimaryNavigation marks the profile item as current on the profile ro
   const navigation = buildPrimaryNavigation({
     request: {
       path: '/profile',
-      app: {
-        authorizedSpecies: [{ id: 'cattle', label: 'Cattle' }]
+      auth: {
+        credentials: {
+          authorizedSpecies: [{ id: 'cattle', label: 'Cattle' }]
+        }
       }
     }
   })
 
   assert.equal(navigation.at(-1)?.text, 'Profile')
   assert.equal(navigation.at(-1)?.current, true)
+})
+
+test('buildPrimaryNavigation ignores the legacy request.app.authorizedSpecies', () => {
+  const navigation = buildPrimaryNavigation({
+    request: {
+      path: '/',
+      app: {
+        authorizedSpecies: [{ id: 'cattle', label: 'Cattle' }]
+      }
+    }
+  })
+
+  assert.deepEqual(navigation, [])
 })
