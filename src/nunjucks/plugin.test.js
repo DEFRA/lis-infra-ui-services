@@ -52,7 +52,9 @@ describe('createNunjucksConfig()', () => {
   test('resolves the base path from the module registry when moduleId is given', () => {
     // Arrange
     mocks.getBasePathForModule.mockReturnValue('/cattle/register')
-    const config = { get: vi.fn((key) => (key === 'root' ? projectRoot : false)) }
+    const config = {
+      get: vi.fn((key) => (key === 'root' ? projectRoot : false))
+    }
 
     // Act
     createNunjucksConfig({
@@ -68,7 +70,9 @@ describe('createNunjucksConfig()', () => {
 
   test('defaults to an empty base path when no moduleId is given', () => {
     // Arrange
-    const config = { get: vi.fn((key) => (key === 'root' ? projectRoot : false)) }
+    const config = {
+      get: vi.fn((key) => (key === 'root' ? projectRoot : false))
+    }
 
     // Act
     const nunjucksConfig = createNunjucksConfig({
