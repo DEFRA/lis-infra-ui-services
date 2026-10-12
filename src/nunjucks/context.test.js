@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import { createNunjucksContextBuilder } from './context.js'
 
@@ -206,4 +206,321 @@ test('createNunjucksContextBuilder marks the user signed out without credentials
   })
 
   assert.equal(context.isSignedIn, false)
+})
+
+describe('createNunjucksContextBuilder() hub flags', () => {
+  test('marks the request as front office when the caller is the front-office hub', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      moduleId: 'cattle-register'
+    })
+    const request = {
+      headers: {},
+      path: '/',
+      auth: { credentials: { user: null, caller: 'lis-hubs-front-office' } }
+    }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.isFrontOffice).toBe(true)
+    expect(context.isBackOffice).toBe(false)
+  })
+
+  test('marks the request as back office when the caller is the back-office hub', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      moduleId: 'cattle-register'
+    })
+    const request = {
+      headers: {},
+      path: '/',
+      auth: { credentials: { user: null, caller: 'lis-hubs-back-office' } }
+    }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.isFrontOffice).toBe(false)
+    expect(context.isBackOffice).toBe(true)
+  })
+
+  test('sets neither flag on a request with no credentials', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      moduleId: 'cattle-register'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.isFrontOffice).toBe(false)
+    expect(context.isBackOffice).toBe(false)
+  })
+
+  test('sets neither flag for an unrecognised caller', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      moduleId: 'cattle-register'
+    })
+    const request = {
+      headers: {},
+      path: '/',
+      auth: { credentials: { user: null, caller: 'lis-hubs-other' } }
+    }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.isFrontOffice).toBe(false)
+    expect(context.isBackOffice).toBe(false)
+  })
+})
+
+describe('createNunjucksContextBuilder() hasPermission()', () => {
+  test('grants a permission the user holds on the given cph', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const user = {
+      statements: [
+        {
+          role: 'keeper',
+          cphs: ['12/345/0001'],
+          permissions: ['lis-perm-cattle-move-write']
+        }
+      ]
+    }
+    const request = { headers: {}, path: '/', auth: { credentials: { user } } }
+
+    // Act
+    const result = contextBuilder(request).hasPermission({
+      permission: 'lis-perm-cattle-move-write',
+      cph: '12/345/0001'
+    })
+
+    // Assert
+    expect(result).toBe(true)
+  })
+
+  test('refuses a permission the user holds only on another cph', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const user = {
+      statements: [
+        {
+          role: 'keeper',
+          cphs: ['12/345/0001'],
+          permissions: ['lis-perm-cattle-move-write']
+        }
+      ]
+    }
+    const request = { headers: {}, path: '/', auth: { credentials: { user } } }
+
+    // Act
+    const result = contextBuilder(request).hasPermission({
+      permission: 'lis-perm-cattle-move-write',
+      cph: '98/765/0002'
+    })
+
+    // Assert
+    expect(result).toBe(false)
+  })
+
+  test("grants a permission held everywhere when cph is '*'", () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const user = {
+      statements: [
+        {
+          role: 'caseworker',
+          cphs: '*',
+          permissions: ['lis-perm-back-office']
+        }
+      ]
+    }
+    const request = { headers: {}, path: '/', auth: { credentials: { user } } }
+
+    // Act
+    const result = contextBuilder(request).hasPermission({
+      permission: 'lis-perm-back-office',
+      cph: '*'
+    })
+
+    // Assert
+    expect(result).toBe(true)
+  })
+
+  test("refuses a permission held only on specific cphs when cph is '*'", () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const user = {
+      statements: [
+        {
+          role: 'keeper',
+          cphs: ['12/345/0001'],
+          permissions: ['lis-perm-cattle-move-write']
+        }
+      ]
+    }
+    const request = { headers: {}, path: '/', auth: { credentials: { user } } }
+
+    // Act
+    const result = contextBuilder(request).hasPermission({
+      permission: 'lis-perm-cattle-move-write',
+      cph: '*'
+    })
+
+    // Assert
+    expect(result).toBe(false)
+  })
+
+  test('refuses every permission when the user is signed out', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    const result = contextBuilder(request).hasPermission({
+      permission: 'lis-perm-cattle-move-write',
+      cph: '12/345/0001'
+    })
+
+    // Assert
+    expect(result).toBe(false)
+  })
+
+  test('throws when no cph is given', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    let result, error
+    try {
+      result = contextBuilder(request).hasPermission({
+        permission: 'lis-perm-cattle-move-write',
+        cph: undefined
+      })
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(result).toBeUndefined()
+    expect(error.message).toBe(
+      "hasPermission() requires a cph - pass '*' where no holding applies"
+    )
+  })
+
+  test('throws when no permission is given', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    let result, error
+    try {
+      result = contextBuilder(request).hasPermission({
+        permission: undefined,
+        cph: '12/345/0001'
+      })
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(result).toBeUndefined()
+    expect(error.message).toBe('hasPermission() requires a permission')
+  })
+
+  test('throws when called with no arguments', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    let result, error
+    try {
+      result = contextBuilder(request).hasPermission()
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(result).toBeUndefined()
+    expect(error.message).toBe('hasPermission() requires a permission')
+  })
 })
