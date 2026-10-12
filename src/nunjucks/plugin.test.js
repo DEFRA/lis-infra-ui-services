@@ -85,4 +85,29 @@ describe('createNunjucksConfig()', () => {
     expect(mocks.getBasePathForModule).not.toHaveBeenCalled()
     expect(nunjucksConfig.plugin).toBeDefined()
   })
+
+  test('exposes PERMISSIONS to templates as a global', () => {
+    // Arrange
+    const addGlobal = vi.fn()
+    mocks.nunjucksConfigure.mockReturnValueOnce({
+      addGlobal,
+      addFilter: vi.fn()
+    })
+    const config = {
+      get: vi.fn((key) => (key === 'root' ? projectRoot : false))
+    }
+
+    // Act
+    createNunjucksConfig({
+      config,
+      logger: {},
+      getRequestBasePath: vi.fn()
+    })
+
+    // Assert
+    expect(addGlobal).toHaveBeenCalledWith(
+      'PERMISSIONS',
+      expect.objectContaining({ backOffice: 'lis-perm-back-office' })
+    )
+  })
 })
