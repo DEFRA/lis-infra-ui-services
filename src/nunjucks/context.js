@@ -57,12 +57,11 @@ function createPermissionCheck(request) {
  */
 
 /**
- * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
+ * @param {{ config: object, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
  * @returns {Function}
  */
 export function createNunjucksContextBuilder({
   config,
-  buildNavigation,
   getRequestBasePath,
   logger,
   readFileSync,
@@ -106,7 +105,8 @@ export function createNunjucksContextBuilder({
       sectionName,
       serviceUrl: '/',
       breadcrumbs: [],
-      navigation: buildNavigation(request),
+      // No primary navigation links for now: only the service name and Sign out.
+      navigation: [],
       isSignedIn: Boolean(request?.auth?.credentials?.user),
       isFrontOffice: requestHubId === 'front-office',
       isBackOffice: requestHubId === 'back-office',
