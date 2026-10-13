@@ -55,6 +55,28 @@ describe('searchForm()', () => {
     expect(html).not.toContain('aria-describedby')
   })
 
+  test('carries hidden fields inside the form so they survive a submit', () => {
+    // Act
+    const html = render({
+      label: 'Search',
+      hiddenFields: [{ name: 'referrer', value: 'abc-123' }]
+    })
+
+    // Assert
+    expect(html).toContain(
+      '<input type="hidden" name="referrer" value="abc-123">'
+    )
+    expect(html.indexOf('<form')).toBeLessThan(html.indexOf('type="hidden"'))
+  })
+
+  test('renders no hidden fields when none are given', () => {
+    // Act
+    const html = render({ label: 'Search' })
+
+    // Assert
+    expect(html).not.toContain('type="hidden"')
+  })
+
   test('defaults the input name and id to "search"', () => {
     // Act
     const html = render({ label: 'Search' })

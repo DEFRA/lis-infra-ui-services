@@ -12,6 +12,9 @@
   {%- endif -%}
 
   <form method="GET" class="lis-search-form">
+    {%- for field in params.hiddenFields -%}
+      <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+    {%- endfor -%}
     <div class="lis-search-form__wrapper">
       <input
         class="govuk-input lis-search-form__input"
