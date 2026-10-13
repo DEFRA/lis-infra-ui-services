@@ -30,6 +30,7 @@
     "./nunjucks-context": "./src/nunjucks-context.js",
     "./proxy/setup-proxy": "./src/proxy/setup-proxy.js",
     "./redis-client": "./src/redis-client.js",
+    "./referrer-link": "./src/referrer-link.js",
     "./session-cache": "./src/session-cache.js",
     "./session-cache/cache-engine": "./src/session-cache/cache-engine.js",
     "./static-files": "./src/static-files.js",
