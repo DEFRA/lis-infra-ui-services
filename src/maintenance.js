@@ -77,6 +77,19 @@ function isExempt(path, { healthPath, assetPrefix }) {
   return path === healthPath || path.startsWith(assetPrefix)
 }
 
+function answerUnavailable(request, h, { availableFrom, retryAfter }) {
+  request.plugins[PLUGIN_NAME] = { answered: true }
+
+  return h
+    .view(serviceUnavailable.view, {
+      pageTitle: serviceUnavailable.pageTitle,
+      availableFrom
+    })
+    .code(statusCodes.serviceUnavailable)
+    .header('Retry-After', retryAfter)
+    .takeover()
+}
+
 /**
  * Answers every request with the service unavailable page while
  * `availableFrom` is set. The health check stays up so the platform does not
@@ -105,23 +118,13 @@ export function createMaintenancePlugin({
         return
       }
 
-      function answerUnavailable(request, h) {
-        request.plugins[PLUGIN_NAME] = { answered: true }
-
-        return h
-          .view(serviceUnavailable.view, {
-            pageTitle: serviceUnavailable.pageTitle,
-            availableFrom: formattedAvailableFrom
-          })
-          .code(statusCodes.serviceUnavailable)
-          .header('Retry-After', retryAfter)
-          .takeover()
-      }
-
       server.ext('onRequest', (request, h) =>
         isExempt(request.path, { healthPath, assetPrefix })
           ? h.continue
-          : answerUnavailable(request, h)
+          : answerUnavailable(request, h, {
+              availableFrom: formattedAvailableFrom,
+              retryAfter
+            })
       )
     }
   }
