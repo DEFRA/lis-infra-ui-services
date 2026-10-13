@@ -105,11 +105,7 @@ export function createMaintenancePlugin({
         return
       }
 
-      server.ext('onRequest', (request, h) => {
-        if (isExempt(request.path, { healthPath, assetPrefix })) {
-          return h.continue
-        }
-
+      function answerUnavailable(request, h) {
         request.plugins[PLUGIN_NAME] = { answered: true }
 
         return h
@@ -120,7 +116,13 @@ export function createMaintenancePlugin({
           .code(statusCodes.serviceUnavailable)
           .header('Retry-After', retryAfter)
           .takeover()
-      })
+      }
+
+      server.ext('onRequest', (request, h) =>
+        isExempt(request.path, { healthPath, assetPrefix })
+          ? h.continue
+          : answerUnavailable(request, h)
+      )
     }
   }
 }
