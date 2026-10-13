@@ -83,10 +83,7 @@ test.each([
     catchAll(request, toolkit)
 
     // Assert
-    assert.deepEqual(toolkit.view.mock.calls[0], [
-      view,
-      { pageTitle, developmentMessage: undefined }
-    ])
+    assert.deepEqual(toolkit.view.mock.calls[0], [view, { pageTitle }])
     assert.deepEqual(toolkit.code.mock.calls[0], [statusCode])
   }
 )
@@ -103,8 +100,7 @@ test('catchAll logs server errors and renders the problem with the service page'
   assert.deepEqual(toolkit.view.mock.calls[0], [
     'error/problem-with-service',
     {
-      pageTitle: 'Sorry, there is a problem with the service',
-      developmentMessage: undefined
+      pageTitle: 'Sorry, there is a problem with the service'
     }
   ])
   assert.deepEqual(toolkit.code.mock.calls[0], [
@@ -143,41 +139,10 @@ test('catchAll prefers a client-attached statusCode over a boomified 500', () =>
   // Assert
   assert.deepEqual(toolkit.view.mock.calls[0], [
     'error/page-not-found',
-    { pageTitle: 'Page not found', developmentMessage: undefined }
+    { pageTitle: 'Page not found' }
   ])
   assert.deepEqual(toolkit.code.mock.calls[0], [statusCodes.notFound])
   assert.equal(logger.error.mock.calls.length, 0)
-})
-
-test("catchAll passes the error's own message to the page in development", () => {
-  // Arrange
-  vi.stubEnv('NODE_ENV', 'development')
-  const request = createBoomRequest(statusCodes.internalServerError)
-  request.response.message = 'Upstream timed out'
-  const toolkit = createToolkit()
-
-  // Act
-  catchAll(request, toolkit)
-
-  // Assert
-  assert.equal(
-    toolkit.view.mock.calls[0][1].developmentMessage,
-    'Upstream timed out'
-  )
-})
-
-test("catchAll leaves out the error's own message outside development", () => {
-  // Arrange
-  vi.stubEnv('NODE_ENV', 'production')
-  const request = createBoomRequest(statusCodes.internalServerError)
-  request.response.message = 'Upstream timed out'
-  const toolkit = createToolkit()
-
-  // Act
-  catchAll(request, toolkit)
-
-  // Assert
-  assert.equal(toolkit.view.mock.calls[0][1].developmentMessage, undefined)
 })
 
 test('catchAll does not log the 503 the maintenance plugin answered with', () => {
