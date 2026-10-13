@@ -59,6 +59,15 @@ function appendReferrerId(href, queryParam, id) {
 }
 
 /**
+ * @param {Request} request
+ * @returns {string | null} the signed-in user's subject, which keys what is remembered for them
+ */
+function userKey(request) {
+  const sub = request.auth?.credentials?.user?.sub
+  return typeof sub === 'string' && sub.length > 0 ? sub : null
+}
+
+/**
  * Remembers where a user came from so pages reached from a list can link
  * back to it, including its query, after moving between related pages.
  *
@@ -97,25 +106,16 @@ export function createReferrerLink(
   }
 ) {
   if (typeof cacheName !== 'string' || cacheName.length === 0) {
-    throw new Error('createReferrerLink() requires a cacheName')
+    throw new TypeError('createReferrerLink() requires a cacheName')
   }
   if (typeof allow !== 'function') {
-    throw new Error('createReferrerLink() requires an allow function')
+    throw new TypeError('createReferrerLink() requires an allow function')
   }
   if (typeof fallbackHref !== 'string' || fallbackHref.length === 0) {
-    throw new Error('createReferrerLink() requires a fallbackHref')
+    throw new TypeError('createReferrerLink() requires a fallbackHref')
   }
 
   const store = server.cache({ cache: cacheName, segment, expiresIn })
-
-  /**
-   * @param {Request} request
-   * @returns {string | null}
-   */
-  function userKey(request) {
-    const sub = request.auth?.credentials?.user?.sub
-    return typeof sub === 'string' && sub.length > 0 ? sub : null
-  }
 
   /**
    * A route pre method: resolves the back link for the request. Null when
