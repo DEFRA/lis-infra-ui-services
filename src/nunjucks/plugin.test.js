@@ -110,4 +110,28 @@ describe('createNunjucksConfig()', () => {
       expect.objectContaining({ backOffice: 'lis-perm-back-office' })
     )
   })
+
+  test('passes the errorPages links through to the view context', () => {
+    // Arrange
+    const config = {
+      get: vi.fn((key) => (key === 'root' ? projectRoot : false))
+    }
+    const errorPages = {
+      contactHref: 'https://example.com/contact',
+      homeHref: '/home',
+      getStartedHref: '/start'
+    }
+
+    // Act
+    const nunjucksConfig = createNunjucksConfig({
+      config,
+      logger: {},
+      getRequestBasePath: vi.fn(() => ''),
+      errorPages
+    })
+    const context = nunjucksConfig.options.context({ headers: {}, path: '/' })
+
+    // Assert
+    expect(context.errorPages).toEqual(errorPages)
+  })
 })

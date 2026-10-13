@@ -1,20 +1,26 @@
 /** @import { Request, ResponseToolkit, Lifecycle } from '@hapi/hapi' */
 import { logger } from '@defra/lis-hubs-infra-core'
 
+import { isAnsweredByMaintenance } from '../maintenance.js'
+import {
+  notAuthorised,
+  pageNotFound,
+  problemWithService,
+  serviceUnavailable
+} from './error-pages.js'
 import { statusCodes } from '../status-codes.js'
 
-function statusCodeMessage(statusCode) {
+function errorPageFor(statusCode) {
   switch (statusCode) {
     case statusCodes.notFound:
-      return 'Page not found'
-    case statusCodes.forbidden:
-      return 'Forbidden'
+      return pageNotFound
     case statusCodes.unauthorized:
-      return 'Unauthorized'
-    case statusCodes.badRequest:
-      return 'Bad Request'
+    case statusCodes.forbidden:
+      return notAuthorised
+    case statusCodes.serviceUnavailable:
+      return serviceUnavailable
     default:
-      return 'Something went wrong'
+      return problemWithService
   }
 }
 
@@ -41,25 +47,21 @@ export function catchAll(request, h) {
   const { response } = request
   const statusCode = getStatusCode(response)
 
-  if (statusCode >= statusCodes.internalServerError) {
+  if (
+    statusCode >= statusCodes.internalServerError &&
+    !isAnsweredByMaintenance(request)
+  ) {
     logger.error(getLogMessage(response, statusCode))
   }
 
   if (!('isBoom' in response)) {
     return h.continue
   }
-  const genericMessage = statusCodeMessage(statusCode)
-  const detailedMessage =
-    response?.message ?? response?.source?.message ?? genericMessage
+  const { view, pageTitle } = errorPageFor(statusCode)
+  const developmentMessage =
+    process.env.NODE_ENV === 'development'
+      ? (response?.message ?? response?.source?.message)
+      : undefined
 
-  const message =
-    process.env.NODE_ENV === 'development' ? detailedMessage : genericMessage
-
-  return h
-    .view('error/index', {
-      pageTitle: genericMessage,
-      heading: statusCode,
-      message
-    })
-    .code(statusCode)
+  return h.view(view, { pageTitle, developmentMessage }).code(statusCode)
 }

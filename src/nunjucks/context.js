@@ -5,6 +5,9 @@ import { HUBS, getModuleById } from '@defra/lis-hubs-infra-registry'
 
 const HUB_SERVICE_NAME_PREFIX = 'lis-hubs-'
 
+export const BCMS_CONTACT_HREF =
+  'https://www.gov.uk/government/organisations/british-cattle-movement-service'
+
 /**
  * Both auth schemes put the hub's service name on credentials.caller - a
  * spoke gets the hub that called it, a hub gets itself - so it is only
@@ -47,7 +50,14 @@ function createPermissionCheck(request) {
 }
 
 /**
- * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string }} options
+ * @typedef {object} ErrorPageLinks
+ * @property {string} [contactHref] - every error page's contact link; defaults to the BCMS GOV.UK page
+ * @property {string} [homeHref] - the page not found "Home page" link; defaults to '/'
+ * @property {string} [getStartedHref] - the page not found "Get started" link; defaults to '/'
+ */
+
+/**
+ * @param {{ config: object, buildNavigation: Function, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
  * @returns {Function}
  */
 export function createNunjucksContextBuilder({
@@ -56,8 +66,14 @@ export function createNunjucksContextBuilder({
   getRequestBasePath,
   logger,
   readFileSync,
-  moduleId
+  moduleId,
+  errorPages = {}
 }) {
+  const errorPageLinks = {
+    contactHref: errorPages.contactHref ?? BCMS_CONTACT_HREF,
+    homeHref: errorPages.homeHref ?? '/',
+    getStartedHref: errorPages.getStartedHref ?? '/'
+  }
   const sectionName = moduleId ? (getModuleById(moduleId)?.label ?? null) : null
   const manifestPath = path.join(
     config.get('root'),
@@ -96,6 +112,7 @@ export function createNunjucksContextBuilder({
       isBackOffice: requestHubId === 'back-office',
       hasPermission: createPermissionCheck(request),
       logoutUrl: '/signout',
+      errorPages: errorPageLinks,
       getAssetPath(asset) {
         const viteAssetPath = viteManifest?.[asset]?.file
         return `${assetRoot}/${viteAssetPath ?? asset}`
