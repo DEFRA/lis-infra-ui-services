@@ -65,6 +65,31 @@ describe('error pages', () => {
     )
   })
 
+  test('not authorised offers a sign in button when signInHref is given', () => {
+    // Arrange
+    const context = { signInHref: '/auth/login' }
+
+    // Act
+    const html = render('error/not-authorised.njk', context)
+
+    // Assert
+    expect(html).toContain(
+      '<a href="/auth/login" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Sign in</a>'
+    )
+  })
+
+  test('not authorised has no sign in button without signInHref', () => {
+    // Arrange
+    const context = {}
+
+    // Act
+    const html = render('error/not-authorised.njk', context)
+
+    // Assert
+    expect(html).not.toContain('govuk-button')
+    expect(html).not.toContain('Sign in')
+  })
+
   test('not authorised shows the heading and the support link', () => {
     // Arrange
     const context = {
