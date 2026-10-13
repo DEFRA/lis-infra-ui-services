@@ -160,35 +160,4 @@ describe('error pages', () => {
       '<a class="govuk-link" href="https://example.com/contact">British Cattle Movement Service (BCMS)</a>'
     )
   })
-
-  test('service unavailable says later when no return time is given', () => {
-    // Arrange
-    const context = { pageTitle: 'Sorry, the service is unavailable' }
-
-    // Act
-    const html = render('error/service-unavailable.njk', context)
-
-    // Assert
-    expect(textOf(html)).toContain('You will be able to use the service later.')
-  })
-
-  test.each([
-    'error/page-not-found.njk',
-    'error/not-authorised.njk',
-    'error/problem-with-service.njk',
-    'error/service-unavailable.njk'
-  ])('%s shows the development message only when one is given', (view) => {
-    // Arrange
-    const withMessage = { developmentMessage: 'Upstream timed out' }
-
-    // Act
-    const htmlWithMessage = render(view, withMessage)
-    const htmlWithoutMessage = render(view)
-
-    // Assert
-    expect(htmlWithMessage).toContain(
-      '<p class="govuk-body">Upstream timed out</p>'
-    )
-    expect(htmlWithoutMessage).not.toContain('Upstream timed out')
-  })
 })

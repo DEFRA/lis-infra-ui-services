@@ -58,10 +58,5 @@ export function catchAll(request, h) {
     return h.continue
   }
   const { view, pageTitle } = errorPageFor(statusCode)
-  const developmentMessage =
-    process.env.NODE_ENV === 'development'
-      ? (response?.message ?? response?.source?.message)
-      : undefined
-
-  return h.view(view, { pageTitle, developmentMessage }).code(statusCode)
+  return h.view(view, { pageTitle }).code(statusCode)
 }
