@@ -66,11 +66,20 @@
   {%- set lastItemOnPage = currentPage * itemsPerPage -%}
   {%- set endItem = totalItems if lastItemOnPage > totalItems else lastItemOnPage -%}
 
-  {%- if totalPages > 1 -%}
-    <p class="govuk-body">Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} results</p>
-  {%- else -%}
-    <p class="govuk-body">Showing {{ totalItems }} result{{ "s" if totalItems != 1 else "" }}</p>
-  {%- endif -%}
+  {%- set summary = params.summary or {} -%}
+
+  {#- the caller may supply the summary wording; otherwise it is the results count -#}
+  {%- set summaryContent -%}
+    {%- if summary.html -%}
+      {{ summary.html | safe }}
+    {%- elif summary.text -%}
+      {{ summary.text }}
+    {%- elif totalPages > 1 -%}
+      Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} results
+    {%- else -%}
+      Showing {{ totalItems }} result{{ "s" if totalItems != 1 else "" }}
+    {%- endif -%}
+  {%- endset -%}
 
   {%- if totalPages > 1 -%}
     {%- set items = [] -%}
@@ -82,10 +91,33 @@
     {%- set previousHref = params.baseHref ~ "?" ~ (query | assign({ sort: params.sort, direction: params.direction, page: currentPage - 1 }) | queryString) -%}
     {%- set nextHref = params.baseHref ~ "?" ~ (query | assign({ sort: params.sort, direction: params.direction, page: currentPage + 1 }) | queryString) -%}
 
-    {{ govukPagination({
-      items: items,
-      previous: { href: previousHref } if currentPage > 1 else undefined,
-      next: { href: nextHref } if currentPage < totalPages else undefined
-    }) }}
+    {%- set paginationHtml -%}
+      {{ govukPagination({
+        items: items,
+        previous: { href: previousHref } if currentPage > 1 else undefined,
+        next: { href: nextHref } if currentPage < totalPages else undefined
+      }) }}
+    {%- endset -%}
+  {%- endif -%}
+
+  {#- "below" puts the summary under the table, beside the page links when there are any -#}
+  {%- if summary.position == "below" -%}
+    {%- if totalPages > 1 -%}
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          {{ paginationHtml | safe }}
+        </div>
+        <div class="govuk-grid-column-one-third govuk-!-text-align-right">
+          <p class="govuk-body govuk-!-margin-top-2">{{ summaryContent | safe }}</p>
+        </div>
+      </div>
+    {%- else -%}
+      <p class="govuk-body">{{ summaryContent | safe }}</p>
+    {%- endif -%}
+  {%- else -%}
+    <p class="govuk-body">{{ summaryContent | safe }}</p>
+    {%- if totalPages > 1 -%}
+      {{ paginationHtml | safe }}
+    {%- endif -%}
   {%- endif -%}
 {%- endif -%}

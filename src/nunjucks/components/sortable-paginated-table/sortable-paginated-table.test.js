@@ -225,6 +225,108 @@ test('shows the results range for the current page', () => {
   assert.match(html, /Showing 6 to 7 of 7 results/)
 })
 
+test('renders the summary above the pagination by default', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals',
+    pagination: {
+      currentPage: 1,
+      totalPages: 2,
+      totalItems: 7,
+      itemsPerPage: 5
+    }
+  })
+
+  assert.ok(
+    html.indexOf('Showing 1 to 5 of 7') < html.indexOf('govuk-pagination')
+  )
+  assert.doesNotMatch(html, /govuk-grid-row/)
+})
+
+test('renders the summary text the caller supplies instead of the results count', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals',
+    summary: { text: 'Showing 1 to 7 of 7 <cattle>' },
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 7,
+      itemsPerPage: 25
+    }
+  })
+
+  assert.match(html, /Showing 1 to 7 of 7 &lt;cattle&gt;</)
+  assert.doesNotMatch(html, /results/)
+})
+
+test('renders summary html the caller supplies unescaped', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals',
+    summary: { html: 'Showing <strong>7</strong> cattle' },
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 7,
+      itemsPerPage: 25
+    }
+  })
+
+  assert.match(html, /Showing <strong>7<\/strong> cattle</)
+})
+
+test('puts the summary beside the pagination, below the table, when positioned below', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals',
+    summary: { position: 'below' },
+    pagination: {
+      currentPage: 1,
+      totalPages: 2,
+      totalItems: 7,
+      itemsPerPage: 5
+    }
+  })
+
+  assert.ok(html.indexOf('</table>') < html.indexOf('govuk-pagination'))
+  assert.ok(
+    html.indexOf('govuk-pagination') < html.indexOf('Showing 1 to 5 of 7')
+  )
+  assert.match(
+    html,
+    /govuk-grid-column-one-third govuk-!-text-align-right">\s*<p class="govuk-body govuk-!-margin-top-2">Showing 1 to 5 of 7 results<\/p>/
+  )
+})
+
+test('puts the summary alone below the table when positioned below with a single page', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals',
+    summary: { position: 'below' },
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 7,
+      itemsPerPage: 25
+    }
+  })
+
+  assert.ok(html.indexOf('</table>') < html.indexOf('Showing 7 results'))
+  assert.doesNotMatch(html, /govuk-grid-row/)
+  assert.doesNotMatch(html, /govuk-pagination/)
+})
+
 test('renders pagination items and next but no previous on the first page', () => {
   const html = render({
     caption: 'Animals',
