@@ -1,0 +1,20 @@
+{% extends 'layouts/page.njk' %}
+
+{% block pageTitle %}{{ pageTitle }} - {{ serviceName }} - GOV.UK{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Sorry, the service is unavailable</h1>
+      {% if availableFrom %}
+        <p class="govuk-body">You will be able to use the service from {{ availableFrom }}.</p>
+      {% else %}
+        <p class="govuk-body">You will be able to use the service later.</p>
+      {% endif %}
+      <p class="govuk-body">Contact the <a class="govuk-link" href="{{ errorPages.contactHref }}">British Cattle Movement Service (BCMS)</a> if you need to speak to someone about your account.</p>
+      {% if developmentMessage %}
+        <p class="govuk-body">{{ developmentMessage }}</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

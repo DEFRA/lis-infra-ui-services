@@ -302,6 +302,82 @@ describe('createNunjucksContextBuilder() hub flags', () => {
   })
 })
 
+describe('createNunjucksContextBuilder() errorPages', () => {
+  test('defaults the contact link to the BCMS GOV.UK page and the other links to the root', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.errorPages).toEqual({
+      contactHref:
+        'https://www.gov.uk/government/organisations/british-cattle-movement-service',
+      homeHref: '/',
+      getStartedHref: '/'
+    })
+  })
+
+  test('uses the links given in the errorPages option', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      errorPages: {
+        contactHref: 'https://example.com/contact',
+        homeHref: '/home',
+        getStartedHref: '/start'
+      }
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.errorPages).toEqual({
+      contactHref: 'https://example.com/contact',
+      homeHref: '/home',
+      getStartedHref: '/start'
+    })
+  })
+
+  test('keeps the default for any link the errorPages option leaves out', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      buildNavigation: () => [],
+      getRequestBasePath: () => '',
+      logger: {},
+      readFileSync: () => '{}',
+      errorPages: { getStartedHref: '/start', homeHref: undefined }
+    })
+    const request = { headers: {}, path: '/', auth: { credentials: null } }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.errorPages).toEqual({
+      contactHref:
+        'https://www.gov.uk/government/organisations/british-cattle-movement-service',
+      homeHref: '/',
+      getStartedHref: '/start'
+    })
+  })
+})
+
 describe('createNunjucksContextBuilder() hasPermission()', () => {
   test('grants a permission the user holds on the given cph', () => {
     // Arrange
