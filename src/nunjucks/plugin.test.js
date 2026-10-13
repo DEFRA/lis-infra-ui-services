@@ -4,15 +4,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import nunjucks from 'nunjucks'
-import { getBasePathForModule } from '@defra/lis-hubs-infra-registry'
 import { createNunjucksConfig } from './plugin.js'
 
 vi.mock('nunjucks')
-vi.mock('@defra/lis-hubs-infra-registry')
 
 const mocks = {
-  nunjucksConfigure: vi.mocked(nunjucks.configure),
-  getBasePathForModule: vi.mocked(getBasePathForModule)
+  nunjucksConfigure: vi.mocked(nunjucks.configure)
 }
 
 function createProjectRoot() {
@@ -49,25 +46,6 @@ describe('createNunjucksConfig()', () => {
     rmSync(projectRoot, { recursive: true, force: true })
   })
 
-  test('resolves the base path from the module registry when moduleId is given', () => {
-    // Arrange
-    mocks.getBasePathForModule.mockReturnValue('/cattle/register')
-    const config = {
-      get: vi.fn((key) => (key === 'root' ? projectRoot : false))
-    }
-
-    // Act
-    createNunjucksConfig({
-      config,
-      logger: {},
-      getRequestBasePath: vi.fn(),
-      moduleId: 'cattle-register'
-    })
-
-    // Assert
-    expect(mocks.getBasePathForModule).toHaveBeenCalledWith('cattle-register')
-  })
-
   test('defaults to an empty base path when no moduleId is given', () => {
     // Arrange
     const config = {
@@ -82,7 +60,6 @@ describe('createNunjucksConfig()', () => {
     })
 
     // Assert
-    expect(mocks.getBasePathForModule).not.toHaveBeenCalled()
     expect(nunjucksConfig.plugin).toBeDefined()
   })
 

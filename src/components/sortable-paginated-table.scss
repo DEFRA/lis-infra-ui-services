@@ -1,24 +1,24 @@
-@use "govuk-frontend" as *;
+@use 'govuk-frontend' as *;
 
 .lis-sortable-table__link {
   display: inline-flex;
   align-items: center;
-  color: govuk-functional-colour("brand");
+  color: govuk-functional-colour('brand');
   text-decoration: none;
 
   &:visited,
   &:hover {
-    color: govuk-functional-colour("brand");
+    color: govuk-functional-colour('brand');
     text-decoration: none;
   }
 
   &:focus {
     outline: none;
-    color: govuk-functional-colour("focus-text");
-    background-color: govuk-functional-colour("focus");
+    color: govuk-functional-colour('focus-text');
+    background-color: govuk-functional-colour('focus');
     box-shadow:
-      0 -2px govuk-functional-colour("focus"),
-      0 4px govuk-functional-colour("focus-text");
+      0 -2px govuk-functional-colour('focus'),
+      0 4px govuk-functional-colour('focus-text');
   }
 }
 
@@ -37,9 +37,9 @@
   // The GOV.UK non-text focus state - yellow alone has too little contrast
   // against a white page. Both rings sit outside the box, clear of the text.
   &:focus {
-    outline: $govuk-focus-width solid govuk-functional-colour("focus");
+    outline: $govuk-focus-width solid govuk-functional-colour('focus');
     outline-offset: $govuk-focus-width;
-    box-shadow: 0 0 0 $govuk-focus-width govuk-functional-colour("focus-text");
+    box-shadow: 0 0 0 $govuk-focus-width govuk-functional-colour('focus-text');
   }
 
   // A header never wraps - on a narrow screen the table scrolls inside the

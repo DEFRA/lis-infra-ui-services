@@ -23,7 +23,6 @@ test('createNunjucksContextBuilder resolves built asset paths from the Vite mani
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
@@ -52,7 +51,6 @@ test('createNunjucksContextBuilder falls back to the source asset path without l
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
@@ -77,7 +75,6 @@ test('createNunjucksContextBuilder resolves sectionName from the module registry
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
@@ -98,7 +95,6 @@ test('createNunjucksContextBuilder leaves sectionName null when no moduleId is g
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
@@ -118,7 +114,6 @@ test('createNunjucksContextBuilder logs once when the Vite manifest is unavailab
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig({ isProduction: true }),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
@@ -143,7 +138,6 @@ test('createNunjucksContextBuilder always sets serviceUrl to the hub root even w
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '/cattle/register',
     logger: {
       error(loggedError, message) {
@@ -169,7 +163,6 @@ test('createNunjucksContextBuilder always sets serviceUrl to the hub root even w
 function createSignedInContextBuilder() {
   return createNunjucksContextBuilder({
     config: createConfig(),
-    buildNavigation: () => [],
     getRequestBasePath: () => '',
     logger: { error: () => undefined },
     readFileSync: () => '{}'
@@ -213,7 +206,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -237,7 +229,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -261,7 +252,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -281,7 +271,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -307,7 +296,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -330,7 +318,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -357,7 +344,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
@@ -383,7 +369,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -413,7 +398,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -443,7 +427,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -473,7 +456,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -503,7 +485,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -524,7 +505,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -553,7 +533,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
@@ -580,7 +559,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      buildNavigation: () => [],
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
