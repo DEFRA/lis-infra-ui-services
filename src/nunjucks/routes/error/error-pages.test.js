@@ -25,7 +25,6 @@ const errorPages = {
 
 function render(view, context = {}) {
   return environment.render(view, {
-    serviceName: 'Livestock Information',
     errorPages,
     ...context
   })
@@ -48,7 +47,7 @@ describe('error pages', () => {
 
     // Assert
     expect(html).toContain(
-      '<title>Page not found - Livestock Information - GOV.UK</title>'
+      '<title>Page not found - Livestock Information</title>'
     )
     expect(html).toContain('<h1 class="govuk-heading-l">Page not found</h1>')
     expect(textOf(html)).toContain(
@@ -77,7 +76,7 @@ describe('error pages', () => {
 
     // Assert
     expect(html).toContain(
-      '<title>Sorry, you are not authorised to view this page - Livestock Information - GOV.UK</title>'
+      '<title>Sorry, you are not authorised to view this page - Livestock Information</title>'
     )
     expect(html).toContain(
       '<h1 class="govuk-heading-l">Sorry, you are not authorised to view this page.</h1>'
@@ -99,7 +98,7 @@ describe('error pages', () => {
 
     // Assert
     expect(html).toContain(
-      '<title>Sorry, there is a problem with the service - Livestock Information - GOV.UK</title>'
+      '<title>Sorry, there is a problem with the service - Livestock Information</title>'
     )
     expect(html).toContain(
       '<h1 class="govuk-heading-l">Sorry, there is a problem with the service</h1>'
@@ -124,7 +123,7 @@ describe('error pages', () => {
 
     // Assert
     expect(html).toContain(
-      '<title>Sorry, the service is unavailable - Livestock Information - GOV.UK</title>'
+      '<title>Sorry, the service is unavailable - Livestock Information</title>'
     )
     expect(html).toContain(
       '<h1 class="govuk-heading-l">Sorry, the service is unavailable</h1>'

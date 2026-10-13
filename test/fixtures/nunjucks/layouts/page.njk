@@ -1,2 +1,2 @@
-<title>{% block pageTitle %}{% endblock %}</title>
+<title>{% block pageTitle %}{{ pageTitle }}{% if sectionName %} - {{ sectionName }}{% endif %} - Livestock Information{% endblock %}</title>
 <main>{% block content %}{% endblock %}</main>

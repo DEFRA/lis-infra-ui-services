@@ -42,7 +42,6 @@ async function createServer(maintenanceOptions) {
       },
       path: path.join(packageRoot, 'src/nunjucks/routes'),
       context: {
-        serviceName: 'Livestock Information',
         errorPages: { contactHref: 'https://example.com/contact' }
       }
     }
@@ -104,7 +103,7 @@ describe('createMaintenancePlugin()', () => {
     // Assert
     expect(response.statusCode).toBe(statusCodes.serviceUnavailable)
     expect(response.payload).toContain(
-      '<title>Sorry, the service is unavailable - Livestock Information - GOV.UK</title>'
+      '<title>Sorry, the service is unavailable - Livestock Information</title>'
     )
     expect(response.payload).toContain(
       'You will be able to use the service from 9am on Monday 16 November 2026.'
