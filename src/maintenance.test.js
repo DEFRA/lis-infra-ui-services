@@ -87,8 +87,42 @@ describe('formatAvailableFrom()', () => {
 
     // Assert
     expect(act).toThrow(
-      'maintenance.availableFrom must be an ISO 8601 date-time, got "next Tuesday"'
+      'maintenance.availableFrom must be the UK local date-time without an offset, e.g. 2026-11-19T09:00, got "next Tuesday"'
     )
+  })
+
+  test.each([['2026-11-19T09:00Z'], ['2026-11-19T09:00:00+01:00']])(
+    'throws on %s because it carries an offset',
+    (isoString) => {
+      // Arrange
+      // Act
+      const act = () => formatAvailableFrom(isoString)
+
+      // Assert
+      expect(act).toThrow('without an offset')
+    }
+  )
+
+  test('throws on a date without a time', () => {
+    // Arrange
+    const isoString = '2026-11-19'
+
+    // Act
+    const act = () => formatAvailableFrom(isoString)
+
+    // Assert
+    expect(act).toThrow('without an offset')
+  })
+
+  test('throws on a date-time that does not exist', () => {
+    // Arrange
+    const isoString = '2026-13-40T09:00'
+
+    // Act
+    const act = () => formatAvailableFrom(isoString)
+
+    // Assert
+    expect(act).toThrow('without an offset')
   })
 })
 
@@ -109,6 +143,19 @@ describe('createMaintenancePlugin()', () => {
       'You will be able to use the service from 9am on Monday 16 November 2026.'
     )
     expect(isAnsweredByMaintenance(response.request)).toBe(true)
+  })
+
+  test('tells clients when to retry with a Retry-After HTTP-date', async () => {
+    // Arrange
+    await createServer({ availableFrom: '2026-11-16T09:00' })
+
+    // Act
+    const response = await server.inject({ method: 'GET', url: '/holdings' })
+
+    // Assert
+    expect(response.headers['retry-after']).toBe(
+      new Date(2026, 10, 16, 9, 0).toUTCString()
+    )
   })
 
   test('leaves the health check untouched', async () => {
@@ -152,6 +199,28 @@ describe('createMaintenancePlugin()', () => {
     expect(response.statusCode).toBe(statusCodes.ok)
   })
 
+  test('treats an asset path with a trailing slash the same as one without', async () => {
+    // Arrange
+    await createServer({
+      availableFrom: '2026-11-16T09:00',
+      assetPath: '/public/'
+    })
+
+    // Act
+    const assetResponse = await server.inject({
+      method: 'GET',
+      url: '/public/app.css'
+    })
+    const pageResponse = await server.inject({
+      method: 'GET',
+      url: '/holdings'
+    })
+
+    // Assert
+    expect(assetResponse.statusCode).toBe(statusCodes.ok)
+    expect(pageResponse.statusCode).toBe(statusCodes.serviceUnavailable)
+  })
+
   test.each([[''], [undefined]])(
     'does nothing when availableFrom is %j',
     async (availableFrom) => {
@@ -167,6 +236,17 @@ describe('createMaintenancePlugin()', () => {
     }
   )
 
+  test('fails at start-up when availableFrom has an offset', () => {
+    // Arrange
+    const options = { availableFrom: '2026-11-16T09:00Z' }
+
+    // Act
+    const act = () => createMaintenancePlugin(options)
+
+    // Assert
+    expect(act).toThrow('without an offset')
+  })
+
   test('fails at start-up when availableFrom is not a date-time', () => {
     // Arrange
     const options = { availableFrom: 'soon' }
@@ -175,6 +255,6 @@ describe('createMaintenancePlugin()', () => {
     const act = () => createMaintenancePlugin(options)
 
     // Assert
-    expect(act).toThrow('maintenance.availableFrom must be an ISO 8601')
+    expect(act).toThrow('maintenance.availableFrom must be the UK local')
   })
 })

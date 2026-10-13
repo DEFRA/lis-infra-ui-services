@@ -1,10 +1,12 @@
 /** @import { Plugin, Request } from '@hapi/hapi' */
 import { format, isValid, parseISO } from 'date-fns'
 
+import { serviceUnavailable } from './errors/error-pages.js'
 import { statusCodes } from './status-codes.js'
 
 const PLUGIN_NAME = 'lis-maintenance'
 const MIDDAY_HOUR = 12
+const LOCAL_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/
 
 function formatTime(date) {
   if (date.getMinutes() === 0) {
@@ -21,20 +23,32 @@ function formatTime(date) {
 }
 
 /**
- * Formats a return time in the GOV.UK style, e.g. "9am on Monday 19 November
- * 2026". A value without an offset is read as wall-clock time, so the page
- * shows what was configured whatever the server's time zone.
+ * Only a local date-time is accepted: it is read as wall-clock time, so the
+ * page shows what was configured whatever the server's time zone, whereas an
+ * offset would be converted to the server's zone.
  * @param {string} isoString
+ * @returns {Date}
+ */
+function parseAvailableFrom(isoString) {
+  const date = LOCAL_DATE_TIME.test(isoString) ? parseISO(isoString) : null
+
+  if (!date || !isValid(date)) {
+    throw new Error(
+      `maintenance.availableFrom must be the UK local date-time without an offset, e.g. 2026-11-19T09:00, got "${isoString}"`
+    )
+  }
+
+  return date
+}
+
+/**
+ * Formats a return time in the GOV.UK style, e.g. "9am on Monday 19 November
+ * 2026".
+ * @param {string} isoString - a local date-time without an offset
  * @returns {string}
  */
 export function formatAvailableFrom(isoString) {
-  const date = parseISO(isoString)
-
-  if (!isValid(date)) {
-    throw new Error(
-      `maintenance.availableFrom must be an ISO 8601 date-time, got "${isoString}"`
-    )
-  }
+  const date = parseAvailableFrom(isoString)
 
   return `${formatTime(date)} on ${format(date, 'EEEE d MMMM yyyy')}`
 }
@@ -49,8 +63,18 @@ export function isAnsweredByMaintenance(request) {
   return request?.plugins?.[PLUGIN_NAME]?.answered === true
 }
 
-function isExempt(path, { healthPath, assetPath }) {
-  return path === healthPath || path.startsWith(`${assetPath}/`)
+function withoutTrailingSlashes(path) {
+  let trimmed = path
+
+  while (trimmed.endsWith('/')) {
+    trimmed = trimmed.slice(0, -1)
+  }
+
+  return trimmed
+}
+
+function isExempt(path, { healthPath, assetPrefix }) {
+  return path === healthPath || path.startsWith(assetPrefix)
 }
 
 /**
@@ -69,6 +93,10 @@ export function createMaintenancePlugin({
   const formattedAvailableFrom = isActive
     ? formatAvailableFrom(availableFrom)
     : undefined
+  const retryAfter = isActive
+    ? parseAvailableFrom(availableFrom).toUTCString()
+    : undefined
+  const assetPrefix = `${withoutTrailingSlashes(assetPath)}/`
 
   return {
     name: PLUGIN_NAME,
@@ -78,18 +106,19 @@ export function createMaintenancePlugin({
       }
 
       server.ext('onRequest', (request, h) => {
-        if (isExempt(request.path, { healthPath, assetPath })) {
+        if (isExempt(request.path, { healthPath, assetPrefix })) {
           return h.continue
         }
 
         request.plugins[PLUGIN_NAME] = { answered: true }
 
         return h
-          .view('error/service-unavailable', {
-            pageTitle: 'Sorry, the service is unavailable',
+          .view(serviceUnavailable.view, {
+            pageTitle: serviceUnavailable.pageTitle,
             availableFrom: formattedAvailableFrom
           })
           .code(statusCodes.serviceUnavailable)
+          .header('Retry-After', retryAfter)
           .takeover()
       })
     }

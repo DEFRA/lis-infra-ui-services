@@ -33,13 +33,13 @@ createNunjucksConfig({
 
 ## Scheduled maintenance
 
-Each hub switches maintenance on with its own config value, `maintenance.availableFrom`: an ISO 8601 date-time for when the service is back, e.g. `2026-11-19T09:00`. Give it without an offset to have the page show that wall-clock time whatever the server's time zone. An empty value leaves the service running as normal.
+Each hub switches maintenance on with its own config value, `maintenance.availableFrom`: the UK local date-time the service is back, in ISO 8601 form without an offset, e.g. `2026-11-19T09:00` or `2026-11-19T09:00:00`. Values with a `Z` or `+hh:mm` offset, and dates without a time, throw at start-up. An empty value leaves the service running as normal.
 
 ```js
 // config.js
 maintenance: {
   availableFrom: {
-    doc: 'ISO 8601 date-time the service is back from; empty when not in maintenance',
+    doc: 'UK local date-time the service is back from, without an offset; empty when not in maintenance',
     format: String,
     default: '',
     env: 'MAINTENANCE_AVAILABLE_FROM'
@@ -58,4 +58,4 @@ await server.register(
 )
 ```
 
-While `availableFrom` is set, every request except the health check and assets under `assetPath` gets the service unavailable page with a 503, showing the time as "9am on Thursday 19 November 2026". An `availableFrom` that is not a date-time throws at start-up.
+While `availableFrom` is set, every request except the health check and assets under `assetPath` gets the service unavailable page with a 503, showing the time as "9am on Thursday 19 November 2026" and carrying it in a `Retry-After` header.
