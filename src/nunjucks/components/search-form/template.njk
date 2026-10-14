@@ -23,6 +23,7 @@
         name="{{ params.name or 'search' }}"
         value="{{ params.value }}"
         {% if params.hint %}aria-describedby="{{ id }}-hint"{% endif %}
+        {% if params.maxlength %}maxlength="{{ params.maxlength }}"{% endif %}
       >
       <div class="lis-search-form__submit-wrapper">
         <button class="lis-search-form__submit" type="submit">

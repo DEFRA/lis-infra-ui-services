@@ -170,4 +170,20 @@ describe('searchForm()', () => {
       'Recent changes such as new registrations may take up to 24 hours to appear in your list.'
     )
   })
+
+  test('renders maxlength on the search input when given', () => {
+    // Act
+    const html = render({ label: 'Search', maxlength: 50 })
+
+    // Assert
+    expect(html).toContain('maxlength="50"')
+  })
+
+  test('renders no maxlength attribute when not given', () => {
+    // Act
+    const html = render({ label: 'Search' })
+
+    // Assert
+    expect(html).not.toContain('maxlength')
+  })
 })
