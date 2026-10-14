@@ -42,9 +42,41 @@ describe('searchForm()', () => {
 
     // Assert
     expect(html).toContain(
-      '<p class="govuk-body" id="search-hint">Search by ear tag</p>'
+      '<div class="govuk-hint" id="search-hint">Search by ear tag</div>'
     )
     expect(html).toContain('aria-describedby="search-hint"')
+  })
+
+  test('makes the form the search landmark, labelled by the label text', () => {
+    // Act
+    const html = render({ label: 'Search animals', hint: 'Search by ear tag' })
+
+    // Assert
+    expect(html).toContain(
+      '<form method="GET" class="lis-search-form" role="search" aria-label="Search animals">'
+    )
+  })
+
+  test('wraps the label, hint and input in the form', () => {
+    // Act
+    const html = render({ label: 'Search animals', hint: 'Search by ear tag' })
+
+    // Assert
+    expect(html.indexOf('<form')).toBeLessThan(html.indexOf('govuk-form-group'))
+    expect(html.indexOf('govuk-hint')).toBeLessThan(html.indexOf('</form>'))
+    expect(html.indexOf('</form>')).toBeGreaterThan(
+      html.indexOf('type="search"')
+    )
+  })
+
+  test('renders the inset text outside the form', () => {
+    // Act
+    const html = render({ label: 'Search', insetText: 'Up to 24 hours' })
+
+    // Assert
+    expect(html.indexOf('govuk-inset-text')).toBeGreaterThan(
+      html.indexOf('</form>')
+    )
   })
 
   test('does not describe the input by a hint when none is given', () => {

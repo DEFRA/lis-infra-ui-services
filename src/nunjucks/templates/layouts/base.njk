@@ -38,13 +38,16 @@
   <link href="{{ getAssetPath('src/client/stylesheets/application.scss') }}" rel="stylesheet">
 {% endblock %}
 
-{% block header %}
+{% block govukHeader %}
   {{ govukHeader({
     homepageUrl: "https://www.gov.uk/",
     classes: "app-header",
     containerClasses: "govuk-width-container",
     useTudorCrown: true
   }) }}
+{% endblock %}
+
+{% block govukServiceNavigation %}
   {% if isSignedIn %}
     {% set signOutNavigationEnd %}
       <li class="govuk-service-navigation__item app-service-navigation__item--right">
@@ -60,7 +63,9 @@
       navigationEnd: signOutNavigationEnd
     }
   }) }}
+{% endblock %}
 
+{% block headerEnd %}
   {{ govukPhaseBanner({
     tag: {
       html: "<b>Steel Thread</b>",
@@ -84,7 +89,7 @@
 
 {% block content %}{% endblock %}
 
-{% block footer %}
+{% block govukFooter %}
   {{ govukFooter({
     meta: {
       items: [

@@ -1,17 +1,17 @@
 {%- set id = params.id or params.name or "search" -%}
 
-<div class="govuk-form-group">
-  <h2 class="govuk-label-wrapper">
-    <label class="govuk-label govuk-label--m" for="{{ id }}">
-      {{ params.label }}
-    </label>
-  </h2>
+<form method="GET" class="lis-search-form" role="search" aria-label="{{ params.label }}">
+  <div class="govuk-form-group">
+    <h2 class="govuk-label-wrapper">
+      <label class="govuk-label govuk-label--m" for="{{ id }}">
+        {{ params.label }}
+      </label>
+    </h2>
 
-  {%- if params.hint -%}
-    <p class="govuk-body" id="{{ id }}-hint">{{ params.hint }}</p>
-  {%- endif -%}
+    {%- if params.hint -%}
+      <div class="govuk-hint" id="{{ id }}-hint">{{ params.hint }}</div>
+    {%- endif -%}
 
-  <form method="GET" class="lis-search-form">
     {%- for field in params.hiddenFields -%}
       <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
     {%- endfor -%}
@@ -34,8 +34,8 @@
         </button>
       </div>
     </div>
-  </form>
-</div>
+  </div>
+</form>
 
 {%- if params.insetText -%}
   <div class="govuk-inset-text">

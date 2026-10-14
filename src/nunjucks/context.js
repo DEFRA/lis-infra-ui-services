@@ -52,8 +52,6 @@ function createPermissionCheck(request) {
 /**
  * @typedef {object} ErrorPageLinks
  * @property {string} [contactHref] - every error page's contact link; defaults to the BCMS GOV.UK page
- * @property {string} [homeHref] - the page not found "Home page" link; defaults to '/'
- * @property {string} [getStartedHref] - the page not found "Get started" link; defaults to '/'
  */
 
 /**
@@ -69,9 +67,7 @@ export function createNunjucksContextBuilder({
   errorPages = {}
 }) {
   const errorPageLinks = {
-    contactHref: errorPages.contactHref ?? BCMS_CONTACT_HREF,
-    homeHref: errorPages.homeHref ?? '/',
-    getStartedHref: errorPages.getStartedHref ?? '/'
+    contactHref: errorPages.contactHref ?? BCMS_CONTACT_HREF
   }
   const sectionName = moduleId ? (getModuleById(moduleId)?.label ?? null) : null
   const manifestPath = path.join(

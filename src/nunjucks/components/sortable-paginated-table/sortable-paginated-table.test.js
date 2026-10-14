@@ -169,7 +169,21 @@ test('wraps the table in a focusable, labelled region so it can be scrolled by k
 
   assert.match(
     html,
-    /<div class="lis-sortable-table__wrapper" tabindex="0" role="region" aria-label="Animals table">\s*<table/
+    /<div class="lis-sortable-table__wrapper" data-module="lis-scrollable-table" tabindex="0" role="region" aria-label="Animals table">\s*<table/
+  )
+})
+
+test('marks the wrapper as a lis-scrollable-table module', () => {
+  const html = render({
+    caption: 'Animals',
+    columns,
+    rows,
+    baseHref: '/animals'
+  })
+
+  assert.match(
+    html,
+    /<div class="lis-sortable-table__wrapper" data-module="lis-scrollable-table"/
   )
 })
 
