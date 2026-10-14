@@ -94,9 +94,7 @@ describe('createNunjucksConfig()', () => {
       get: vi.fn((key) => (key === 'root' ? projectRoot : false))
     }
     const errorPages = {
-      contactHref: 'https://example.com/contact',
-      homeHref: '/home',
-      getStartedHref: '/start'
+      contactHref: 'https://example.com/contact'
     }
 
     // Act

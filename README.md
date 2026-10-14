@@ -15,7 +15,7 @@ Install dependencies for this package locally with `npm install` from this direc
 | 503           | `service-unavailable`  |
 | anything else | `problem-with-service` |
 
-The links on these pages come from the `errorPages` option of `createNunjucksConfig` (or `createNunjucksContextBuilder`), exposed to templates as `errorPages`. Every key is optional:
+The contact link on these pages comes from the `errorPages` option of `createNunjucksConfig` (or `createNunjucksContextBuilder`), exposed to templates as `errorPages`. The key is optional:
 
 ```js
 createNunjucksConfig({
@@ -24,11 +24,39 @@ createNunjucksConfig({
   getRequestBasePath,
   errorPages: {
     contactHref:
-      'https://www.gov.uk/government/organisations/british-cattle-movement-service', // default
-    homeHref: '/', // default, "Home page" on page not found
-    getStartedHref: '/' // default, "Get started" on page not found
+      'https://www.gov.uk/government/organisations/british-cattle-movement-service' // default
   }
 })
+```
+
+## Layout scripts
+
+`layoutComponents` from `@defra/lis-infra-ui-services/components/layout` is the list of GOV.UK Frontend components the layout template renders: Service navigation and Skip link.
+
+`errorPageComponents` from `@defra/lis-infra-ui-services/components/error-pages` is the list the shared error pages render (Button, for the not-authorised sign-in button). Every app that serves the shared error pages must add it.
+
+Start each with `createAll`, alongside any page-level components (see the full example under [Scrollable table](#scrollable-table)).
+
+Wrap the combined list in a `Set`, so a component that appears in more than one list (or that the app also lists itself) is only initialised once: govuk's base class logs an InitError on double init.
+
+### Scrollable table
+
+Apps that render the sortable paginated table macro also start `ScrollableTable` from `@defra/lis-infra-ui-services/components/scrollable-table`. It drops the tab stop (and the region role and label) from a table wrapper that fits, and restores them when the table overflows, re-checking whenever the wrapper or table changes size. Without JavaScript the wrapper stays focusable.
+
+```js
+import { createAll, Tabs } from 'govuk-frontend'
+import { errorPageComponents } from '@defra/lis-infra-ui-services/components/error-pages'
+import { layoutComponents } from '@defra/lis-infra-ui-services/components/layout'
+import { ScrollableTable } from '@defra/lis-infra-ui-services/components/scrollable-table'
+
+for (const component of new Set([
+  ...layoutComponents,
+  ...errorPageComponents,
+  ScrollableTable,
+  Tabs
+])) {
+  createAll(component)
+}
 ```
 
 ## Scheduled maintenance

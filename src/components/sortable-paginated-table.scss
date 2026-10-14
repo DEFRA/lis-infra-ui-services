@@ -13,7 +13,7 @@
   }
 
   &:focus {
-    outline: none;
+    outline: $govuk-focus-width solid transparent;
     color: govuk-functional-colour('focus-text');
     background-color: govuk-functional-colour('focus');
     box-shadow:
@@ -33,6 +33,27 @@
   // would otherwise escape the overflow and make the whole page scroll.
   position: relative;
   overflow-x: auto;
+
+  // Scroll shadows: an edge shadows only while more of the table is hidden
+  // past it. The body-coloured covers scroll with the content and hide each
+  // shadow once that end is reached, so a table that fits shows none.
+  background:
+    linear-gradient(
+        to right,
+        govuk-functional-colour('body-background') 30%,
+        transparent
+      )
+      left center / 40px 100% no-repeat local,
+    linear-gradient(
+        to left,
+        govuk-functional-colour('body-background') 30%,
+        transparent
+      )
+      right center / 40px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.2), transparent)
+      left center / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.2), transparent)
+      right center / 14px 100% no-repeat scroll;
 
   // The GOV.UK non-text focus state - yellow alone has too little contrast
   // against a white page. Both rings sit outside the box, clear of the text.

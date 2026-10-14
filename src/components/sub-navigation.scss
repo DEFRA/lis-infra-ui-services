@@ -60,7 +60,7 @@
       0 -2px govuk-functional-colour('focus'),
       0 4px govuk-functional-colour('focus-text');
     text-decoration: none;
-    outline: none;
+    outline: $govuk-focus-width solid transparent;
   }
 
   &[aria-current='page'] {

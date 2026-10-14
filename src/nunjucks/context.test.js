@@ -292,7 +292,7 @@ describe('createNunjucksContextBuilder() hub flags', () => {
 })
 
 describe('createNunjucksContextBuilder() errorPages', () => {
-  test('defaults the contact link to the BCMS GOV.UK page and the other links to the root', () => {
+  test('defaults the contact link to the BCMS GOV.UK page', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
@@ -308,9 +308,7 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Assert
     expect(context.errorPages).toEqual({
       contactHref:
-        'https://www.gov.uk/government/organisations/british-cattle-movement-service',
-      homeHref: '/',
-      getStartedHref: '/'
+        'https://www.gov.uk/government/organisations/british-cattle-movement-service'
     })
   })
 
@@ -322,9 +320,7 @@ describe('createNunjucksContextBuilder() errorPages', () => {
       logger: {},
       readFileSync: () => '{}',
       errorPages: {
-        contactHref: 'https://example.com/contact',
-        homeHref: '/home',
-        getStartedHref: '/start'
+        contactHref: 'https://example.com/contact'
       }
     })
     const request = { headers: {}, path: '/', auth: { credentials: null } }
@@ -334,20 +330,18 @@ describe('createNunjucksContextBuilder() errorPages', () => {
 
     // Assert
     expect(context.errorPages).toEqual({
-      contactHref: 'https://example.com/contact',
-      homeHref: '/home',
-      getStartedHref: '/start'
+      contactHref: 'https://example.com/contact'
     })
   })
 
-  test('keeps the default for any link the errorPages option leaves out', () => {
+  test('keeps the default for a link the errorPages option leaves undefined', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
       getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
-      errorPages: { getStartedHref: '/start', homeHref: undefined }
+      errorPages: { contactHref: undefined }
     })
     const request = { headers: {}, path: '/', auth: { credentials: null } }
 
@@ -357,9 +351,7 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Assert
     expect(context.errorPages).toEqual({
       contactHref:
-        'https://www.gov.uk/government/organisations/british-cattle-movement-service',
-      homeHref: '/',
-      getStartedHref: '/start'
+        'https://www.gov.uk/government/organisations/british-cattle-movement-service'
     })
   })
 })

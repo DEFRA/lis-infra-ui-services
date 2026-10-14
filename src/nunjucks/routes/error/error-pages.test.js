@@ -38,7 +38,7 @@ function textOf(html) {
 }
 
 describe('error pages', () => {
-  test('page not found shows the heading, the three links and the support link', () => {
+  test('page not found shows the heading, the guidance and the BCMS link', () => {
     // Arrange
     const context = { pageTitle: 'Page not found' }
 
@@ -51,18 +51,13 @@ describe('error pages', () => {
     )
     expect(html).toContain('<h1 class="govuk-heading-l">Page not found</h1>')
     expect(textOf(html)).toContain(
-      "Sorry, we could not find the page you were looking for. You might find what you're looking for by visiting: Home page Get started GOV.UK If you cannot find the information you need, contact our support team."
-    )
-    expect(html).toContain('<a class="govuk-link" href="/home">Home page</a>')
-    expect(html).toContain(
-      '<a class="govuk-link" href="/start">Get started</a>'
+      'If you typed the web address, check it is correct. If you pasted the web address, check you copied the entire address. If the web address is correct or you selected a link or button, contact the British Cattle Movement Service (BCMS) if you need to speak to someone about your account.'
     )
     expect(html).toContain(
-      '<a class="govuk-link" href="https://www.gov.uk">GOV.UK</a>'
+      '<a class="govuk-link" href="https://example.com/contact">British Cattle Movement Service (BCMS)</a>'
     )
-    expect(html).toContain(
-      '<a class="govuk-link" href="https://example.com/contact">contact our support team</a>'
-    )
+    expect(html).not.toContain('Home page')
+    expect(html).not.toContain('Get started')
   })
 
   test('not authorised offers a sign in button when signInHref is given', () => {
@@ -104,7 +99,7 @@ describe('error pages', () => {
       '<title>Sorry, you are not authorised to view this page - Livestock Information</title>'
     )
     expect(html).toContain(
-      '<h1 class="govuk-heading-l">Sorry, you are not authorised to view this page.</h1>'
+      '<h1 class="govuk-heading-l">Sorry, you are not authorised to view this page</h1>'
     )
     expect(textOf(html)).toContain(
       'Check your details are correct and try again. If you think this is incorrect contact our support team.'

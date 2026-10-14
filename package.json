@@ -11,6 +11,9 @@
     ".": "./src/index.js",
     "./base-path": "./src/base-path.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
+    "./components/error-pages": "./src/components/error-pages.js",
+    "./components/layout": "./src/components/layout.js",
+    "./components/scrollable-table": "./src/components/scrollable-table.js",
     "./components/autocomplete.scss": "./src/components/autocomplete.scss",
     "./components/search-form.scss": "./src/components/search-form.scss",
     "./components/service-navigation.scss": "./src/components/service-navigation.scss",
@@ -71,7 +74,8 @@
   "peerDependencies": {
     "@defra/lis-hubs-infra-access": ">=0.29.0 <1.0.0",
     "@defra/lis-hubs-infra-core": ">=0.4.0 <1.0.0",
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "govuk-frontend": ">=6.5.0 <7.0.0"
   },
   "devDependencies": {
     "@defra/lis-hubs-infra-access": "^0.29.0",
@@ -81,7 +85,9 @@
     "@vitest/coverage-istanbul": "^4.1.10",
     "audit-ci": "^7.1.0",
     "eslint": "^9.0.0",
+    "govuk-frontend": "6.5.0",
     "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
     "prettier": "^3.8.4",
     "vitest": "^4.1.10"
   }
