@@ -27,6 +27,15 @@ $lis-search-form-input-size: 50px;
   border-right-width: 0;
   @include govuk-font($size: 19);
 
+  &.govuk-input--error {
+    border-color: govuk-functional-colour('error');
+
+    // GOV.UK switches an error input back to the normal border while focused.
+    &:focus {
+      border-color: govuk-functional-colour('input-border');
+    }
+  }
+
   &:focus {
     outline: $govuk-focus-width solid govuk-functional-colour('focus');
     outline-offset: 0;

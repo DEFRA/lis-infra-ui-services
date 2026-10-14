@@ -171,19 +171,55 @@ describe('searchForm()', () => {
     )
   })
 
-  test('renders maxlength on the search input when given', () => {
+  test('renders the error message with a visually hidden prefix', () => {
     // Act
-    const html = render({ label: 'Search', maxlength: 50 })
+    const html = render({ label: 'Search', errorMessage: 'Too long' })
 
     // Assert
-    expect(html).toContain('maxlength="50"')
+    expect(html).toContain(
+      '<p id="search-error" class="govuk-error-message"><span class="govuk-visually-hidden">Error:</span> Too long</p>'
+    )
+    expect(html.indexOf('govuk-error-message')).toBeLessThan(
+      html.indexOf('lis-search-form__wrapper')
+    )
   })
 
-  test('renders no maxlength attribute when not given', () => {
+  test('adds the error classes to the form group and input', () => {
     // Act
-    const html = render({ label: 'Search' })
+    const html = render({ label: 'Search', errorMessage: 'Too long' })
 
     // Assert
-    expect(html).not.toContain('maxlength')
+    expect(html).toContain('govuk-form-group govuk-form-group--error')
+    expect(html).toContain('lis-search-form__input govuk-input--error')
+  })
+
+  test('describes the input by the hint then the error when both are given', () => {
+    // Act
+    const html = render({
+      label: 'Search',
+      hint: 'Search by ear tag',
+      errorMessage: 'Too long'
+    })
+
+    // Assert
+    expect(html).toContain('aria-describedby="search-hint search-error"')
+  })
+
+  test('describes the input by the error alone when there is no hint', () => {
+    // Act
+    const html = render({ label: 'Search', errorMessage: 'Too long' })
+
+    // Assert
+    expect(html).toContain('aria-describedby="search-error"')
+  })
+
+  test('renders no error markup when no error message is given', () => {
+    // Act
+    const html = render({ label: 'Search', hint: 'Search by ear tag' })
+
+    // Assert
+    expect(html).not.toContain('govuk-error-message')
+    expect(html).not.toContain('--error')
+    expect(html).not.toContain('search-error')
   })
 })
