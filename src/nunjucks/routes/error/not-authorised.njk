@@ -6,7 +6,9 @@
       <h1 class="govuk-heading-l">Sorry, you are not authorised to view this page</h1>
       <p class="govuk-body">Check your details are correct and try again.</p>
       <p class="govuk-body">If you think this is incorrect <a class="govuk-link" href="{{ errorPages.contactHref }}">contact our support team</a>.</p>
-      {% if signInHref %}
+      {% if signOutHref %}
+        <a href="{{ signOutHref }}" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Sign out</a>
+      {% elif signInHref %}
         <a href="{{ signInHref }}" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Sign in</a>
       {% endif %}
     </div>

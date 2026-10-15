@@ -1,6 +1,10 @@
 // Modelled on govuk_publishing_components' gem-c-search (large, on-white
 // variant): https://github.com/alphagov/govuk_publishing_components
-@use 'govuk-frontend' as *;
+// Only govuk-frontend's settings, tools and helpers are used here, never its
+// full entry point: that emits every govuk rule again wherever it resolves to
+// a second copy of the package (a symlinked install does), and the repeat
+// lands after this package's rules and overrides them.
+@use 'govuk-frontend/dist/govuk/base' as *;
 
 $lis-search-form-input-size: 50px;
 

@@ -1,5 +1,8 @@
 /* Pushes the Sign out item to the end of the service navigation bar.
-   base.njk renders it with the app-service-navigation__item--right class. */
+   base.njk renders it with the app-service-navigation__item--right class.
+   govuk-frontend lays the list out as a flex row from tablet up, so an auto
+   margin is all it takes. This file deliberately uses nothing from
+   govuk-frontend: see the note in search-form.scss. */
 .app-service-navigation__item--right {
   margin-left: auto;
 }
