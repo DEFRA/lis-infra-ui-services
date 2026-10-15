@@ -85,6 +85,34 @@ describe('error pages', () => {
     expect(html).not.toContain('Sign in')
   })
 
+  test('not authorised offers a sign out button when signOutHref is given', () => {
+    // Arrange
+    const context = { signOutHref: '/signout' }
+
+    // Act
+    const html = render('error/not-authorised.njk', context)
+
+    // Assert
+    expect(html).toContain(
+      '<a href="/signout" role="button" draggable="false" class="govuk-button" data-module="govuk-button">Sign out</a>'
+    )
+    expect(html).not.toContain('Sign in')
+  })
+
+  test('not authorised prefers sign out over sign in when both are given', () => {
+    // Arrange
+    const context = { signInHref: '/auth/login', signOutHref: '/signout' }
+
+    // Act
+    const html = render('error/not-authorised.njk', context)
+
+    // Assert
+    expect(html).toContain('href="/signout"')
+    expect(html).toContain('Sign out')
+    expect(html).not.toContain('Sign in')
+    expect(html).not.toContain('/auth/login')
+  })
+
   test('not authorised shows the heading and the support link', () => {
     // Arrange
     const context = {
