@@ -19,7 +19,7 @@ test('createSessionCachePlugin builds the expected yar plugin options', () => {
     }
   }
 
-  const plugin = createSessionCachePlugin({ sessionConfig, isSecure: true })
+  const plugin = createSessionCachePlugin({ sessionConfig })
 
   assert.equal(plugin.plugin, yar)
   assert.deepEqual(plugin.options, {
@@ -58,20 +58,16 @@ test('createSessionCachePluginForConfig maps config values into the plugin', () 
           }
         }
       }
-
-      if (key === 'session.cookie.secure') {
-        return false
-      }
     }
   }
 
   const plugin = createSessionCachePluginForConfig(config)
 
-  assert.deepEqual(calls, ['session', 'session.cookie.secure'])
+  assert.deepEqual(calls, ['session'])
   assert.equal(plugin.options.name, 'mapped-session')
   assert.equal(plugin.options.cache.expiresIn, 1000)
   assert.equal(plugin.options.cookieOptions.password, 'secret')
   assert.equal(plugin.options.cookieOptions.ttl, 2000)
-  assert.equal(plugin.options.cookieOptions.isSecure, false)
+  assert.equal(plugin.options.cookieOptions.isSecure, true)
   assert.equal(plugin.options.cookieOptions.isSameSite, 'Lax')
 })

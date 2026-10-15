@@ -1,10 +1,10 @@
 import yar from '@hapi/yar'
 
 /**
- * @param {{ sessionConfig: object, isSecure: boolean }} options
+ * @param {{ sessionConfig: object }} options
  * @returns {object}
  */
-export function createSessionCachePlugin({ sessionConfig, isSecure }) {
+export function createSessionCachePlugin({ sessionConfig }) {
   return {
     plugin: yar,
     options: {
@@ -18,7 +18,9 @@ export function createSessionCachePlugin({ sessionConfig, isSecure }) {
       cookieOptions: {
         password: sessionConfig.cookie.password,
         ttl: sessionConfig.cookie.ttl,
-        isSecure,
+        // Secure is a fixed invariant: the browser always reaches the app over
+        // HTTPS (Caddy locally, the CDP edge deployed).
+        isSecure: true,
         isSameSite: 'Lax',
         clearInvalid: true
       }
@@ -32,7 +34,6 @@ export function createSessionCachePlugin({ sessionConfig, isSecure }) {
  */
 export function createSessionCachePluginForConfig(config) {
   return createSessionCachePlugin({
-    sessionConfig: config.get('session'),
-    isSecure: config.get('session.cookie.secure')
+    sessionConfig: config.get('session')
   })
 }
