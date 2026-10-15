@@ -47,6 +47,20 @@ describe('base layout', () => {
     expect(headerHtml).toContain('govuk-phase-banner')
   })
 
+  test('renders the alpha phase banner', () => {
+    // Act
+    const html = render()
+
+    // Assert
+    expect(html).toMatch(
+      /<strong class="govuk-tag govuk-phase-banner__content__tag">\s*Alpha\s*<\/strong>/
+    )
+    expect(html).toContain(
+      'This is a new service – your feedback will help us to improve it.'
+    )
+    expect(html).not.toContain('Steel Thread')
+  })
+
   test('renders one footer landmark wrapping the footer', () => {
     // Act
     const html = render()
