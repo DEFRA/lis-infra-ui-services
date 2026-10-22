@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import { existsSync, readFileSync } from 'node:fs'
 import nunjucks from 'nunjucks'
 import hapiVision from '@hapi/vision'
