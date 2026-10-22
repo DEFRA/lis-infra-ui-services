@@ -22,7 +22,6 @@
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
     "./maintenance": "./src/maintenance.js",
-    "./nunjucks/build-navigation": "./src/nunjucks/build-navigation.js",
     "./nunjucks/context": "./src/nunjucks/context.js",
     "./nunjucks/filters": "./src/nunjucks/filters.js",
     "./nunjucks/format-currency": "./src/nunjucks/format-currency.js",

@@ -27,8 +27,8 @@ Import and initialise the client module from the consuming application's entry
 point, and include its stylesheet:
 
 ```js
-import { initAllAutocompletes } from '@livestock/ui-services/components/autocomplete'
-import '@livestock/ui-services/components/autocomplete.scss'
+import { initAllAutocompletes } from '@defra/lis-infra-ui-services/components/autocomplete'
+import '@defra/lis-infra-ui-services/components/autocomplete.scss'
 
 initAllAutocompletes()
 ```
