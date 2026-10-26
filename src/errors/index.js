@@ -64,11 +64,16 @@ function logFailure(request, statusCode) {
     return
   }
 
-  // Keys mirror hapi-pino's shape because the CDP pipeline maps them to ECS fields and drops the rest; request.path deliberately omits the query string
+  // Native ECS keys: hubs register hapi-pino on the shared logger, whose
+  // req/res serialisers expect real HTTP objects (and null the status of a
+  // plain one). request.path deliberately omits the query string.
   const context = {
     err: getError(response, statusCode),
-    req: { method: request.method, url: request.path },
-    res: { statusCode }
+    http: {
+      request: { method: request.method },
+      response: { status_code: statusCode }
+    },
+    url: { path: request.path }
   }
 
   if (isServerError) {

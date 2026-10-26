@@ -107,8 +107,11 @@ test('catchAll logs server errors and renders the problem with the service page'
   assert.deepEqual(logger.error.mock.calls[0], [
     {
       err: request.response,
-      req: { method: 'get', url: '/mock-path' },
-      res: { statusCode: statusCodes.internalServerError }
+      http: {
+        request: { method: 'get' },
+        response: { status_code: statusCodes.internalServerError }
+      },
+      url: { path: '/mock-path' }
     },
     'Request failed'
   ])
@@ -129,8 +132,11 @@ test.each([statusCodes.badRequest, statusCodes.unprocessableEntity])(
     assert.deepEqual(logger.warn.mock.calls[0], [
       {
         err: request.response,
-        req: { method: 'get', url: '/mock-path' },
-        res: { statusCode }
+        http: {
+          request: { method: 'get' },
+          response: { status_code: statusCode }
+        },
+        url: { path: '/mock-path' }
       },
       'Request rejected'
     ])
@@ -214,8 +220,11 @@ test('catchAll logs the error behind plain 500 responses before continuing', () 
   assert.deepEqual(logger.error.mock.calls[0], [
     {
       err: sourceError,
-      req: { method: 'post', url: '/plain' },
-      res: { statusCode: statusCodes.internalServerError }
+      http: {
+        request: { method: 'post' },
+        response: { status_code: statusCodes.internalServerError }
+      },
+      url: { path: '/plain' }
     },
     'Request failed'
   ])
