@@ -28,14 +28,54 @@ function getStatusCode(response) {
   return response?.statusCode ?? response?.output?.statusCode
 }
 
-function getLogMessage(response, statusCode) {
+const routineClientErrors = new Set([
+  statusCodes.notFound,
+  statusCodes.unauthorized,
+  statusCodes.forbidden
+])
+
+function getError(response, statusCode) {
+  const error = response?.source instanceof Error ? response.source : response
+  if (error instanceof Error) {
+    return error
+  }
+  if (typeof response?.source?.message === 'string') {
+    return new Error(response.source.message)
+  }
+  return new Error(`Request failed with status ${statusCode}`)
+}
+
+function isLoggableClientError(response, statusCode) {
   return (
-    response?.stack ??
-    response?.message ??
-    response?.source?.stack ??
-    response?.source?.message ??
-    `Request failed with status ${statusCode}`
+    response?.isBoom === true &&
+    statusCode >= statusCodes.badRequest &&
+    statusCode < statusCodes.internalServerError &&
+    !routineClientErrors.has(statusCode)
   )
+}
+
+function logFailure(request, statusCode) {
+  const { response } = request
+  const isServerError =
+    statusCode >= statusCodes.internalServerError &&
+    !isAnsweredByMaintenance(request)
+
+  if (!isServerError && !isLoggableClientError(response, statusCode)) {
+    return
+  }
+
+  // Keys mirror hapi-pino's shape because the CDP pipeline maps them to ECS fields and drops the rest; request.path deliberately omits the query string
+  const context = {
+    err: getError(response, statusCode),
+    req: { method: request.method, url: request.path },
+    res: { statusCode }
+  }
+
+  if (isServerError) {
+    logger.error(context, 'Request failed')
+  } else {
+    logger.warn(context, 'Request rejected')
+  }
 }
 
 /**
@@ -47,12 +87,7 @@ export function catchAll(request, h) {
   const { response } = request
   const statusCode = getStatusCode(response)
 
-  if (
-    statusCode >= statusCodes.internalServerError &&
-    !isAnsweredByMaintenance(request)
-  ) {
-    logger.error(getLogMessage(response, statusCode))
-  }
+  logFailure(request, statusCode)
 
   if (!('isBoom' in response)) {
     return h.continue
