@@ -180,7 +180,7 @@ The main entry point (`@defra/lis-infra-ui-services`) exports `buildMicrositePat
 | 503           | `service-unavailable`  |
 | anything else | `problem-with-service` |
 
-5xx responses are logged at `error`, and 4xx responses other than 401, 403 and 404 at `warn`, each with the error object, request method, path and status code. Boom messages are logged, so application code must not put user-supplied text in them.
+5xx responses are logged at `error`, and 4xx responses other than 401, 403 and 404 at `warn`, each with the error object and the ECS fields `http.request.method`, `url.path` and `http.response.status_code`. Boom messages are logged, so application code must not put user-supplied text in them.
 
 ```js
 import { catchAll } from '@defra/lis-infra-ui-services/errors'
