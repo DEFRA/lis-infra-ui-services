@@ -1,3 +1,10 @@
-import { ServiceNavigation, SkipLink } from 'govuk-frontend'
+import { NotificationBanner, ServiceNavigation, SkipLink } from 'govuk-frontend'
 
-export const layoutComponents = [ServiceNavigation, SkipLink]
+import { CookieBanner } from './cookie-banner.js'
+
+export const layoutComponents = [
+  ServiceNavigation,
+  SkipLink,
+  NotificationBanner,
+  CookieBanner
+]
