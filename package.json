@@ -10,7 +10,10 @@
   "exports": {
     ".": "./src/index.js",
     "./base-path": "./src/base-path.js",
+    "./cookies": "./src/cookies/index.js",
+    "./cookies/cookies-policy": "./src/cookies/cookies-policy.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
+    "./components/cookie-banner": "./src/components/cookie-banner.js",
     "./components/error-pages": "./src/components/error-pages.js",
     "./components/layout": "./src/components/layout.js",
     "./components/scrollable-table": "./src/components/scrollable-table.js",

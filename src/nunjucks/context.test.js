@@ -201,6 +201,52 @@ test('createNunjucksContextBuilder marks the user signed out without credentials
   assert.equal(context.isSignedIn, false)
 })
 
+describe('createNunjucksContextBuilder() cookies', () => {
+  test('exposes the cookies page path and no policy before consent', () => {
+    // Arrange
+    const contextBuilder = createSignedInContextBuilder()
+
+    // Act
+    const context = contextBuilder({ headers: {}, path: '/', state: {} })
+
+    // Assert
+    assert.equal(context.cookiesPath, '/cookies')
+    assert.equal(context.cookiesPolicy, null)
+    assert.equal(context.isCookiesPage, false)
+  })
+
+  test('exposes the consent recorded in the cookies_policy cookie', () => {
+    // Arrange
+    const contextBuilder = createSignedInContextBuilder()
+
+    // Act
+    const context = contextBuilder({
+      headers: {},
+      path: '/',
+      state: {
+        cookies_policy: '%7B%22essential%22%3Atrue%2C%22analytics%22%3Afalse%7D'
+      }
+    })
+
+    // Assert
+    assert.deepEqual(context.cookiesPolicy, {
+      essential: true,
+      analytics: false
+    })
+  })
+
+  test('flags the cookies page so the layout can hide the banner on it', () => {
+    // Arrange
+    const contextBuilder = createSignedInContextBuilder()
+
+    // Act
+    const context = contextBuilder({ headers: {}, path: '/cookies', state: {} })
+
+    // Assert
+    assert.equal(context.isCookiesPage, true)
+  })
+})
+
 describe('createNunjucksContextBuilder() hub flags', () => {
   test('marks the request as front office when the caller is the front-office hub', () => {
     // Arrange

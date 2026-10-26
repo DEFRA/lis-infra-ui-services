@@ -279,6 +279,29 @@ await server.register(
 
 While `availableFrom` is set, every request except the health check and assets under `assetPath` gets the service unavailable page with a 503, showing the time as "9am on Thursday 19 November 2026" and carrying it in a `Retry-After` header.
 
+### Cookies
+
+The base layout shows the GOV.UK cookie banner until the visitor has made a choice, and its footer links to a cookies page at `/cookies`. The choice is kept for a year in a `cookies_policy` cookie (URL-encoded JSON, readable by client-side scripts so analytics can check it before loading), set by the banner's JavaScript or, without JavaScript, by posting the banner's form to `/cookies`. Each hub registers the page with the essential cookies it sets, which the page lists:
+
+```js
+// server.js, after @hapi/vision is registered
+import { createCookiesPlugin } from '@defra/lis-infra-ui-services/cookies'
+
+await server.register(
+  createCookiesPlugin({
+    essentialCookies: [
+      {
+        name: config.get('session.cache.name'),
+        purpose: 'Keeps you signed in as you move between pages',
+        expires: 'After 4 hours, or when you sign out'
+      }
+    ]
+  })
+)
+```
+
+`GET /cookies` shows the page, with a form to change the choice. `POST /cookies` records a choice (`analytics=yes|no`), ignoring cross-site posts, and redirects to the page with a confirmation and a link back to the same-host page the visitor came from. The `CookieBanner` component is part of `layoutComponents` (see [Layout scripts](#layout-scripts)), so a hub that already initialises those needs no further client-side change. `getCookiesPolicy(request)` from `@defra/lis-infra-ui-services/cookies/cookies-policy` reads the recorded choice server-side.
+
 ### Environment variables
 
 The package reads no environment variables itself. It takes all its settings from the `config` object the consuming app passes in. In the example above, `MAINTENANCE_AVAILABLE_FROM` is a variable the hub defines in its own config.

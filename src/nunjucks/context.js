@@ -3,6 +3,8 @@ import path from 'node:path'
 import { hasPermission } from '@defra/lis-hubs-infra-access/authorization'
 import { HUBS, getModuleById } from '@defra/lis-hubs-infra-registry'
 
+import { COOKIES_PATH, getCookiesPolicy } from '../cookies/cookies-policy.js'
+
 const HUB_SERVICE_NAME_PREFIX = 'lis-hubs-'
 
 export const BCMS_CONTACT_HREF =
@@ -108,6 +110,9 @@ export function createNunjucksContextBuilder({
       isBackOffice: requestHubId === 'back-office',
       hasPermission: createPermissionCheck(request),
       logoutUrl: '/signout',
+      cookiesPath: COOKIES_PATH,
+      cookiesPolicy: getCookiesPolicy(request),
+      isCookiesPage: request?.path === COOKIES_PATH,
       errorPages: errorPageLinks,
       getAssetPath(asset) {
         const viteAssetPath = viteManifest?.[asset]?.file
