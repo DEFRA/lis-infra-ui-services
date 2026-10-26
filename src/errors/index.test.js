@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
-import { afterEach, test, vi } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 
 import { statusCodes } from '../status-codes.js'
 
 const { logger } = vi.hoisted(() => ({
-  logger: { error: vi.fn() }
+  logger: { error: vi.fn(), warn: vi.fn() }
 }))
 
 vi.mock('@defra/lis-hubs-infra-core', () => ({ logger }))
@@ -23,13 +23,11 @@ function createToolkit() {
   return toolkit
 }
 
-function createBoomRequest(statusCode) {
+function createBoomRequest(statusCode, error = new Error('Mock error')) {
   return {
-    response: {
-      isBoom: true,
-      stack: 'Mock error stack',
-      output: { statusCode }
-    }
+    method: 'get',
+    path: '/mock-path',
+    response: Object.assign(error, { isBoom: true, output: { statusCode } })
   }
 }
 
@@ -106,19 +104,54 @@ test('catchAll logs server errors and renders the problem with the service page'
   assert.deepEqual(toolkit.code.mock.calls[0], [
     statusCodes.internalServerError
   ])
-  assert.deepEqual(logger.error.mock.calls[0], ['Mock error stack'])
+  assert.deepEqual(logger.error.mock.calls[0], [
+    {
+      err: request.response,
+      req: { method: 'get', url: '/mock-path' },
+      res: { statusCode: statusCodes.internalServerError }
+    },
+    'Request failed'
+  ])
+  assert.equal(logger.warn.mock.calls.length, 0)
 })
 
-test('catchAll does not log client errors', () => {
+test.each([statusCodes.badRequest, statusCodes.unprocessableEntity])(
+  'catchAll warns about a %i with the error',
+  (statusCode) => {
+    // Arrange
+    const request = createBoomRequest(statusCode, new Error('Invalid input'))
+    const toolkit = createToolkit()
+
+    // Act
+    catchAll(request, toolkit)
+
+    // Assert
+    assert.deepEqual(logger.warn.mock.calls[0], [
+      {
+        err: request.response,
+        req: { method: 'get', url: '/mock-path' },
+        res: { statusCode }
+      },
+      'Request rejected'
+    ])
+    assert.equal(logger.error.mock.calls.length, 0)
+  }
+)
+
+test.each([
+  statusCodes.notFound,
+  statusCodes.unauthorized,
+  statusCodes.forbidden
+])('catchAll does not log a routine %i', (statusCode) => {
   // Arrange
-  const request = createBoomRequest(statusCodes.notFound)
-  const toolkit = createToolkit()
+  const request = createBoomRequest(statusCode)
 
   // Act
-  catchAll(request, toolkit)
+  catchAll(request, createToolkit())
 
   // Assert
   assert.equal(logger.error.mock.calls.length, 0)
+  assert.equal(logger.warn.mock.calls.length, 0)
 })
 
 test('catchAll prefers a client-attached statusCode over a boomified 500', () => {
@@ -127,7 +160,6 @@ test('catchAll prefers a client-attached statusCode over a boomified 500', () =>
     response: {
       isBoom: true,
       statusCode: statusCodes.notFound,
-      stack: 'Mock error stack',
       output: { statusCode: statusCodes.internalServerError }
     }
   }
@@ -161,15 +193,16 @@ test('catchAll does not log the 503 the maintenance plugin answered with', () =>
   assert.equal(logger.error.mock.calls.length, 0)
 })
 
-test('catchAll logs plain 500 responses before continuing', () => {
+test('catchAll logs the error behind plain 500 responses before continuing', () => {
   // Arrange
   const toolkit = createToolkit()
+  const sourceError = new Error('Plain 500 response')
   const request = {
+    method: 'post',
+    path: '/plain',
     response: {
       statusCode: statusCodes.internalServerError,
-      source: {
-        message: 'Plain 500 response'
-      }
+      source: sourceError
     }
   }
 
@@ -178,6 +211,48 @@ test('catchAll logs plain 500 responses before continuing', () => {
 
   // Assert
   assert.equal(result, toolkit.continue)
-  assert.deepEqual(logger.error.mock.calls[0], ['Plain 500 response'])
+  assert.deepEqual(logger.error.mock.calls[0], [
+    {
+      err: sourceError,
+      req: { method: 'post', url: '/plain' },
+      res: { statusCode: statusCodes.internalServerError }
+    },
+    'Request failed'
+  ])
   assert.equal(toolkit.view.mock.calls.length, 0)
+})
+
+test('catchAll falls back to a generated error when none is attached', () => {
+  // Arrange
+  const request = {
+    method: 'get',
+    path: '/x',
+    response: { statusCode: statusCodes.internalServerError, source: {} }
+  }
+
+  // Act
+  catchAll(request, createToolkit())
+
+  // Assert
+  expect(logger.error.mock.calls[0][0].err.message).toBe(
+    'Request failed with status 500'
+  )
+})
+
+test('catchAll logs the message of a plain 500 response whose source has one', () => {
+  // Arrange
+  const request = {
+    method: 'get',
+    path: '/x',
+    response: {
+      statusCode: statusCodes.internalServerError,
+      source: { message: 'Something broke' }
+    }
+  }
+
+  // Act
+  catchAll(request, createToolkit())
+
+  // Assert
+  expect(logger.error.mock.calls[0][0].err.message).toBe('Something broke')
 })
