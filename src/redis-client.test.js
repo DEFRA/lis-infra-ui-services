@@ -135,7 +135,7 @@ test('buildRedisClient uses the default port and logs client events', () => {
 
   assert.deepEqual(logger.info.mock.calls[0], ['Connected to Redis server'])
   assert.deepEqual(logger.error.mock.calls[0], [
-    { err: connectionError },
+    connectionError,
     'Redis connection error'
   ])
 })
