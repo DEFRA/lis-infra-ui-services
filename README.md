@@ -95,6 +95,33 @@ const serveStaticFiles = createStaticFilesPlugin({
 It serves `/favicon.ico` and the files under each asset path. `/status-codes` exports `statusCodes`.
 `/duration` exports the `milliseconds` and `seconds` lookups and `unixEpoch()`.
 
+### Config formats
+
+`/config-formats` exports convict formats for settings the hubs and spokes share. Register each with `convict.addFormat()`; a bad value fails `config.validate()` with the setting named.
+
+- `positiveInteger` (`'positive-integer'`): a whole number of at least 1, for timeouts, TTLs and circuit breaker thresholds, where 0 is a misconfiguration rather than "off". Values from environment variables are coerced from strings.
+- `secret` (`'secret'`): a signing or encryption secret of at least 32 characters with no default, for `HUB_JWT_SECRET` and `SESSION_COOKIE_PASSWORD`. The setting must also be marked `sensitive: true`, or convict appends the value to the validation error.
+
+```js
+import convict from 'convict'
+import { positiveInteger, secret } from '@defra/lis-infra-ui-services/config-formats'
+
+convict.addFormat(positiveInteger)
+convict.addFormat(secret)
+
+timeout: {
+  format: 'positive-integer',
+  default: 5000,
+  env: 'CATTLE_HOME_API_TIMEOUT'
+},
+hubJwtSecret: {
+  format: 'secret',
+  default: null,
+  env: 'HUB_JWT_SECRET',
+  sensitive: true
+}
+```
+
 ### Security headers
 
 `securityHeaders` is a hapi plugin that adds HSTS, `x-content-type-options`, `referrer-policy` and
