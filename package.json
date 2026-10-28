@@ -10,6 +10,7 @@
   "exports": {
     ".": "./src/index.js",
     "./base-path": "./src/base-path.js",
+    "./config-formats": "./src/config-formats.js",
     "./cookies": "./src/cookies/index.js",
     "./cookies/cookies-policy": "./src/cookies/cookies-policy.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
@@ -87,6 +88,7 @@
     "@hapi/hapi": "^21.4.10",
     "@vitest/coverage-istanbul": "^4.1.10",
     "audit-ci": "^7.1.0",
+    "convict": "^6.2.5",
     "eslint": "^9.0.0",
     "govuk-frontend": "6.5.0",
     "husky": "^9.1.7",
