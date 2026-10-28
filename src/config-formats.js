@@ -20,7 +20,11 @@ export const positiveInteger = {
    * @param {unknown} value the coerced value
    */
   validate(value) {
-    if (!Number.isSafeInteger(value) || value < 1) {
+    if (
+      typeof value !== 'number' ||
+      !Number.isSafeInteger(value) ||
+      value < 1
+    ) {
       throw new Error('must be a positive integer')
     }
   }
