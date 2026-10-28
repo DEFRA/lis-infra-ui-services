@@ -5,8 +5,7 @@ import { isAnsweredByMaintenance } from '../maintenance.js'
 import {
   notAuthorised,
   pageNotFound,
-  problemWithService,
-  serviceUnavailable
+  problemWithService
 } from './error-pages.js'
 import { statusCodes } from '../status-codes.js'
 
@@ -17,8 +16,6 @@ function errorPageFor(statusCode) {
     case statusCodes.unauthorized:
     case statusCodes.forbidden:
       return notAuthorised
-    case statusCodes.serviceUnavailable:
-      return serviceUnavailable
     default:
       return problemWithService
   }

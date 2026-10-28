@@ -67,8 +67,8 @@ test.each([
   ],
   [
     statusCodes.serviceUnavailable,
-    'error/service-unavailable',
-    'Sorry, the service is unavailable'
+    'error/problem-with-service',
+    'Sorry, there is a problem with the service'
   ]
 ])(
   'catchAll renders a %i as the %s page titled "%s"',
