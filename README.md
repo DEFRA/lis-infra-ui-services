@@ -101,18 +101,30 @@ It serves `/favicon.ico` and the files under each asset path. `/status-codes` ex
 
 - `positiveInteger` (`'positive-integer'`): a whole number of at least 1, for timeouts, TTLs and circuit breaker thresholds, where 0 is a misconfiguration rather than "off". Values from environment variables are coerced from strings.
 - `duration({ max })` (`'duration'`, or `'duration-max-P7D'` when `max` is given): a length of time read as milliseconds. An environment variable may give an ISO 8601 duration of days, hours, minutes and seconds (`PT4H`, `P7D`, `P1DT12H`) or a whole number of milliseconds; both are coerced to milliseconds (the schema `default` must be a number). `max` is itself an ISO 8601 duration and rejects anything longer, for `SESSION_CACHE_TTL` where CDP requires sessions to expire within 7 days.
+- `cdpEnvironment` (`'cdp-environment'`): one of the CDP environments the platform injects as `ENVIRONMENT` (`infra-dev`, `management`, `dev`, `test`, `ext-test`, `perf-test`, `prod`), or `local` or `docker_compose` outside CDP. One list for every service, so a new environment is added here rather than in each repository's own enum; `ENVIRONMENTS` exports the list.
 - `secret` (`'secret'`): a signing or encryption secret of at least 32 characters with no default, for `HUB_JWT_SECRET` and `SESSION_COOKIE_PASSWORD`. The setting must also be marked `sensitive: true`, or convict appends the value to the validation error.
 
 ```js
 import convict from 'convict'
-import { duration, positiveInteger, secret } from '@defra/lis-infra-ui-services/config-formats'
+import {
+  cdpEnvironment,
+  duration,
+  positiveInteger,
+  secret
+} from '@defra/lis-infra-ui-services/config-formats'
 import { milliseconds } from '@defra/lis-infra-ui-services/duration'
 
 const sessionTtl = duration({ max: 'P7D' })
+convict.addFormat(cdpEnvironment)
 convict.addFormat(positiveInteger)
 convict.addFormat(sessionTtl)
 convict.addFormat(secret)
 
+environment: {
+  format: 'cdp-environment',
+  default: 'local',
+  env: 'ENVIRONMENT'
+},
 sessionCacheTtl: {
   format: sessionTtl.name,
   default: milliseconds.fourHours,

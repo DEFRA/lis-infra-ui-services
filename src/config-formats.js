@@ -57,6 +57,36 @@ export const secret = {
   }
 }
 
+/**
+ * The environments a LIS service can run in: the CDP environments, which
+ * the platform injects as `ENVIRONMENT`, plus `local` and `docker_compose`
+ * for running outside CDP. Register it with
+ * `convict.addFormat(cdpEnvironment)` and use `format: 'cdp-environment'`.
+ */
+export const ENVIRONMENTS = Object.freeze([
+  'local',
+  'docker_compose',
+  'infra-dev',
+  'management',
+  'dev',
+  'test',
+  'ext-test',
+  'perf-test',
+  'prod'
+])
+
+export const cdpEnvironment = {
+  name: 'cdp-environment',
+  /**
+   * @param {unknown} value
+   */
+  validate(value) {
+    if (!ENVIRONMENTS.includes(value)) {
+      throw new Error(`must be one of ${ENVIRONMENTS.join(', ')}`)
+    }
+  }
+}
+
 const ISO_DURATION_DATE = /^P(?:(\d+)D)?(?:T(.+))?$/
 const ISO_DURATION_TIME = /^(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/
 const MILLIS_IN_SECOND = 1000

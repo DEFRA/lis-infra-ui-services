@@ -2,12 +2,15 @@ import { describe, expect, test } from 'vitest'
 import convict from 'convict'
 
 import {
+  cdpEnvironment,
   duration,
+  ENVIRONMENTS,
   parseIsoDuration,
   positiveInteger,
   secret
 } from './config-formats.js'
 
+convict.addFormat(cdpEnvironment)
 convict.addFormat(positiveInteger)
 convict.addFormat(secret)
 
@@ -309,4 +312,48 @@ describe('duration', () => {
       )
     }
   )
+})
+
+describe('cdpEnvironment', () => {
+  function createEnvironmentConfig(value) {
+    return convict({
+      environment: {
+        format: 'cdp-environment',
+        default: 'local'
+      }
+    }).load({ environment: value })
+  }
+
+  test('is registered as the cdp-environment format', () => {
+    // Assert
+    expect(cdpEnvironment.name).toBe('cdp-environment')
+  })
+
+  test.each(ENVIRONMENTS)('accepts %s', (value) => {
+    // Act
+    let error
+    try {
+      createEnvironmentConfig(value).validate({ allowed: 'strict' })
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error).toBeUndefined()
+  })
+
+  test.each(['staging', 'Dev', '', null])('rejects %j', (value) => {
+    // Act
+    let error
+    try {
+      createEnvironmentConfig(value).validate({ allowed: 'strict' })
+    } catch (e) {
+      error = e
+    }
+
+    // Assert
+    expect(error.message).toContain(
+      'environment: must be one of local, docker_compose, infra-dev, management, dev, test, ext-test, perf-test, prod'
+    )
+  })
 })
