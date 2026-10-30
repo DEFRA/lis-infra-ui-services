@@ -100,14 +100,24 @@ It serves `/favicon.ico` and the files under each asset path. `/status-codes` ex
 `/config-formats` exports convict formats for settings the hubs and spokes share. Register each with `convict.addFormat()`; a bad value fails `config.validate()` with the setting named.
 
 - `positiveInteger` (`'positive-integer'`): a whole number of at least 1, for timeouts, TTLs and circuit breaker thresholds, where 0 is a misconfiguration rather than "off". Values from environment variables are coerced from strings.
+- `duration({ max })` (`'duration'`, or `'duration-max-P7D'` when `max` is given): a length of time read as milliseconds. An environment variable may give an ISO 8601 duration of days, hours, minutes and seconds (`PT4H`, `P7D`, `P1DT12H`) or a whole number of milliseconds; both are coerced to milliseconds (the schema `default` must be a number). `max` is itself an ISO 8601 duration and rejects anything longer, for `SESSION_CACHE_TTL` where CDP requires sessions to expire within 7 days.
 - `secret` (`'secret'`): a signing or encryption secret of at least 32 characters with no default, for `HUB_JWT_SECRET` and `SESSION_COOKIE_PASSWORD`. The setting must also be marked `sensitive: true`, or convict appends the value to the validation error.
 
 ```js
 import convict from 'convict'
-import { positiveInteger, secret } from '@defra/lis-infra-ui-services/config-formats'
+import { duration, positiveInteger, secret } from '@defra/lis-infra-ui-services/config-formats'
+import { milliseconds } from '@defra/lis-infra-ui-services/duration'
 
+const sessionTtl = duration({ max: 'P7D' })
 convict.addFormat(positiveInteger)
+convict.addFormat(sessionTtl)
 convict.addFormat(secret)
+
+sessionCacheTtl: {
+  format: sessionTtl.name,
+  default: milliseconds.fourHours,
+  env: 'SESSION_CACHE_TTL'
+},
 
 timeout: {
   format: 'positive-integer',
@@ -138,7 +148,9 @@ await server.register(securityHeaders)
 
 `getCacheEngine` picks Redis or in-memory Catbox. `createSessionCachePluginForConfig` registers
 [yar](https://hapi.dev/module/yar/) from the `session` config (`cache.name`, `cache.ttl`,
-`cookie.password`, `cookie.ttl`). Session cookies are always `Secure`.
+`cookie.password`, `cookie.ttl`). Session cookies are always `Secure`. Both engines cap the ttl of
+every write at `MAX_CACHE_TTL` (7 days), so no cache policy can keep session data longer than
+CDP allows.
 
 ```js
 import { getCacheEngine } from '@defra/lis-infra-ui-services/session-cache/cache-engine'
