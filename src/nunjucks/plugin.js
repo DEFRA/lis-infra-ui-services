@@ -99,16 +99,10 @@ function buildNunjucksEnvironment({
 
 /**
  * @import { ErrorPageLinks } from './context.js'
- * @param {{ config: object, logger: object, getRequestBasePath: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
+ * @param {{ config: object, logger: object, moduleId?: string, errorPages?: ErrorPageLinks }} options
  * @returns {object}
  */
-export function createNunjucksConfig({
-  config,
-  logger,
-  getRequestBasePath,
-  moduleId,
-  errorPages
-}) {
+export function createNunjucksConfig({ config, logger, moduleId, errorPages }) {
   const projectRoot = config.get('root')
   const infrastructureRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -124,7 +118,6 @@ export function createNunjucksConfig({
 
   const context = createNunjucksContextBuilder({
     config,
-    getRequestBasePath,
     logger,
     readFileSync,
     moduleId,

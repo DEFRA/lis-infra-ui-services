@@ -47,7 +47,6 @@ import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plug
 const nunjucksConfig = createNunjucksConfig({
   config, // reads root, assetPath, serviceName, isProduction, nunjucks.watch, nunjucks.noCache
   logger,
-  getRequestBasePath,
   moduleId: 'cattle-home' // spokes only
 })
 
@@ -62,22 +61,24 @@ individual `/nunjucks/format-currency`, `/nunjucks/format-date` and `/nunjucks/q
 subpaths. `/nunjucks/globals` exports `PERMISSIONS` and `govukRebrand` (always `true`, which turns
 on the GOV.UK rebrand in templates).
 
-### Base path
+### Asset path
 
-Hubs serve spokes under a path prefix. `createBasePathHelpersForConfig` gives the helpers
-`getRequestBasePath`, `buildAppPath`, `isPrefixedRequest`, `getRouteVariants` and `getAssetPaths`. The
-prefix comes from the module in `@defra/lis-hubs-infra-registry`.
+A hub serves its built CSS and JavaScript at its configured `assetPath`. A spoke serves its own at
+its `assets` mount from `@defra/lis-hubs-infra-registry` (`/assets/cattle-home`), which the hub
+proxies to it unchanged, so the same URL works through a hub or directly.
+`createAssetPathHelpers` resolves that root once; `getAssetPaths` feeds the static files plugin and
+the Nunjucks context derives the same root itself from `moduleId`.
 
 ```js
-import { createBasePathHelpersForConfig } from '@defra/lis-infra-ui-services/base-path'
+import { createAssetPathHelpers } from '@defra/lis-infra-ui-services/asset-path'
 
-const { getRequestBasePath, getAssetPaths } = createBasePathHelpersForConfig({
+const { getAssetPaths } = createAssetPathHelpers({
   moduleId: 'cattle-home', // leave out in a hub
   assetPath: config.get('assetPath')
 })
 ```
 
-The standalone functions of the same names are exported too.
+The standalone `getAssetRoot` is exported too.
 
 ### Static files
 
@@ -246,7 +247,6 @@ The contact link on these pages comes from the `errorPages` option of `createNun
 createNunjucksConfig({
   config,
   logger,
-  getRequestBasePath,
   errorPages: {
     contactHref:
       'https://www.gov.uk/government/organisations/british-cattle-movement-service' // default
