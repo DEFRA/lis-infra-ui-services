@@ -77,13 +77,13 @@
   "peerDependencies": {
     "@defra/lis-hubs-infra-access": ">=0.29.0 <1.0.0",
     "@defra/lis-hubs-infra-core": ">=0.4.0 <1.0.0",
-    "@defra/lis-hubs-infra-registry": ">=0.6.0 <1.0.0",
+    "@defra/lis-hubs-infra-registry": ">=0.13.0 <1.0.0",
     "govuk-frontend": ">=6.5.0 <7.0.0"
   },
   "devDependencies": {
     "@defra/lis-hubs-infra-access": "^0.35.0",
     "@defra/lis-hubs-infra-core": "^0.17.0",
-    "@defra/lis-hubs-infra-registry": "^0.6.0",
+    "@defra/lis-hubs-infra-registry": "^0.13.0",
     "@defra/lis-infra-eslint-config": "^0.6.0",
     "@hapi/hapi": "^21.4.10",
     "@vitest/coverage-istanbul": "^4.1.10",
