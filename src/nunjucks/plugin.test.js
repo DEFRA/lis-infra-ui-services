@@ -46,7 +46,7 @@ describe('createNunjucksConfig()', () => {
     rmSync(projectRoot, { recursive: true, force: true })
   })
 
-  test('defaults to an empty base path when no moduleId is given', () => {
+  test('builds a config for a hub when no moduleId is given', () => {
     // Arrange
     const config = {
       get: vi.fn((key) => (key === 'root' ? projectRoot : false))
@@ -55,8 +55,7 @@ describe('createNunjucksConfig()', () => {
     // Act
     const nunjucksConfig = createNunjucksConfig({
       config,
-      logger: {},
-      getRequestBasePath: vi.fn()
+      logger: {}
     })
 
     // Assert
@@ -77,8 +76,7 @@ describe('createNunjucksConfig()', () => {
     // Act
     createNunjucksConfig({
       config,
-      logger: {},
-      getRequestBasePath: vi.fn()
+      logger: {}
     })
 
     // Assert
@@ -101,7 +99,6 @@ describe('createNunjucksConfig()', () => {
     const nunjucksConfig = createNunjucksConfig({
       config,
       logger: {},
-      getRequestBasePath: vi.fn(() => ''),
       errorPages
     })
     const context = nunjucksConfig.options.context({ headers: {}, path: '/' })

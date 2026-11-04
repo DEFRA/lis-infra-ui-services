@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict'
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
+import { getMountPath } from '@defra/lis-hubs-infra-registry'
 import { createNunjucksContextBuilder } from './context.js'
+
+vi.mock('@defra/lis-hubs-infra-registry', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getMountPath: vi.fn()
+}))
 
 function createConfig(overrides = {}) {
   const values = {
@@ -23,7 +29,6 @@ test('createNunjucksContextBuilder resolves built asset paths from the Vite mani
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -51,7 +56,6 @@ test('createNunjucksContextBuilder falls back to the source asset path without l
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -75,7 +79,6 @@ test('createNunjucksContextBuilder resolves sectionName from the module registry
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -95,7 +98,6 @@ test('createNunjucksContextBuilder leaves sectionName null when no moduleId is g
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -114,7 +116,6 @@ test('createNunjucksContextBuilder logs once when the Vite manifest is unavailab
   const loggerMessages = []
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig({ isProduction: true }),
-    getRequestBasePath: () => '',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -134,11 +135,12 @@ test('createNunjucksContextBuilder logs once when the Vite manifest is unavailab
   assert.deepEqual(loggerMessages, ['Vite manifest.json not found'])
 })
 
-test('createNunjucksContextBuilder always sets serviceUrl to the hub root even when rendered under a spoke base path', () => {
+test('createNunjucksContextBuilder serves a spoke its assets from its assets mount, with serviceUrl still the hub root', () => {
   const loggerMessages = []
+  vi.mocked(getMountPath).mockReturnValue('/assets/cattle-register')
   const contextBuilder = createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '/cattle/register',
+    moduleId: 'cattle-register',
     logger: {
       error(loggedError, message) {
         loggerMessages.push(message)
@@ -155,15 +157,19 @@ test('createNunjucksContextBuilder always sets serviceUrl to the hub root even w
 
   const context = contextBuilder({ headers: {}, path: '/' })
 
+  expect(getMountPath).toHaveBeenCalledWith('cattle-register', 'assets')
   assert.equal(context.serviceUrl, '/')
-  assert.equal(context.assetPath, '/cattle/register/public/assets')
+  assert.equal(context.assetPath, '/assets/cattle-register/assets')
+  assert.equal(
+    context.getAssetPath('src/client/stylesheets/application.scss'),
+    '/assets/cattle-register/assets/application-123.css'
+  )
   assert.deepEqual(loggerMessages, [])
 })
 
 function createSignedInContextBuilder() {
   return createNunjucksContextBuilder({
     config: createConfig(),
-    getRequestBasePath: () => '',
     logger: { error: () => undefined },
     readFileSync: () => '{}'
   })
@@ -252,7 +258,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       moduleId: 'cattle-register'
@@ -275,7 +280,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       moduleId: 'cattle-register'
@@ -298,7 +302,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       moduleId: 'cattle-register'
@@ -317,7 +320,6 @@ describe('createNunjucksContextBuilder() hub flags', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       moduleId: 'cattle-register'
@@ -342,7 +344,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -362,7 +363,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       errorPages: {
@@ -384,7 +384,6 @@ describe('createNunjucksContextBuilder() errorPages', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}',
       errorPages: { contactHref: undefined }
@@ -407,7 +406,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -436,7 +434,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -465,7 +462,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -494,7 +490,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -523,7 +518,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -543,7 +537,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -571,7 +564,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })
@@ -597,7 +589,6 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     // Arrange
     const contextBuilder = createNunjucksContextBuilder({
       config: createConfig(),
-      getRequestBasePath: () => '',
       logger: {},
       readFileSync: () => '{}'
     })

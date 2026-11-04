@@ -3,6 +3,8 @@ import path from 'node:path'
 import { hasPermission } from '@defra/lis-hubs-infra-access/authorization'
 import { HUBS, getModuleById } from '@defra/lis-hubs-infra-registry'
 
+import { getAssetRoot } from '../asset-path.js'
+
 import { COOKIES_PATH, getCookiesPolicy } from '../cookies/cookies-policy.js'
 
 const HUB_SERVICE_NAME_PREFIX = 'lis-hubs-'
@@ -57,12 +59,11 @@ function createPermissionCheck(request) {
  */
 
 /**
- * @param {{ config: object, getRequestBasePath: Function, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
+ * @param {{ config: object, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
  * @returns {Function}
  */
 export function createNunjucksContextBuilder({
   config,
-  getRequestBasePath,
   logger,
   readFileSync,
   moduleId,
@@ -72,6 +73,10 @@ export function createNunjucksContextBuilder({
     contactHref: errorPages.contactHref ?? BCMS_CONTACT_HREF
   }
   const sectionName = moduleId ? (getModuleById(moduleId)?.label ?? null) : null
+  const assetRoot = getAssetRoot({
+    moduleId,
+    assetPath: config.get('assetPath')
+  })
   const manifestPath = path.join(
     config.get('root'),
     '.public/.vite/manifest.json'
@@ -93,8 +98,6 @@ export function createNunjucksContextBuilder({
       }
     }
 
-    const requestBasePath = getRequestBasePath(request)
-    const assetRoot = `${requestBasePath}${config.get('assetPath')}`
     const requestHubId = resolveHubId(request)
 
     return {
