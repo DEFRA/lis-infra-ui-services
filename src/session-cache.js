@@ -14,6 +14,8 @@ export function createSessionCachePlugin({ sessionConfig }) {
         expiresIn: sessionConfig.cache.ttl
       },
       storeBlank: false,
+      // The session carries the user's hub JWT, so it must always live in the server cache, never the cookie.
+      maxCookieSize: 0,
       errorOnCacheNotReady: true,
       cookieOptions: {
         password: sessionConfig.cookie.password,

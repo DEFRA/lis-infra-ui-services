@@ -29,6 +29,7 @@ test('createSessionCachePlugin builds the expected yar plugin options', () => {
       expiresIn: 1234
     },
     storeBlank: false,
+    maxCookieSize: 0,
     errorOnCacheNotReady: true,
     cookieOptions: {
       password: 'password',
