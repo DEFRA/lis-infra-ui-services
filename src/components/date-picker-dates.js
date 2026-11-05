@@ -61,7 +61,7 @@ export function parseDateRange(rangeString) {
     .map((part) => parseDate(part, null))
 
   if (startDate && endDate) {
-    let date = new Date(startDate.getTime())
+    let date = new Date(startDate)
     while (date <= endDate) {
       dates.push(date)
       date = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
@@ -82,8 +82,8 @@ export function parseExcludedDates(excludedDates) {
     .map((item) =>
       item.includes('-') ? parseDateRange(item) : [parseDate(item, new Date())]
     )
-    .reduce((dates, items) => dates.concat(items))
-    .filter((date) => date)
+    .reduce((dates, items) => dates.concat(items), [])
+    .filter(Boolean)
 }
 
 /**

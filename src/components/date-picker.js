@@ -319,7 +319,7 @@ export class DatePicker extends ConfigurableComponent {
    */
   setWeekStartDay() {
     const weekStartDayParam = this.config.weekStartDay
-    if (weekStartDayParam && weekStartDayParam.toLowerCase() === 'sunday') {
+    if (weekStartDayParam?.toLowerCase() === 'sunday') {
       this.config.weekStartDay = 'sunday'
       this.dayLabels.unshift(this.dayLabels.pop())
     } else {
@@ -460,8 +460,10 @@ export class DatePicker extends ConfigurableComponent {
   setCurrentDate(focus = true) {
     const { currentDate } = this
     this.calendarDays.forEach((calendarDay) => {
-      calendarDay.$button.classList.add('lis-date-picker__button')
-      calendarDay.$button.classList.add('lis-date-picker__calendar-day')
+      calendarDay.$button.classList.add(
+        'lis-date-picker__button',
+        'lis-date-picker__calendar-day'
+      )
       calendarDay.$button.setAttribute('tabindex', '-1')
       calendarDay.$button.classList.remove(this.selectedDayButtonClass)
       const calendarDayDate = calendarDay.date
@@ -476,10 +478,7 @@ export class DatePicker extends ConfigurableComponent {
         calendarDay.$button.classList.add(this.selectedDayButtonClass)
       }
 
-      if (
-        this.inputDate &&
-        calendarDayDate.getTime() === this.inputDate.getTime()
-      ) {
+      if (calendarDayDate.getTime() === this.inputDate?.getTime()) {
         calendarDay.$button.classList.add(this.currentDayButtonClass)
         calendarDay.$button.setAttribute('aria-current', 'date')
       } else {
@@ -496,13 +495,13 @@ export class DatePicker extends ConfigurableComponent {
 
     // When no day is focused, the first enabled day becomes the grid's tab stop.
     if (!focus) {
-      const enabledDays = this.calendarDays.filter((calendarDay) => {
+      const firstEnabledDay = this.calendarDays.find((calendarDay) => {
         return !calendarDay.$button.hidden && !calendarDay.$button.disabled
       })
 
-      enabledDays[0].$button.setAttribute('tabindex', '0')
+      firstEnabledDay.$button.setAttribute('tabindex', '0')
 
-      this.currentDate = enabledDays[0].date
+      this.currentDate = firstEnabledDay.date
     }
   }
 
@@ -562,10 +561,10 @@ export class DatePicker extends ConfigurableComponent {
 
     this.inputDate = this.formattedDateFromString(this.$input.value)
     if (this.minDate && this.minDate > this.inputDate) {
-      this.inputDate = new Date(this.minDate.getTime())
+      this.inputDate = new Date(this.minDate)
     }
     if (this.maxDate && this.maxDate < this.inputDate) {
-      this.inputDate = new Date(this.maxDate.getTime())
+      this.inputDate = new Date(this.maxDate)
     }
     if (this.minDate && this.maxDate && this.minDate > this.maxDate) {
       console.error('min date is after max date. No dates will be selectable')

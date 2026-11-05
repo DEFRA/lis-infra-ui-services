@@ -219,65 +219,16 @@ $lis-date-picker-hover-colour: #949494;
     max-width: 20.5em;
   }
 
-  &.govuk-\!-width-full {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
-    max-width: none;
-  }
-
-  &.govuk-\!-width-three-quarters {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
-    max-width: none;
-
-    @include govuk-media-query($from: tablet) {
-      // stylelint-disable-next-line declaration-no-important
-      width: 75% !important;
-    }
-  }
-
-  &.govuk-\!-width-two-thirds {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
-    max-width: none;
-
-    @include govuk-media-query($from: tablet) {
-      // stylelint-disable-next-line declaration-no-important
-      width: 66.66% !important;
-    }
-  }
-
-  &.govuk-\!-width-one-half {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
-    max-width: none;
-
-    @include govuk-media-query($from: tablet) {
-      // stylelint-disable-next-line declaration-no-important
-      width: 50% !important;
-    }
-  }
-
-  &.govuk-\!-width-one-third {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
-    max-width: none;
-
-    @include govuk-media-query($from: tablet) {
-      // stylelint-disable-next-line declaration-no-important
-      width: 33.33% !important;
-    }
-  }
-
+  // GOV.UK's width override classes already force the same widths, at the
+  // same breakpoint, that MoJ's version repeated here, so only the default
+  // max-width above has to be lifted for them.
+  &.govuk-\!-width-full,
+  &.govuk-\!-width-three-quarters,
+  &.govuk-\!-width-two-thirds,
+  &.govuk-\!-width-one-half,
+  &.govuk-\!-width-one-third,
   &.govuk-\!-width-one-quarter {
-    // stylelint-disable-next-line declaration-no-important
-    width: 100% !important;
     max-width: none;
-
-    @include govuk-media-query($from: tablet) {
-      // stylelint-disable-next-line declaration-no-important
-      width: 25% !important;
-    }
   }
 }
 

@@ -72,10 +72,7 @@ export class CalendarDay {
     }
 
     this.$button.hidden = hidden
-    this.$button.setAttribute(
-      'data-testid',
-      this.picker.formattedDateFromDate(day)
-    )
+    this.$button.dataset.testid = this.picker.formattedDateFromDate(day)
 
     this.$button.innerHTML = `<span class="govuk-visually-hidden">${accessibleLabel}</span><span aria-hidden="true">${label}</span>`
     this.date = new Date(day)
