@@ -1,0 +1,324 @@
+// Adapted from the date picker in MoJ Frontend 12.0.0
+// (https://github.com/ministryofjustice/moj-frontend), MIT licence.
+// Copyright (c) 2019 Ministry of Justice
+// Only govuk-frontend's settings, tools and helpers are used here, never its
+// full entry point: see search-form.scss.
+@use 'govuk-frontend/dist/govuk/base' as *;
+
+// MoJ's $moj-button-menu-color: a custom grey that passes WCAG 2.2 AA
+// contrast for text on it and against the surrounding white.
+$lis-date-picker-hover-colour: #949494;
+
+.lis-date-picker {
+  position: relative;
+  @include govuk-font($size: 16);
+}
+
+.lis-date-picker__dialog {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  min-width: 280px;
+  padding: govuk-spacing(4);
+  transition:
+    background-color 0.2s,
+    outline-color 0.2s;
+  outline: 2px solid govuk-functional-colour('text');
+  outline-offset: -2px;
+  background-color: govuk-colour('white');
+}
+
+.lis-date-picker__dialog--open {
+  display: block;
+}
+
+.lis-date-picker__dialog-header {
+  display: flex;
+  position: relative;
+  margin-bottom: govuk-spacing(2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lis-date-picker__dialog-title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: bold;
+  @include govuk-font($size: 16);
+}
+
+.lis-date-picker__dialog-navbuttons {
+  display: flex;
+  align-items: center;
+}
+
+.lis-date-picker__calendar {
+  margin-bottom: govuk-spacing(4);
+  border-collapse: collapse;
+
+  tbody:focus-within {
+    outline: 2px solid govuk-functional-colour('focus');
+  }
+
+  td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+  }
+
+  th {
+    color: govuk-functional-colour('text');
+    font-weight: bold;
+    @include govuk-font($size: 16);
+  }
+}
+
+// Day buttons were display: block in MoJ's version, set inline. Here days
+// outside the month use the hidden attribute instead, so the block display
+// must not apply to them.
+.lis-date-picker__calendar-day:not([hidden]) {
+  display: block;
+}
+
+.lis-date-picker__dialog > .govuk-button-group {
+  margin-bottom: 0;
+
+  > * {
+    margin-bottom: 0;
+  }
+}
+
+.lis-date-picker__button {
+  position: relative;
+  width: 44px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  outline: 2px solid rgb(0, 0, 0, 0);
+  outline-offset: -2px;
+  color: govuk-functional-colour('text');
+  background-color: transparent;
+  @include govuk-font($size: 16);
+
+  @media (forced-colors: active) {
+    // Don't show the bottom bar in forced-color modes as it blocks the outline
+    &::after {
+      display: none;
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background-color: transparent;
+  }
+
+  &[aria-disabled='true'],
+  &[aria-disabled='true']:hover {
+    color: govuk-functional-colour('text');
+    background-color: govuk-colour('black', $variant: 'tint-95');
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
+  &:hover {
+    color: govuk-functional-colour('text');
+    background-color: $lis-date-picker-hover-colour;
+    text-decoration: none;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    cursor: pointer;
+  }
+
+  &:focus {
+    outline-color: transparent;
+    color: govuk-functional-colour('text');
+    background-color: govuk-functional-colour('focus');
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+
+    &::after {
+      background-color: govuk-functional-colour('text');
+    }
+  }
+
+  &:focus:hover {
+    outline-color: govuk-functional-colour('focus');
+    background-color: $lis-date-picker-hover-colour;
+
+    &::after {
+      background-color: transparent;
+    }
+  }
+
+  &--current:not(:focus) {
+    outline-color: govuk-functional-colour('link');
+    color: govuk-colour('white');
+    background-color: govuk-functional-colour('link');
+
+    &::after {
+      background-color: govuk-functional-colour('link');
+    }
+  }
+
+  // A current day that is not the grid's tab stop drops its highlight.
+  // stylelint-disable-next-line selector-no-qualifying-type
+  &--current[tabindex='-1'] {
+    outline-color: transparent;
+    color: currentcolor;
+    background: transparent;
+
+    &::after {
+      background-color: transparent;
+    }
+  }
+
+  &--today {
+    border: 2px solid govuk-functional-colour('text');
+  }
+
+  &--selected:not(:focus) {
+    color: govuk-colour('white');
+    background-color: govuk-functional-colour('link');
+
+    &::after {
+      background-color: govuk-functional-colour('link');
+    }
+
+    &:hover {
+      outline-color: govuk-functional-colour('link');
+      color: govuk-functional-colour('text');
+      background-color: $lis-date-picker-hover-colour;
+
+      &::after {
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+// Defaults the input to the width of .govuk-input--width-10 (10 characters),
+// which the input width modifiers and width overrides can change. Width
+// classes under 10 characters are left out as they are narrower than a date.
+// stylelint-disable selector-no-qualifying-type
+.lis-date-picker input {
+  max-width: 11.5em; // govuk-input--width-10
+
+  &.govuk-input--width-30 {
+    max-width: 29.5em;
+  }
+
+  &.govuk-input--width-20 {
+    max-width: 20.5em;
+  }
+
+  &.govuk-\!-width-full {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+  }
+
+  &.govuk-\!-width-three-quarters {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+
+    @include govuk-media-query($from: tablet) {
+      // stylelint-disable-next-line declaration-no-important
+      width: 75% !important;
+    }
+  }
+
+  &.govuk-\!-width-two-thirds {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+
+    @include govuk-media-query($from: tablet) {
+      // stylelint-disable-next-line declaration-no-important
+      width: 66.66% !important;
+    }
+  }
+
+  &.govuk-\!-width-one-half {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+
+    @include govuk-media-query($from: tablet) {
+      // stylelint-disable-next-line declaration-no-important
+      width: 50% !important;
+    }
+  }
+
+  &.govuk-\!-width-one-third {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+
+    @include govuk-media-query($from: tablet) {
+      // stylelint-disable-next-line declaration-no-important
+      width: 33.33% !important;
+    }
+  }
+
+  &.govuk-\!-width-one-quarter {
+    // stylelint-disable-next-line declaration-no-important
+    width: 100% !important;
+    max-width: none;
+
+    @include govuk-media-query($from: tablet) {
+      // stylelint-disable-next-line declaration-no-important
+      width: 25% !important;
+    }
+  }
+}
+
+// stylelint-enable selector-no-qualifying-type
+
+.lis-date-picker__wrapper {
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .lis-date-picker__dialog {
+    width: auto;
+  }
+}
+
+.lis-date-picker__toggle {
+  height: 40px;
+  padding-top: 6px;
+  border: none;
+  border-bottom: 4px solid rgb(0, 0, 0, 0);
+  outline: 3px solid rgb(0, 0, 0, 0);
+  outline-offset: -3px;
+  color: govuk-colour('white');
+  background-color: govuk-functional-colour('text');
+  cursor: pointer;
+
+  &:focus {
+    border-bottom: 4px solid govuk-functional-colour('text');
+    color: govuk-functional-colour('text');
+    background-color: govuk-functional-colour('focus');
+  }
+
+  &:hover {
+    border-bottom: 4px solid $lis-date-picker-hover-colour;
+    color: govuk-functional-colour('text');
+    background-color: $lis-date-picker-hover-colour;
+  }
+
+  &:focus:hover {
+    border-bottom: 4px solid govuk-functional-colour('text');
+    color: govuk-functional-colour('text');
+    background-color: $lis-date-picker-hover-colour;
+  }
+}
