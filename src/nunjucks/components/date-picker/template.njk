@@ -1,0 +1,61 @@
+{#
+  Adapted from the date picker in MoJ Frontend 12.0.0
+  (https://github.com/ministryofjustice/moj-frontend), MIT licence.
+  Copyright (c) 2019 Ministry of Justice
+#}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/macros/attributes.njk" import govukAttributes %}
+
+{% set classNames = "lis-js-date-picker-input " %}
+
+{%- if params.classes %}
+  {% set classNames = classNames + " " + params.classes %}
+{% endif %}
+
+{#
+  leadingZeros is passed as the text "true" or "false": govukAttributes renders
+  an optional true value as a valueless attribute, which the component's config
+  parser reads as false.
+#}
+{% set attributes = {
+  "data-module": "lis-date-picker",
+  "data-min-date": {
+    value: params.minDate,
+    optional: true
+  },
+  "data-max-date": {
+    value: params.maxDate,
+    optional: true
+  },
+  "data-excluded-dates": {
+    value: params.excludedDates,
+    optional: true
+  },
+  "data-excluded-days": {
+    value: params.excludedDays,
+    optional: true
+  },
+  "data-leading-zeros": {
+    value: ("" ~ params.leadingZeros) if params.leadingZeros is defined else undefined,
+    optional: true
+  },
+  "data-week-start-day": {
+    value: params.weekStartDay,
+    optional: true
+  }
+} %}
+
+<div class="lis-date-picker" {{ govukAttributes(attributes) }}>
+    {{ govukInput({
+      classes: classNames,
+      id: params.id,
+      name: params.name,
+      value: params.value,
+      autocomplete: "off",
+      formGroup: params.formGroup,
+      label: params.label,
+      hint: params.hint,
+      errorMessage: params.errorMessage,
+      attributes: params.attributes
+    }) }}
+</div>

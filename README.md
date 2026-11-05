@@ -53,7 +53,7 @@ const nunjucksConfig = createNunjucksConfig({
 await server.register(nunjucksConfig)
 ```
 
-The template components are `appHeading`, `appAutocomplete`, `lisSubNavigation`, plus the search form,
+The template components are `appHeading`, `appAutocomplete`, `lisDatePicker`, `lisSubNavigation`, plus the search form,
 sortable paginated table and date templates. `createNunjucksContextBuilder` (also exported from
 `/nunjucks-context`) builds just the view context. The filters `formatAge`, `formatDate`,
 `formatEarTag`, `formatCurrency` and `queryString` are also exported from `/nunjucks/filters`, and the
@@ -294,10 +294,37 @@ import { initAllAutocompletes } from '@defra/lis-infra-ui-services/components/au
 initAllAutocompletes()
 ```
 
+#### Date picker
+
+The `lisDatePicker` template component adds a calendar dialog to a GOV.UK text input, adapted from the [MoJ Frontend date picker](https://design-patterns.service.justice.gov.uk/components/date-picker) (MIT licence, see [LICENCE-moj-frontend.txt](./LICENCE-moj-frontend.txt)). It takes the same `id`, `name`, `value`, `label`, `hint`, `errorMessage`, `formGroup`, `classes` and `attributes` as `govukInput`, plus `minDate` and `maxDate` (`d/m/yyyy`), `excludedDates`, `excludedDays` (day names separated by spaces), `leadingZeros` (picked dates are `27/3/2026` by default, `27/03/2026` when `true`) and `weekStartDay` (`monday` or `sunday`, default `monday`).
+
+`excludedDates` takes dates and ranges separated by spaces, for example `"1/6/2026 10/6/2026-12/6/2026"`. A hyphen always marks a range, so dates there must use `/` (or `.` or `,`) between their parts, never `-`. Anything that is not a real date, such as `31/4/2026` or `1-6-2026`, is ignored.
+
+```njk
+{% from "date-picker/macro.njk" import lisDatePicker %}
+
+{{ lisDatePicker({
+  id: "movement-date",
+  name: "movementDate",
+  label: { text: "Date of movement" },
+  hint: { text: "For example, 27/3/2026" },
+  maxDate: "5/11/2026"
+}) }}
+```
+
+Start `DatePicker` from `@defra/lis-infra-ui-services/components/date-picker` with `createAll`, alongside the other components. Without JavaScript the plain text input remains.
+
+```js
+import { createAll } from 'govuk-frontend'
+import { DatePicker } from '@defra/lis-infra-ui-services/components/date-picker'
+
+createAll(DatePicker)
+```
+
 ### Styles
 
 Import the Sass files you need from your app's stylesheet: `components/autocomplete.scss`,
-`components/search-form.scss`, `components/service-navigation.scss`,
+`components/date-picker.scss`, `components/search-form.scss`, `components/service-navigation.scss`,
 `components/sortable-paginated-table.scss` and `components/sub-navigation.scss`.
 
 ```scss
