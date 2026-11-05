@@ -607,3 +607,41 @@ describe('createNunjucksContextBuilder() hasPermission()', () => {
     expect(error.message).toBe('hasPermission() requires a permission')
   })
 })
+
+describe('createNunjucksContextBuilder() csrfToken', () => {
+  test('exposes the token the CSRF plugin resolved for the request', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = {
+      headers: {},
+      path: '/',
+      plugins: { 'lis-csrf': { token: 'resolved-token' } }
+    }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.csrfToken).toBe('resolved-token')
+  })
+
+  test('leaves the token undefined when the CSRF plugin is not registered', () => {
+    // Arrange
+    const contextBuilder = createNunjucksContextBuilder({
+      config: createConfig(),
+      logger: {},
+      readFileSync: () => '{}'
+    })
+    const request = { headers: {}, path: '/', plugins: {} }
+
+    // Act
+    const context = contextBuilder(request)
+
+    // Assert
+    expect(context.csrfToken).toBeUndefined()
+  })
+})

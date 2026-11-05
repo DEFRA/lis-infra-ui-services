@@ -1,0 +1,20 @@
+{#
+  The Sign out link lands here: a GET never signs out, so the page asks for
+  the POST, carrying the CSRF token. Takes signOutHref, the path to post to.
+#}
+{% extends 'layouts/page.njk' %}
+{% from "form/macro.njk" import lisForm with context %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Are you sure you want to sign out?</h1>
+      {% call lisForm({ action: signOutHref }) %}
+        <div class="govuk-button-group">
+          <button type="submit" class="govuk-button" data-module="govuk-button">Sign out</button>
+          <a class="govuk-link" href="/">Cancel</a>
+        </div>
+      {% endcall %}
+    </div>
+  </div>
+{% endblock %}

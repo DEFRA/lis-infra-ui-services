@@ -13,6 +13,7 @@ import {
   isSameSiteRequest,
   toSameOriginPath
 } from './index.js'
+import { csrfPlugin } from '../csrf/index.js'
 
 const packageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -40,7 +41,7 @@ const essentialCookies = [
 
 let server
 
-async function createServer() {
+async function createServer({ withCsrf = false } = {}) {
   server = hapi.server()
   await server.register({
     plugin: hapiVision,
@@ -62,6 +63,12 @@ async function createServer() {
   }))
   server.auth.strategy('none', 'none')
   server.auth.default('none')
+  if (withCsrf) {
+    await server.register({
+      plugin: csrfPlugin,
+      options: { tokenSource: 'header' }
+    })
+  }
   await server.register(createCookiesPlugin({ essentialCookies }))
   await server.initialize()
 
@@ -156,7 +163,11 @@ describe('createCookiesPlugin()', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/cookies',
-      headers: { host: 'lis.test', referer: 'https://lis.test/cattle/home' },
+      headers: {
+        host: 'lis.test',
+        referer: 'https://lis.test/cattle/home',
+        'sec-fetch-site': 'same-origin'
+      },
       payload: { analytics: 'yes' }
     })
 
@@ -183,6 +194,7 @@ describe('createCookiesPlugin()', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/cookies',
+      headers: { 'sec-fetch-site': 'same-origin' },
       payload: { analytics: 'no' }
     })
 
@@ -201,6 +213,7 @@ describe('createCookiesPlugin()', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/cookies',
+      headers: { 'sec-fetch-site': 'same-origin' },
       payload: { analytics: 'maybe' }
     })
 
@@ -271,10 +284,10 @@ describe('getReturnPath()', () => {
 describe('isSameSiteRequest()', () => {
   test.each([
     ['sec-fetch-site same-origin', { 'sec-fetch-site': 'same-origin' }, true],
-    ['sec-fetch-site same-site', { 'sec-fetch-site': 'same-site' }, true],
+    ['sec-fetch-site same-site', { 'sec-fetch-site': 'same-site' }, false],
     ['sec-fetch-site cross-site', { 'sec-fetch-site': 'cross-site' }, false],
     ['sec-fetch-site none', { 'sec-fetch-site': 'none' }, false],
-    ['no signals at all', {}, true],
+    ['no signals at all', {}, false],
     ['matching origin', { origin: 'https://lis.test' }, true],
     ['foreign origin', { origin: 'https://evil.example' }, false],
     ['unparseable origin', { origin: 'not a url' }, false],
@@ -302,7 +315,9 @@ describe('isSameSiteRequest()', () => {
 describe('POST /cookies from another site', () => {
   test.each([
     ['sec-fetch-site cross-site', { 'sec-fetch-site': 'cross-site' }],
-    ['a foreign origin', { origin: 'https://evil.example' }]
+    ['sec-fetch-site same-site', { 'sec-fetch-site': 'same-site' }],
+    ['a foreign origin', { origin: 'https://evil.example' }],
+    ['neither sec-fetch-site nor origin', {}]
   ])('ignores a consent POST with %s', async (_label, headers) => {
     // Arrange
     await createServer()
@@ -312,6 +327,43 @@ describe('POST /cookies from another site', () => {
       method: 'POST',
       url: '/cookies',
       headers,
+      payload: { analytics: 'yes' }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/cookies')
+    expect(response.headers['set-cookie']).toBeUndefined()
+  })
+})
+
+describe('POST /cookies with the CSRF plugin registered', () => {
+  test('records a signed-out same-origin choice without a token', async () => {
+    // Arrange
+    await createServer({ withCsrf: true })
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: { 'sec-fetch-site': 'same-origin' },
+      payload: { analytics: 'yes' }
+    })
+
+    // Assert
+    expect(response.statusCode).toBe(302)
+    expect(response.headers.location).toBe('/cookies?saved=true&returnPath=%2F')
+  })
+
+  test('still returns a cross-site post to the page rather than a 403', async () => {
+    // Arrange
+    await createServer({ withCsrf: true })
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: { 'sec-fetch-site': 'cross-site' },
       payload: { analytics: 'yes' }
     })
 
