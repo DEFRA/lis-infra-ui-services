@@ -15,8 +15,9 @@ export function getRequestHost(request) {
  * signals. Same-site is not enough: deployed hubs share a platform domain with
  * other tenants. Sec-Fetch-Site `none` is a navigation the user started (e.g.
  * from the address bar), which can never be a form posted from a page, so it
- * fails too. A request with neither header fails, as every browser sends one
- * of them on a POST.
+ * fails too. A request with neither header fails: current browsers send at
+ * least one of them on a form POST, but those that send neither on a
+ * same-origin one (IE11, Firefox before 70) are refused.
  * @param {Request} request
  * @returns {boolean}
  */

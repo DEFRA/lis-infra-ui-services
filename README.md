@@ -323,7 +323,7 @@ createAll(DatePicker)
 
 #### Form
 
-The `lisForm` template component renders a `novalidate` form with the CSRF token in a hidden `_csrf` field (see [CSRF protection](#csrf-protection)) around the caller's body. It takes `action` (left out when not given, so the form posts to the page itself), `method` (default `post`), `classes` and `attributes`. Import it `with context` so it reads `csrfToken` from the page, or pass `csrfToken` yourself. A `GET` form gets no token field, which would otherwise end up in the URL.
+The `lisForm` template component renders a `novalidate` form with the CSRF token in a hidden `_csrf` field (see [CSRF protection](#csrf-protection)) around the caller's body. It takes `action` (left out when not given, so the form posts to the page itself), `method` (default `post`), `classes` and `attributes`. Import it `with context` so it reads `csrfToken` from the page, or pass `csrfToken` yourself. A `GET` form gets no token field, which would otherwise end up in the URL. A `POST` form with no token gets no field either, so its submission is refused with a 403: that usually means the macro was imported without `with context`, or the CSRF plugin is not registered on the server.
 
 ```njk
 {% from "form/macro.njk" import lisForm with context %}
@@ -416,9 +416,13 @@ await server.register({
 })
 ```
 
-- **Origin check**: `Sec-Fetch-Site` must be `same-origin` (`same-site`, `cross-site` and `none` fail, as other tenants share the platform domain). Without it, the `Origin` host must match the host the browser addressed (`x-forwarded-host`, then `host`). A request with neither fails. `isSameOriginRequest(request)` exposes the check.
+- **Origin check**: `Sec-Fetch-Site` must be `same-origin` (`same-site`, `cross-site` and `none` fail, as other tenants share the platform domain). Without it, the `Origin` host must match the host the browser addressed (`x-forwarded-host`, then `host`); the scheme is not compared, as TLS ends before the hub and spoke. A request with neither fails. `isSameOriginRequest(request)` exposes the check.
 - **Token check**: the `_csrf` field (`CSRF_FIELD_NAME`) of a parsed form or JSON body must match the request's token, compared in constant time. A streamed or raw body fails. The field is removed from `request.payload` before route validation, so schemas need not allow it.
 - The token is published at `request.plugins['lis-csrf'].token` and given to every view as `csrfToken`. `clearCsrfToken(request)` drops it from the session, so the next signed-in request gets a new one.
+
+**Known limitation:** browsers that send neither `Sec-Fetch-Site` nor `Origin` on a same-origin form `POST` (Internet Explorer 11, Firefox before 70) are refused with a 403.
+
+**Stricter `isSameSiteRequest`:** `isSameSiteRequest` from `@defra/lis-infra-ui-services/cookies` is kept for existing callers but deprecated, and now behaves as `isSameOriginRequest`: a `same-site` request, or one with neither `Sec-Fetch-Site` nor `Origin`, which it used to accept, is now refused.
 
 A route opts out through `options.plugins['lis-csrf']`: `false` or `{ enabled: false }` skips every check; `{ token: false }` keeps only the origin check, for a proxied (streamed) body or a form a signed-out visitor submits.
 

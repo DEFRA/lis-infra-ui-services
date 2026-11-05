@@ -135,12 +135,13 @@ describe('lisForm()', () => {
     expect(form.querySelector('input[name="_csrf"]')).toBeNull()
   })
 
-  test('renders an empty token field when the request has no token', async () => {
+  test('leaves the token field out when the request has no token, so the post is refused', async () => {
     // Act
     const form = await render({ form: { action: '/edit' } })
 
     // Assert
-    expect(form.querySelector('input[name="_csrf"]').value).toBe('')
+    expect(form.getAttribute('method')).toBe('post')
+    expect(form.querySelector('input[name="_csrf"]')).toBeNull()
   })
 
   test('takes an explicit csrfToken when imported without context', async () => {
@@ -157,7 +158,7 @@ describe('lisForm()', () => {
     )
   })
 
-  test('cannot see the request token when imported without context', async () => {
+  test('cannot see the request token when imported without context, so renders no token field', async () => {
     // Act
     const form = await render({
       view: 'form-without-context',
@@ -166,6 +167,6 @@ describe('lisForm()', () => {
     })
 
     // Assert
-    expect(form.querySelector('input[name="_csrf"]').value).toBe('')
+    expect(form.querySelector('input[name="_csrf"]')).toBeNull()
   })
 })

@@ -2,6 +2,8 @@
   Import with context so the token comes from the page:
   {% from "form/macro.njk" import lisForm with context %}
   A GET form never carries the token, which would otherwise end up in the URL.
+  With no token the field is left out, so the post is refused: the macro was
+  imported without context, or the CSRF plugin is not registered.
 #}
 {% from "govuk/macros/attributes.njk" import govukAttributes %}
 
@@ -9,7 +11,7 @@
 {%- set token = params.csrfToken if params.csrfToken is defined else csrfToken -%}
 
 <form{% if params.action %} action="{{ params.action }}"{% endif %} method="{{ method }}"{% if params.classes %} class="{{ params.classes }}"{% endif %}{{ govukAttributes(params.attributes) }} novalidate>
-  {%- if method | lower != "get" %}
+  {%- if method | lower != "get" and token %}
   <input type="hidden" name="_csrf" value="{{ token }}">
   {%- endif %}
   {{ caller() if caller }}
