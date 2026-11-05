@@ -173,10 +173,10 @@ async function reject(request, h, check, failAction) {
 
 /**
  * @param {(request: Request) => string | undefined} resolveToken
- * @returns {(request: Request, h: ResponseToolkit) => unknown}
+ * @returns {(request: Request, h: ResponseToolkit) => Promise<unknown>}
  */
 function createOnPostAuth(resolveToken) {
-  return function protectAgainstCsrf(request, h) {
+  return async function protectAgainstCsrf(request, h) {
     const token = resolveToken(request)
     request.plugins[CSRF_PLUGIN_NAME] = { token }
 
