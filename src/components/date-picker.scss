@@ -9,6 +9,12 @@
 // contrast for text on it and against the surrounding white.
 $lis-date-picker-hover-colour: #949494;
 
+$lis-date-picker-day-width: 44px;
+$lis-date-picker-narrow-padding: govuk-spacing(2);
+// WCAG 2.2 target size (minimum).
+$lis-date-picker-min-target-size: 24px;
+$lis-date-picker-narrow-nav-width: 32px;
+
 .lis-date-picker {
   position: relative;
   @include govuk-font($size: 16);
@@ -92,7 +98,7 @@ $lis-date-picker-hover-colour: #949494;
 
 .lis-date-picker__button {
   position: relative;
-  width: 44px;
+  width: $lis-date-picker-day-width;
   height: 40px;
   margin: 0;
   padding: 0;
@@ -149,13 +155,11 @@ $lis-date-picker-hover-colour: #949494;
     }
   }
 
+  // Keeps the black bar from :focus, so the indicator still contrasts with
+  // the grey hover background.
   &:focus:hover {
     outline-color: govuk-functional-colour('focus');
     background-color: $lis-date-picker-hover-colour;
-
-    &::after {
-      background-color: transparent;
-    }
   }
 
   &--current:not(:focus) {
@@ -201,6 +205,46 @@ $lis-date-picker-hover-colour: #949494;
         background-color: transparent;
       }
     }
+  }
+}
+
+// On narrow screens the fixed-size calendar can be wider than the page, so it
+// fills the input's wrapper instead (already inset by the page gutters and by
+// any error-state indent) and its seven columns share that width. It stops
+// growing once the day buttons reach their usual size.
+@include govuk-media-query($until: tablet) {
+  .lis-date-picker__dialog {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: $lis-date-picker-day-width * 7 + $lis-date-picker-narrow-padding *
+      2;
+    padding: $lis-date-picker-narrow-padding;
+  }
+
+  .lis-date-picker__dialog-title {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .lis-date-picker__dialog-navbuttons .lis-date-picker__button {
+    width: $lis-date-picker-narrow-nav-width;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .lis-date-picker__calendar {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .lis-date-picker__calendar-day {
+    width: 100%;
+    min-width: $lis-date-picker-min-target-size;
   }
 }
 

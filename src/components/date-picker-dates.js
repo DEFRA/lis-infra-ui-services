@@ -2,8 +2,9 @@
 // (https://github.com/ministryofjustice/moj-frontend), MIT licence.
 // Copyright (c) 2019 Ministry of Justice
 
-// Accepts d/m/yyyy and dd/mm/yyyy, with -, /, comma, full stop or space between parts.
-const DATE_FORMAT_PATTERN = /(\d{1,2})([-/,. ])(\d{1,2})\2(\d{4})/
+// Accepts d/m/yyyy and dd/mm/yyyy, with -, /, comma, full stop or space between
+// parts, and nothing else around them but whitespace.
+const DATE_FORMAT_PATTERN = /^\s*(\d{1,2})([-/,. ])(\d{1,2})\2(\d{4})\s*$/
 const DAY_GROUP = 1
 const MONTH_GROUP = 3
 const YEAR_GROUP = 4
@@ -24,7 +25,7 @@ const SUNDAY_FIRST_DAYS = [
  * @param {number} length - The length in characters of the output
  * @returns {string} the padded value
  */
-export function padNumber(value, length = PADDED_LENGTH) {
+function padNumber(value, length = PADDED_LENGTH) {
   return value.toString().padStart(length, '0')
 }
 
@@ -41,12 +42,17 @@ export function parseDate(dateString, fallback) {
     return fallback
   }
 
-  const date = new Date(
-    Number(match[YEAR_GROUP]),
-    Number(match[MONTH_GROUP]) - 1,
-    Number(match[DAY_GROUP])
-  )
-  return Number.isFinite(date.getTime()) ? date : fallback
+  const year = Number(match[YEAR_GROUP])
+  const monthIndex = Number(match[MONTH_GROUP]) - 1
+  const day = Number(match[DAY_GROUP])
+  const date = new Date(year, monthIndex, day)
+
+  // Date rolls impossible dates over (31/4 becomes 1/5), so those are rejected.
+  const isRealDate =
+    date.getFullYear() === year &&
+    date.getMonth() === monthIndex &&
+    date.getDate() === day
+  return isRealDate ? date : fallback
 }
 
 /**
@@ -71,23 +77,24 @@ export function parseDateRange(rangeString) {
 }
 
 /**
- * Parses space-separated dates and date ranges.
+ * Parses whitespace-separated dates and date ranges. A hyphen always marks a
+ * range, so the dates must not use it between their parts.
  * @param {string} excludedDates - e.g. "1/6/2026 10/6/2026-12/6/2026"
- * @returns {Date[]} the valid dates
+ * @returns {Date[]} the valid dates; anything that is not a date is dropped
  */
 export function parseExcludedDates(excludedDates) {
   return excludedDates
-    .replace(/\s+/, ' ')
-    .split(' ')
+    .trim()
+    .split(/\s+/)
     .map((item) =>
-      item.includes('-') ? parseDateRange(item) : [parseDate(item, new Date())]
+      item.includes('-') ? parseDateRange(item) : [parseDate(item, null)]
     )
     .reduce((dates, items) => dates.concat(items), [])
     .filter(Boolean)
 }
 
 /**
- * Parses space-separated day names into Date.getDay() indexes.
+ * Parses whitespace-separated day names into Date.getDay() indexes.
  * @param {string} excludedDays - e.g. "saturday sunday"
  * @returns {number[]} the indexes of the recognised days
  */
@@ -95,11 +102,10 @@ export function parseExcludedDays(excludedDays) {
   // Sunday first, so a day's index matches Date.getDay(). MoJ's version reads
   // the week start day before it is normalised, which shifts every excluded
   // day back by one when the week starts on Sunday.
-
   return excludedDays
-    .replace(/\s+/, ' ')
+    .trim()
     .toLowerCase()
-    .split(' ')
+    .split(/\s+/)
     .map((item) => SUNDAY_FIRST_DAYS.indexOf(item))
     .filter((item) => item !== -1)
 }

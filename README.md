@@ -296,7 +296,9 @@ initAllAutocompletes()
 
 #### Date picker
 
-The `lisDatePicker` template component adds a calendar dialog to a GOV.UK text input, adapted from the [MoJ Frontend date picker](https://design-patterns.service.justice.gov.uk/components/date-picker) (MIT licence). It takes the same `id`, `name`, `value`, `label`, `hint`, `errorMessage`, `formGroup`, `classes` and `attributes` as `govukInput`, plus `minDate` and `maxDate` (`d/m/yyyy`), `excludedDates` (space-separated dates or `d/m/yyyy-d/m/yyyy` ranges), `excludedDays` (space-separated day names), `leadingZeros` (picked dates are `27/3/2026` by default, `27/03/2026` when `true`) and `weekStartDay` (`monday` or `sunday`, default `monday`).
+The `lisDatePicker` template component adds a calendar dialog to a GOV.UK text input, adapted from the [MoJ Frontend date picker](https://design-patterns.service.justice.gov.uk/components/date-picker) (MIT licence, see [LICENCE-moj-frontend.txt](./LICENCE-moj-frontend.txt)). It takes the same `id`, `name`, `value`, `label`, `hint`, `errorMessage`, `formGroup`, `classes` and `attributes` as `govukInput`, plus `minDate` and `maxDate` (`d/m/yyyy`), `excludedDates`, `excludedDays` (day names separated by spaces), `leadingZeros` (picked dates are `27/3/2026` by default, `27/03/2026` when `true`) and `weekStartDay` (`monday` or `sunday`, default `monday`).
+
+`excludedDates` takes dates and ranges separated by spaces, for example `"1/6/2026 10/6/2026-12/6/2026"`. A hyphen always marks a range, so dates there must use `/` (or `.` or `,`) between their parts, never `-`. Anything that is not a real date, such as `31/4/2026` or `1-6-2026`, is ignored.
 
 ```njk
 {% from "date-picker/macro.njk" import lisDatePicker %}

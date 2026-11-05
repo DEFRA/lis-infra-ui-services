@@ -46,10 +46,9 @@ function navigationButton(jsClass, label, arrowPaths) {
 
 /**
  * HTML for the calendar dialog's header, grid and buttons.
- * @param {string} titleId - id attribute for the dialog title
  * @returns {string} the dialog markup
  */
-export function dialogTemplate(titleId) {
+function dialogTemplate() {
   return `<div class="lis-date-picker__dialog-header">
           <div class="lis-date-picker__dialog-navbuttons">
             ${navigationButton(
@@ -69,7 +68,7 @@ export function dialogTemplate(titleId) {
             )}
           </div>
 
-          <h2 id="${titleId}" class="lis-date-picker__dialog-title lis-js-date-picker-month-year" aria-live="polite">June 2020</h2>
+          <h2 class="lis-date-picker__dialog-title lis-js-date-picker-month-year" aria-live="polite">June 2020</h2>
 
           <div class="lis-date-picker__dialog-navbuttons">
             ${navigationButton('lis-js-date-picker-next-month', 'Next month', [
@@ -82,7 +81,7 @@ export function dialogTemplate(titleId) {
           </div>
         </div>
 
-        <table class="lis-date-picker__calendar lis-js-date-picker-grid" role="application" aria-labelledby="${titleId}">
+        <table class="lis-date-picker__calendar lis-js-date-picker-grid" role="application">
           <thead>
             <tr></tr>
           </thead>
@@ -94,4 +93,31 @@ export function dialogTemplate(titleId) {
           <button type="button" class="govuk-button lis-js-date-picker-ok">Select</button>
           <button type="button" class="govuk-button govuk-button--secondary lis-js-date-picker-cancel">Close</button>
         </div>`
+}
+
+/**
+ * Builds the hidden calendar dialog. Ids are set as attributes rather than
+ * written into the markup.
+ * @param {string} dialogId - id for the dialog, which the toggle controls
+ * @param {string} titleId - id for the month and year heading that labels it
+ * @returns {object} the hidden calendar dialog element
+ */
+export function createDialogElement(dialogId, titleId) {
+  const $dialog = document.createElement('div')
+
+  $dialog.id = dialogId
+  $dialog.setAttribute('class', 'lis-date-picker__dialog')
+  $dialog.setAttribute('role', 'dialog')
+  $dialog.setAttribute('aria-modal', 'true')
+  $dialog.setAttribute('aria-labelledby', titleId)
+  $dialog.innerHTML = dialogTemplate()
+  $dialog
+    .querySelector('.lis-js-date-picker-month-year')
+    .setAttribute('id', titleId)
+  $dialog
+    .querySelector('.lis-js-date-picker-grid')
+    .setAttribute('aria-labelledby', titleId)
+  $dialog.hidden = true
+
+  return $dialog
 }

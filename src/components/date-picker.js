@@ -6,12 +6,11 @@ import { ConfigurableComponent } from 'govuk-frontend'
 import { createCalendarDays } from './date-picker-calendar-day.js'
 import {
   formatDate,
-  padNumber,
   parseDate,
   parseExcludedDates,
   parseExcludedDays
 } from './date-picker-dates.js'
-import { dialogTemplate, toggleTemplate } from './date-picker-templates.js'
+import { createDialogElement, toggleTemplate } from './date-picker-templates.js'
 
 const DAYS_IN_WEEK = 7
 const LAST_DAY_OF_WEEK_OFFSET = DAYS_IN_WEEK - 1
@@ -99,12 +98,28 @@ export class DatePicker extends ConfigurableComponent {
 
     $inputWrapper.insertAdjacentHTML('beforeend', toggleTemplate())
 
-    this.$calendarButton = this.$root.querySelector(
+    this.$calendarButton = $inputWrapper.querySelector(
       '.lis-js-date-picker-toggle'
     )
     this.$calendarButton.addEventListener('click', (event) =>
       this.toggleDialog(event)
     )
+
+    for (const type of ['input', 'change']) {
+      this.$input.addEventListener(type, () => this.updateToggleName())
+    }
+    this.updateToggleName()
+  }
+
+  /**
+   * Keeps the toggle's name in step with the input: it names the date only
+   * while the input holds a real one.
+   */
+  updateToggleName() {
+    const date = this.formattedDateFromString(this.$input.value, null)
+    this.$calendarButton.querySelector('span').textContent = date
+      ? `Choose date. Selected date is ${this.formattedDateHuman(date)}`
+      : 'Choose date'
   }
 
   /**
@@ -222,18 +237,7 @@ export class DatePicker extends ConfigurableComponent {
    * @returns {object} the hidden calendar dialog element
    */
   createDialog() {
-    const titleId = `datepicker-title-${this.$input.id}`
-    const $dialog = document.createElement('div')
-
-    $dialog.id = this.id
-    $dialog.setAttribute('class', 'lis-date-picker__dialog')
-    $dialog.setAttribute('role', 'dialog')
-    $dialog.setAttribute('aria-modal', 'true')
-    $dialog.setAttribute('aria-labelledby', titleId)
-    $dialog.innerHTML = dialogTemplate(titleId)
-    $dialog.hidden = true
-
-    return $dialog
+    return createDialogElement(this.id, `datepicker-title-${this.$input.id}`)
   }
 
   /**
@@ -255,16 +259,6 @@ export class DatePicker extends ConfigurableComponent {
       const $headerRow = this.$dialog.querySelector('thead > tr')
       $headerRow.insertAdjacentHTML('beforeend', html)
     })
-  }
-
-  /**
-   * Pads given number with leading zeros
-   * @param {number} value - The value to be padded
-   * @param {number} length - The length in characters of the output
-   * @returns {string} the padded value
-   */
-  leadingZeros(value, length) {
-    return padNumber(value, length)
   }
 
   /**
@@ -393,7 +387,8 @@ export class DatePicker extends ConfigurableComponent {
       !this.$calendarButton.contains(event.target)
     ) {
       event.preventDefault()
-      this.closeDialog()
+      // Leaves focus on whatever the user clicked.
+      this.closeDialog(false)
     }
   }
 
@@ -423,7 +418,7 @@ export class DatePicker extends ConfigurableComponent {
    * Renders the month containing the current date.
    */
   updateCalendar() {
-    this.$dialogTitle.innerHTML = `${this.monthLabels[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`
+    this.$dialogTitle.textContent = `${this.monthLabels[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`
 
     const day = this.currentDate
     const firstOfMonth = new Date(day.getFullYear(), day.getMonth(), 1)
@@ -461,7 +456,7 @@ export class DatePicker extends ConfigurableComponent {
     const { currentDate } = this
     this.calendarDays.forEach((calendarDay) => {
       calendarDay.$button.classList.add(
-        'lis-date-picker__button',
+        this.buttonClass,
         'lis-date-picker__calendar-day'
       )
       calendarDay.$button.setAttribute('tabindex', '-1')
@@ -496,12 +491,17 @@ export class DatePicker extends ConfigurableComponent {
     // When no day is focused, the first enabled day becomes the grid's tab stop.
     if (!focus) {
       const firstEnabledDay = this.calendarDays.find((calendarDay) => {
-        return !calendarDay.$button.hidden && !calendarDay.$button.disabled
+        return (
+          !calendarDay.$button.hidden &&
+          calendarDay.$button.getAttribute('aria-disabled') !== 'true'
+        )
       })
 
-      firstEnabledDay.$button.setAttribute('tabindex', '0')
-
-      this.currentDate = firstEnabledDay.date
+      // A month with every day excluded keeps no tab stop rather than throwing.
+      if (firstEnabledDay) {
+        firstEnabledDay.$button.setAttribute('tabindex', '0')
+        this.currentDate = firstEnabledDay.date
+      }
     }
   }
 
@@ -514,9 +514,8 @@ export class DatePicker extends ConfigurableComponent {
       return
     }
 
-    this.$calendarButton.querySelector('span').textContent =
-      `Choose date. Selected date is ${this.formattedDateHuman(date)}`
     this.$input.value = this.formattedDateFromDate(date)
+    this.updateToggleName()
 
     const changeEvent = new Event('change', { bubbles: true, cancelable: true })
     this.$input.dispatchEvent(changeEvent)
@@ -576,6 +575,8 @@ export class DatePicker extends ConfigurableComponent {
     this.updateCalendar()
     this.setCurrentDate()
 
+    // Drops any listener left by a repeated call while already open.
+    this.openController?.abort()
     this.openController = new AbortController()
     document.body.addEventListener(
       'mouseup',
@@ -585,14 +586,17 @@ export class DatePicker extends ConfigurableComponent {
   }
 
   /**
-   * Hides the dialog and returns focus to the toggle button.
+   * Hides the dialog, returning focus to the toggle button unless asked not to.
+   * @param {boolean} [restoreFocus] - focus the toggle button
    */
-  closeDialog() {
+  closeDialog(restoreFocus = true) {
     this.openController?.abort()
     this.$dialog.hidden = true
     this.$dialog.classList.remove(OPEN_DIALOG_CLASS)
     this.$calendarButton.setAttribute('aria-expanded', 'false')
-    this.$calendarButton.focus()
+    if (restoreFocus) {
+      this.$calendarButton.focus()
+    }
   }
 
   /**
