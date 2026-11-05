@@ -6,6 +6,7 @@ import { HUBS, getModuleById } from '@defra/lis-hubs-infra-registry'
 import { getAssetRoot } from '../asset-path.js'
 
 import { COOKIES_PATH, getCookiesPolicy } from '../cookies/cookies-policy.js'
+import { CSRF_PLUGIN_NAME } from '../csrf/constants.js'
 
 const HUB_SERVICE_NAME_PREFIX = 'lis-hubs-'
 
@@ -116,6 +117,7 @@ export function createNunjucksContextBuilder({
       cookiesPath: COOKIES_PATH,
       cookiesPolicy: getCookiesPolicy(request),
       isCookiesPage: request?.path === COOKIES_PATH,
+      csrfToken: request?.plugins?.[CSRF_PLUGIN_NAME]?.token,
       errorPages: errorPageLinks,
       getAssetPath(asset) {
         const viteAssetPath = viteManifest?.[asset]?.file

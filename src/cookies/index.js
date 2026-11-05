@@ -1,4 +1,6 @@
 /** @import { Plugin, Request, ResponseToolkit } from '@hapi/hapi' */
+import { CSRF_PLUGIN_NAME } from '../csrf/constants.js'
+import { isSameOriginRequest } from '../csrf/same-origin.js'
 import { getSameHostReferrerPath } from '../referrer-link.js'
 import {
   COOKIES_PATH,
@@ -67,40 +69,14 @@ export function getReturnPath(request) {
 }
 
 /**
- * @param {Request} request
- * @returns {string} the host the browser addressed, as the hub proxy forwards it
- */
-function getRequestHost(request) {
-  return (request.headers['x-forwarded-host'] ?? request.headers.host ?? '')
-    .split(',')[0]
-    .trim()
-}
-
-/**
- * Whether a consent POST came from this site. Hapi has no CSRF token here, so
- * the browser's own signals are used: Sec-Fetch-Site when present, otherwise
- * the Origin header, which browsers always send on a cross-site form POST.
+ * @deprecated Use isSameOriginRequest from `@defra/lis-infra-ui-services/csrf`.
+ * Kept for existing callers; it now requires the same origin, so a same-site
+ * request, or one with neither Sec-Fetch-Site nor Origin, no longer passes.
  * @param {Request} request
  * @returns {boolean}
  */
 export function isSameSiteRequest(request) {
-  const fetchSite = request.headers['sec-fetch-site']
-
-  if (typeof fetchSite === 'string') {
-    return fetchSite === 'same-origin' || fetchSite === 'same-site'
-  }
-
-  const origin = request.headers.origin
-
-  if (typeof origin !== 'string' || origin === '') {
-    return true
-  }
-
-  try {
-    return new URL(origin).host === getRequestHost(request)
-  } catch {
-    return false
-  }
+  return isSameOriginRequest(request)
 }
 
 /**
@@ -134,7 +110,7 @@ function createGetHandler(essentialCookies) {
 function postConsent(request, h) {
   const analytics = request.payload?.analytics
 
-  if (!CONSENT_VALUES.has(analytics) || !isSameSiteRequest(request)) {
+  if (!CONSENT_VALUES.has(analytics) || !isSameOriginRequest(request)) {
     return h.redirect(COOKIES_PATH)
   }
 
@@ -176,7 +152,13 @@ export function createCookiesPlugin({ essentialCookies } = {}) {
         {
           method: 'POST',
           path: COOKIES_PATH,
-          options: { auth: { mode: 'try' } },
+          // A signed-out visitor has no CSRF token, and a refused post
+          // returns to the page rather than a 403, so the handler checks the
+          // origin itself.
+          options: {
+            auth: { mode: 'try' },
+            plugins: { [CSRF_PLUGIN_NAME]: false }
+          },
           handler: postConsent
         }
       ])

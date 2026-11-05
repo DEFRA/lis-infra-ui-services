@@ -321,6 +321,19 @@ import { DatePicker } from '@defra/lis-infra-ui-services/components/date-picker'
 createAll(DatePicker)
 ```
 
+#### Form
+
+The `lisForm` template component renders a `novalidate` form with the CSRF token in a hidden `_csrf` field (see [CSRF protection](#csrf-protection)) around the caller's body. It takes `action` (left out when not given, so the form posts to the page itself), `method` (default `post`), `classes` and `attributes`. Import it `with context` so it reads `csrfToken` from the page, or pass `csrfToken` yourself. A `GET` form gets no token field, which would otherwise end up in the URL.
+
+```njk
+{% from "form/macro.njk" import lisForm with context %}
+
+{% call lisForm({ action: "/holdings/12/345/6789/edit", classes: "lis-edit-form" }) %}
+  {{ govukInput({ id: "nickname", name: "nickname", label: { text: "Nickname" } }) }}
+  {{ govukButton({ text: "Save" }) }}
+{% endcall %}
+```
+
 ### Styles
 
 Import the Sass files you need from your app's stylesheet: `components/autocomplete.scss`,
@@ -381,7 +394,33 @@ await server.register(
 )
 ```
 
-`GET /cookies` shows the page, with a form to change the choice. `POST /cookies` records a choice (`analytics=yes|no`), ignoring cross-site posts, and redirects to the page with a confirmation and a link back to the same-host page the visitor came from. The `CookieBanner` component is part of `layoutComponents` (see [Layout scripts](#layout-scripts)), so a hub that already initialises those needs no further client-side change. `getCookiesPolicy(request)` from `@defra/lis-infra-ui-services/cookies/cookies-policy` reads the recorded choice server-side.
+`GET /cookies` shows the page, with a form to change the choice. `POST /cookies` records a choice (`analytics=yes|no`), ignoring any post that is not same-origin (it opts out of the CSRF plugin, as a signed-out visitor has no token), and redirects to the page with a confirmation and a link back to the same-host page the visitor came from. The `CookieBanner` component is part of `layoutComponents` (see [Layout scripts](#layout-scripts)), so a hub that already initialises those needs no further client-side change. `getCookiesPolicy(request)` from `@defra/lis-infra-ui-services/cookies/cookies-policy` reads the recorded choice server-side.
+
+### CSRF protection
+
+`csrfPlugin` from `@defra/lis-infra-ui-services/csrf` refuses, with a 403 and a warning log naming the failed check, every request other than `GET`, `HEAD` and `OPTIONS` that is not same-origin or does not carry the token. Register it after authentication and, on a hub, after the session:
+
+```js
+import { csrfPlugin } from '@defra/lis-infra-ui-services/csrf'
+
+// hub: the token lives in the yar session, issued once the user is signed in
+await server.register({
+  plugin: csrfPlugin,
+  options: { tokenSource: 'session' }
+})
+
+// spoke: the token comes from the hub in the x-lis-csrf-token header (CSRF_TOKEN_HEADER)
+await server.register({
+  plugin: csrfPlugin,
+  options: { tokenSource: 'header' }
+})
+```
+
+- **Origin check**: `Sec-Fetch-Site` must be `same-origin` (`same-site`, `cross-site` and `none` fail, as other tenants share the platform domain). Without it, the `Origin` host must match the host the browser addressed (`x-forwarded-host`, then `host`). A request with neither fails. `isSameOriginRequest(request)` exposes the check.
+- **Token check**: the `_csrf` field (`CSRF_FIELD_NAME`) of a parsed form or JSON body must match the request's token, compared in constant time. A streamed or raw body fails. The field is removed from `request.payload` before route validation, so schemas need not allow it.
+- The token is published at `request.plugins['lis-csrf'].token` and given to every view as `csrfToken`. `clearCsrfToken(request)` drops it from the session, so the next signed-in request gets a new one.
+
+A route opts out through `options.plugins['lis-csrf']`: `false` or `{ enabled: false }` skips every check; `{ token: false }` keeps only the origin check, for a proxied (streamed) body or a form a signed-out visitor submits.
 
 ### Environment variables
 

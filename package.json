@@ -13,6 +13,7 @@
     "./config-formats": "./src/config-formats.js",
     "./cookies": "./src/cookies/index.js",
     "./cookies/cookies-policy": "./src/cookies/cookies-policy.js",
+    "./csrf": "./src/csrf/index.js",
     "./components/autocomplete": "./src/components/autocomplete.js",
     "./components/cookie-banner": "./src/components/cookie-banner.js",
     "./components/date-picker": "./src/components/date-picker.js",
@@ -63,6 +64,7 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "dependencies": {
+    "@hapi/boom": "10.0.1",
     "@hapi/catbox-memory": "6.0.2",
     "@hapi/catbox-redis": "7.0.2",
     "@hapi/vision": "7.0.3",
@@ -96,6 +98,7 @@
     "eslint": "^9.0.0",
     "govuk-frontend": "6.5.0",
     "husky": "^9.1.7",
+    "joi": "17.13.8",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.4",
     "vitest": "^4.1.10"

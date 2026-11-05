@@ -1,0 +1,16 @@
+{#
+  Import with context so the token comes from the page:
+  {% from "form/macro.njk" import lisForm with context %}
+  A GET form never carries the token, which would otherwise end up in the URL.
+#}
+{% from "govuk/macros/attributes.njk" import govukAttributes %}
+
+{%- set method = params.method or "post" -%}
+{%- set token = params.csrfToken if params.csrfToken is defined else csrfToken -%}
+
+<form{% if params.action %} action="{{ params.action }}"{% endif %} method="{{ method }}"{% if params.classes %} class="{{ params.classes }}"{% endif %}{{ govukAttributes(params.attributes) }} novalidate>
+  {%- if method | lower != "get" %}
+  <input type="hidden" name="_csrf" value="{{ token }}">
+  {%- endif %}
+  {{ caller() if caller }}
+</form>
