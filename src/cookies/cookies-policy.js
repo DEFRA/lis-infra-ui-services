@@ -1,6 +1,9 @@
 /** @import { Request } from '@hapi/hapi' */
 import { milliseconds } from '../duration.js'
 
+// Kept as a literal because the browser bundle imports this file and must not
+// pull in the server-only infra-core package. Must match the cookie the hub proxy
+// forwards to spokes, COOKIES_POLICY_COOKIE_NAME in @defra/lis-hubs-infra-core.
 export const COOKIES_POLICY_COOKIE_NAME = 'cookies_policy'
 export const COOKIES_PATH = '/cookies'
 

@@ -161,7 +161,7 @@ await server.register(securityHeaders)
 
 `getCacheEngine` picks Redis or in-memory Catbox. `createSessionCachePluginForConfig` registers
 [yar](https://hapi.dev/module/yar/) from the `session` config (`cache.name`, `cache.ttl`,
-`cookie.password`, `cookie.ttl`). Session cookies are always `Secure`. Both engines cap the ttl of
+`cookie.password`, `cookie.ttl`). Session cookies are always `Secure`, and `maxCookieSize` is `0` so session data always lives in the server cache, never the cookie, because the session carries the hub JWT. Both engines cap the ttl of
 every write at `MAX_CACHE_TTL` (7 days), so no cache policy can keep session data longer than
 CDP allows.
 
