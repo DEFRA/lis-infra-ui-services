@@ -422,6 +422,12 @@ await server.register({
 
 A route opts out through `options.plugins['lis-csrf']`: `false` or `{ enabled: false }` skips every check; `{ token: false }` keeps only the origin check, for a proxied (streamed) body or a form a signed-out visitor submits.
 
+A route can answer a failed check itself with `options.plugins['lis-csrf'] = { failAction: (request, h) => h.redirect('/') }`: the warning is still logged, then the plugin takes over with what `failAction` returns (a response or an error) in place of the 403. Returning `h.continue` still gets a 403, so a failed request never reaches the handler. Hub sign-out uses it to send an expired or forged sign-out home.
+
+The token is kept in the hub session under `lis-csrf-token` (`CSRF_SESSION_KEY`), which `@defra/lis-hubs-infra-access` clears at sign-in. A hub proxy sends it to spokes in `x-lis-csrf-token` and leaves the token check to the spoke.
+
+The base layout's header Sign out and the `error/not-authorised` view's Sign out (given a `signOutHref`) are links to `/signout`. A hub answers that `GET` with the `auth/sign-out` view, which asks the user to confirm: an `Are you sure you want to sign out?` heading, a `Sign out` button in a form posting the token to `signOutHref`, and a `Cancel` link to `/`. Pass `pageTitle` and `signOutHref`; render it only when there is a `csrfToken`.
+
 ### Environment variables
 
 The package reads no environment variables itself. It takes all its settings from the `config` object the consuming app passes in. In the example above, `MAINTENANCE_AVAILABLE_FROM` is a variable the hub defines in its own config.

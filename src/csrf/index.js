@@ -7,14 +7,19 @@ import { logger } from '@defra/lis-hubs-infra-core'
 import {
   CSRF_FIELD_NAME,
   CSRF_PLUGIN_NAME,
+  CSRF_SESSION_KEY,
   CSRF_TOKEN_HEADER
 } from './constants.js'
 import { isSameOriginRequest } from './same-origin.js'
 
-export { CSRF_FIELD_NAME, CSRF_PLUGIN_NAME, CSRF_TOKEN_HEADER }
+export {
+  CSRF_FIELD_NAME,
+  CSRF_PLUGIN_NAME,
+  CSRF_SESSION_KEY,
+  CSRF_TOKEN_HEADER
+}
 export { isSameOriginRequest }
 
-const SESSION_KEY = 'lis-csrf-token'
 const TOKEN_BYTES = 32
 const SAFE_METHODS = new Set(['get', 'head', 'options'])
 
@@ -31,9 +36,17 @@ const tokenResolvers = {
  */
 
 /**
- * @typedef {false | { enabled?: boolean, token?: boolean }} CsrfRouteOptions
+ * @typedef {(request: Request, h: ResponseToolkit) => unknown} CsrfFailAction
+ * Answers a request that failed a check, in place of the 403. It must respond
+ * (e.g. `h.redirect('/')`) or return an error: `h.continue` is refused with a
+ * 403 all the same, so a failed request never reaches the handler.
+ */
+
+/**
+ * @typedef {false | { enabled?: boolean, token?: boolean, failAction?: CsrfFailAction }} CsrfRouteOptions
  * Route `options.plugins['lis-csrf']`: `false` or `{ enabled: false }` skips
- * every check; `{ token: false }` keeps the origin check only.
+ * every check; `{ token: false }` keeps the origin check only; `failAction`
+ * answers a failed check in place of the 403, after the warning is logged.
  */
 
 /**
@@ -43,7 +56,7 @@ const tokenResolvers = {
  * @returns {string | undefined}
  */
 function resolveSessionToken(request) {
-  const stored = request.yar?.get(SESSION_KEY)
+  const stored = request.yar?.get(CSRF_SESSION_KEY)
 
   if (typeof stored === 'string' && stored !== '') {
     return stored
@@ -54,7 +67,7 @@ function resolveSessionToken(request) {
   }
 
   const token = randomBytes(TOKEN_BYTES).toString('base64url')
-  request.yar.set(SESSION_KEY, token)
+  request.yar.set(CSRF_SESSION_KEY, token)
 
   return token
 }
@@ -71,7 +84,7 @@ function resolveHeaderToken(request) {
 
 /**
  * @param {Request} request
- * @returns {{ enabled: boolean, checkToken: boolean }}
+ * @returns {{ enabled: boolean, checkToken: boolean, failAction?: CsrfFailAction }}
  */
 function getRouteSettings(request) {
   const settings = request.route.settings.plugins?.[CSRF_PLUGIN_NAME]
@@ -80,7 +93,13 @@ function getRouteSettings(request) {
     return { enabled: false, checkToken: false }
   }
 
-  return { enabled: true, checkToken: settings?.token !== false }
+  return {
+    enabled: true,
+    checkToken: settings?.token !== false,
+    ...(typeof settings?.failAction === 'function' && {
+      failAction: settings.failAction
+    })
+  }
 }
 
 /**
@@ -124,10 +143,12 @@ function tokensMatch(submitted, expected) {
 
 /**
  * @param {Request} request
+ * @param {ResponseToolkit} h
  * @param {'origin' | 'token'} check
- * @returns {Boom.Boom}
+ * @param {CsrfFailAction} [failAction]
+ * @returns {Promise<unknown>} the route's failAction response, taken over, or a 403
  */
-function reject(request, check) {
+async function reject(request, h, check, failAction) {
   logger.warn(
     {
       http: { request: { method: request.method } },
@@ -137,7 +158,17 @@ function reject(request, check) {
     `CSRF ${check} check failed`
   )
 
-  return Boom.forbidden()
+  if (!failAction) {
+    return Boom.forbidden()
+  }
+
+  const result = await failAction(request, h)
+
+  if (result === h.continue) {
+    return Boom.forbidden()
+  }
+
+  return typeof result?.takeover === 'function' ? result.takeover() : result
 }
 
 /**
@@ -149,14 +180,14 @@ function createOnPostAuth(resolveToken) {
     const token = resolveToken(request)
     request.plugins[CSRF_PLUGIN_NAME] = { token }
 
-    const { enabled, checkToken } = getRouteSettings(request)
+    const { enabled, checkToken, failAction } = getRouteSettings(request)
 
     if (!enabled || SAFE_METHODS.has(request.method)) {
       return h.continue
     }
 
     if (!isSameOriginRequest(request)) {
-      return reject(request, 'origin')
+      return reject(request, h, 'origin', failAction)
     }
 
     if (!checkToken) {
@@ -169,7 +200,7 @@ function createOnPostAuth(resolveToken) {
       !isParsedObject(payload) ||
       !tokensMatch(payload[CSRF_FIELD_NAME], token)
     ) {
-      return reject(request, 'token')
+      return reject(request, h, 'token', failAction)
     }
 
     // Route payload validation runs after onPostAuth, so it never sees the field.
@@ -185,7 +216,7 @@ function createOnPostAuth(resolveToken) {
  * @param {Request} request
  */
 export function clearCsrfToken(request) {
-  request.yar?.clear(SESSION_KEY)
+  request.yar?.clear(CSRF_SESSION_KEY)
   request.plugins[CSRF_PLUGIN_NAME] = {}
 }
 
