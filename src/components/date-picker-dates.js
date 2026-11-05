@@ -86,10 +86,9 @@ export function parseExcludedDates(excludedDates) {
   return excludedDates
     .trim()
     .split(/\s+/)
-    .map((item) =>
+    .flatMap((item) =>
       item.includes('-') ? parseDateRange(item) : [parseDate(item, null)]
     )
-    .reduce((dates, items) => dates.concat(items), [])
     .filter(Boolean)
 }
 
