@@ -70,7 +70,7 @@
     "@hapi/vision": "7.0.3",
     "@hapi/yar": "11.0.3",
     "accessible-autocomplete": "3.0.1",
-    "chokidar": "3.6.0",
+    "chokidar": "6.0.0",
     "date-fns": "^4.1.0",
     "global-agent": "3.0.0",
     "ioredis": "5.8.2",
