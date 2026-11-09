@@ -94,7 +94,7 @@
     "@vitest/coverage-istanbul": "^5.1.0",
     "audit-ci": "^7.1.0",
     "convict": "^6.2.5",
-    "eslint": "^9.0.0",
+    "eslint": "^10.14.0",
     "govuk-frontend": "6.5.0",
     "husky": "^9.1.7",
     "joi": "17.13.8",
