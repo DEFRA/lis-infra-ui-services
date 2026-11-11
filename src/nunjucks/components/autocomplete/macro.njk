@@ -1,6 +1,9 @@
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
 
 {% macro appAutocomplete(params = {}) %}
+  {# Items with values are a choice that submits the value, not the text #}
+  {% set hasValues = params.items | length and params.items[0].value is defined %}
   <div
     class="app-autocomplete{% if params.containerClasses %} {{ params.containerClasses }}{% endif %}"
     data-module="app-autocomplete"
@@ -9,17 +12,38 @@
     {% if params.displayMenu %}data-display-menu="{{ params.displayMenu }}"{% endif %}
     {% if params.minLength %}data-min-length="{{ params.minLength }}"{% endif %}
     {% if params.showAllValues %}data-show-all-values="true"{% endif %}
+    {% if hasValues and params.classes %}data-input-classes="{{ params.classes }}"{% endif %}
   >
-    {#
-      Keep GOV.UK's input macro as the source of labels, hints, errors and the
-      no-JavaScript control. The client module progressively enhances its input.
-    #}
-    {{ govukInput(params) }}
+    {% if hasValues %}
+      {#
+        A GOV.UK select is the source of the label, hint, error and the
+        no-JavaScript control. The client module enhances it, keeping it as
+        the control that submits the chosen item's value.
+      #}
+      {{ govukSelect({
+        id: params.id,
+        name: params.name,
+        value: params.value,
+        label: params.label,
+        hint: params.hint,
+        errorMessage: params.errorMessage,
+        formGroup: params.formGroup,
+        describedBy: params.describedBy,
+        disabled: params.disabled,
+        items: [{ value: "", text: "" }].concat(params.items)
+      }) }}
+    {% else %}
+      {#
+        Keep GOV.UK's input macro as the source of labels, hints, errors and the
+        no-JavaScript control. The client module progressively enhances its input.
+      #}
+      {{ govukInput(params) }}
 
-    <ul class="app-autocomplete__source" hidden>
-      {% for item in params.items %}
-        <li>{% if item.text %}{{ item.text }}{% else %}{{ item }}{% endif %}</li>
-      {% endfor %}
-    </ul>
+      <ul class="app-autocomplete__source" hidden>
+        {% for item in params.items %}
+          <li>{% if item.text %}{{ item.text }}{% else %}{{ item }}{% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
   </div>
 {% endmacro %}

@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict'
 import { beforeEach, test, vi } from 'vitest'
 
-const { accessibleAutocomplete } = vi.hoisted(() => ({
-  accessibleAutocomplete: vi.fn(({ element }) => {
+const { accessibleAutocomplete } = vi.hoisted(() => {
+  const enhance = vi.fn(({ element }) => {
     element.input = createInput()
   })
-}))
+  enhance.enhanceSelectElement = vi.fn(({ selectElement }) => {
+    selectElement.root.enhancedInput = createInput({ value: '' })
+  })
+  return { accessibleAutocomplete: enhance }
+})
 
 vi.mock('accessible-autocomplete', () => ({ default: accessibleAutocomplete }))
 
@@ -34,8 +38,10 @@ function createInput(overrides = {}) {
       if (existing) existing.value = value
       else this.attributes.push({ name, value })
     },
-    addEventListener: (name, listener) => listeners.set(name, listener),
-    dispatch: (name) => listeners.get(name)?.(),
+    addEventListener: (name, listener) =>
+      listeners.set(name, [...(listeners.get(name) ?? []), listener]),
+    dispatch: (name) =>
+      (listeners.get(name) ?? []).forEach((listener) => listener()),
     before: vi.fn(),
     remove: vi.fn(),
     ...overrides
@@ -65,6 +71,7 @@ function createElement({
 
 beforeEach(() => {
   accessibleAutocomplete.mockClear()
+  accessibleAutocomplete.enhanceSelectElement.mockClear()
   vi.stubGlobal('document', {
     createElement: () => ({
       input: null,
@@ -174,4 +181,118 @@ test('initialises all valid components below a root', () => {
   const root = { querySelectorAll: () => [valid, disabled] }
 
   assert.equal(initAllAutocompletes(root).length, 1)
+})
+
+function createSelectElement({ classes = [], disabled = false } = {}) {
+  const attributeValues = new Map()
+  const select = {
+    disabled,
+    value: 'SH',
+    options: [
+      { value: '', textContent: '' },
+      { value: 'CA', textContent: ' Cattle ' },
+      { value: 'SH', textContent: 'Sheep' }
+    ],
+    classList: { contains: (name) => classes.includes(name) },
+    getAttribute: (name) => attributeValues.get(name) ?? null,
+    setAttribute: (name, value) => attributeValues.set(name, value)
+  }
+  const element = {
+    dataset: {},
+    querySelector(selector) {
+      if (selector === '.govuk-select') return select
+      if (selector === 'input[role="combobox"]')
+        return this.enhancedInput ?? null
+      return null
+    },
+    select
+  }
+  select.root = element
+  return element
+}
+
+test('enhances a select, keeping it as the control that submits', () => {
+  const element = createSelectElement()
+  Object.assign(element.dataset, {
+    autoselect: 'true',
+    minLength: '1',
+    inputClasses: 'govuk-input--width-20'
+  })
+
+  const enhancedInput = initAutocomplete(element)
+  const options = accessibleAutocomplete.enhanceSelectElement.mock.calls[0][0]
+
+  assert.equal(enhancedInput, element.enhancedInput)
+  assert.equal(options.selectElement, element.select)
+  assert.equal(options.inputClasses, 'govuk-input govuk-input--width-20')
+  assert.equal(options.hintClasses, 'govuk-input govuk-input--width-20')
+  assert.equal(options.autoselect, true)
+  assert.equal(options.confirmOnBlur, true)
+  assert.equal(options.displayMenu, 'inline')
+  assert.equal(options.minLength, 1)
+  assert.equal(options.templates.suggestion('<b>'), '&lt;b&gt;')
+  assert.equal(element.dataset.appAutocompleteInitialised, 'true')
+  assert.equal(accessibleAutocomplete.mock.calls.length, 0)
+})
+
+test('marks the enhanced input of a select in error', () => {
+  const element = createSelectElement({ classes: ['govuk-select--error'] })
+
+  initAutocomplete(element)
+
+  assert.equal(
+    accessibleAutocomplete.enhanceSelectElement.mock.calls[0][0].inputClasses,
+    'govuk-input govuk-input--error'
+  )
+})
+
+test('keeps the descriptions of a select on its enhanced input', async () => {
+  const element = createSelectElement()
+  element.select.setAttribute('aria-describedby', 'species-hint')
+
+  const enhancedInput = initAutocomplete(element)
+
+  assert.equal(enhancedInput.getAttribute('aria-describedby'), 'species-hint')
+
+  enhancedInput.setAttribute('aria-describedby', 'assistive-hint')
+  enhancedInput.dispatch('input')
+  await new Promise(queueMicrotask)
+  assert.equal(enhancedInput.getAttribute('aria-describedby'), 'species-hint')
+})
+
+test('selects no option when the typed text is only part of one', () => {
+  const element = createSelectElement()
+  const enhancedInput = initAutocomplete(element)
+
+  enhancedInput.value = 'Shee'
+  enhancedInput.dispatch('input')
+
+  assert.equal(element.select.value, '')
+})
+
+test('selects the option whose text is typed, whatever its case', () => {
+  const element = createSelectElement()
+  const enhancedInput = initAutocomplete(element)
+
+  enhancedInput.value = ' cattle'
+  enhancedInput.dispatch('input')
+
+  assert.equal(element.select.value, 'CA')
+})
+
+test('selects no option when the text is cleared', () => {
+  const element = createSelectElement()
+  const enhancedInput = initAutocomplete(element)
+
+  enhancedInput.value = ''
+  enhancedInput.dispatch('input')
+
+  assert.equal(element.select.value, '')
+})
+
+test('does not enhance a disabled select', () => {
+  const element = createSelectElement({ disabled: true })
+
+  assert.equal(initAutocomplete(element), null)
+  assert.equal(accessibleAutocomplete.enhanceSelectElement.mock.calls.length, 0)
 })
