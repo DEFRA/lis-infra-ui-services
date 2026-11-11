@@ -1,0 +1,12 @@
+{% macro govukSelect(params) %}
+  <div class="govuk-form-group{% if params.errorMessage %} govuk-form-group--error{% endif %}">
+    <label class="govuk-label" for="{{ params.id or params.name }}">{{ params.label.text }}</label>
+    {% if params.hint %}<div id="{{ params.id or params.name }}-hint">{{ params.hint.text }}</div>{% endif %}
+    {% if params.errorMessage %}<p id="{{ params.id or params.name }}-error">{{ params.errorMessage.text }}</p>{% endif %}
+    <select class="govuk-select{% if params.errorMessage %} govuk-select--error{% endif %}" id="{{ params.id or params.name }}" name="{{ params.name }}"{% if params.disabled %} disabled{% endif %}>
+      {% for item in params.items %}
+        <option value="{{ item.value }}"{% if item.value == params.value %} selected{% endif %}>{{ item.text }}</option>
+      {% endfor %}
+    </select>
+  </div>
+{% endmacro %}
