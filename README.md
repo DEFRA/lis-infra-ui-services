@@ -432,6 +432,71 @@ The token is kept in the hub session under `lis-csrf-token` (`CSRF_SESSION_KEY`)
 
 The base layout's header Sign out and the `error/not-authorised` view's Sign out (given a `signOutHref`) are links to `/signout`. A hub answers that `GET` with the `auth/sign-out` view, which asks the user to confirm: an `Are you sure you want to sign out?` heading, a `Sign out` button in a form posting the token to `signOutHref`, and a `Cancel` link to `/`. Pass `pageTitle` and `signOutHref`; render it only when there is a `csrfToken`.
 
+### Journeys
+
+`createJourney` from `@defra/lis-infra-ui-services/journey` turns the ordered steps of a multi-page form into the questions its pages ask: is this answer valid, which page comes next, and does the record belong on this page yet. It reads and saves nothing: each question takes the record, its answers so far as one flat object, and answers from it.
+
+A step is a page and the Joi schema over the answers that page owns. Each rule's message is the code of its error, for the page to word:
+
+```js
+import Joi from 'joi'
+import { createJourney } from '@defra/lis-infra-ui-services/journey'
+
+/** @import { Step } from '@defra/lis-infra-ui-services/journey' */
+
+/**
+ * @typedef {object} Options
+ * @property {string[]} damEarTags
+ */
+
+/** @type {Step<DraftAnimal, Options>[]} */
+const steps = [
+  {
+    page: 'dam-details',
+    schema: Joi.object({
+      damType: Joi.valid('genetic', 'surrogate')
+        .required()
+        .messages({ 'any.required': 'DAM_TYPE_REQUIRED' })
+    }),
+    clearsOnChange: ['geneticDamEarTagNumber']
+  },
+  {
+    page: 'genetic-dam',
+    schema: geneticDamSchema,
+    appliesTo: (animal) => animal.damType === 'genetic',
+    context: ({ damEarTags }) => ({ damEarTags })
+  }
+]
+
+export const registration = createJourney(steps)
+```
+
+- `schema`: validated with `abortEarly: false` and `allowUnknown: true`, against the whole record, so a rule can refer to another step's answer.
+- `context(options, saved)`: what the schema's rules refer to with `Joi.ref('$name')`, from the options the page passes and the record as it is saved.
+- `appliesTo(record)`: whether the record goes through the step. Absent when every record does.
+- `clearsOnChange`: answers that no longer hold when the step's own answers change. They are removed from the record `withAnswers` returns.
+
+Typing the steps as `Step<TRecord, TOptions>[]` types the journey: its questions then take and give `TRecord`, and take `TOptions`.
+
+| Question                                       | Answer                                                                                                                                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `validateStep(page, record, values, options?)` | `{ errors, warnings }`, each a list of `{ field, code }` in the schema's order, from judging the page's answers as part of the record they would be saved on                               |
+| `withAnswers(page, record, answers)`           | the record to save: the page's answers replaced, and the answers they invalidate removed                                                                                                   |
+| `nextPage(page, record)`                       | the page of the step the record goes through next; `undefined` after its last                                                                                                              |
+| `previousPage(page, record)`                   | the page of the step the record went through before; `undefined` for the first                                                                                                             |
+| `pageOwed(page, record)`                       | the page to send the record to instead: the earlier step with an answer missing or, for a step the record does not go through, the last one it does. `undefined` when it belongs on `page` |
+| `firstUnansweredPage(record)`                  | the page of the first step the record goes through with an answer yet to be saved; `undefined` when every step has been                                                                    |
+| `firstIncompleteStep(record, options)`         | the first step the record goes through whose answers are missing or wrong; `undefined` when the record is complete                                                                         |
+
+A record is flat and every answer in it is a string:
+
+- A page must give `validateStep` and `withAnswers` a string for every answer its step owns, a blank one as `''`. An answer left out is saved as absent, and its step then counts as unanswered: `pageOwed` and `firstUnansweredPage` keep sending the record back to it.
+- `trimAnswers(answers)` returns a page's answers with surrounding spaces removed, for passing to `validateStep`. It takes strings only.
+- A rule with no message of its own gives Joi's wording as its code.
+- The questions that take a page throw for a page no step has.
+
+Joi is not a dependency of this package: a journey only calls the schemas it is given.
+
 ### Environment variables
 
 The package reads no environment variables itself. It takes all its settings from the `config` object the consuming app passes in. In the example above, `MAINTENANCE_AVAILABLE_FROM` is a variable the hub defines in its own config.

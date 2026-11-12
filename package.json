@@ -28,6 +28,7 @@
     "./components/sub-navigation.scss": "./src/components/sub-navigation.scss",
     "./duration": "./src/duration.js",
     "./errors": "./src/errors/index.js",
+    "./journey": "./src/journey/index.js",
     "./maintenance": "./src/maintenance.js",
     "./nunjucks/context": "./src/nunjucks/context.js",
     "./nunjucks/filters": "./src/nunjucks/filters.js",
