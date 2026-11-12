@@ -8,7 +8,7 @@ const earTagPattern = /^(UK)(\d{6})(\d{6})$/
  *   number, or undefined if the ear tag isn't in that format
  */
 function earTagGroups(earTag) {
-  return earTag.replace(/\s+/g, '').toUpperCase().match(earTagPattern)?.slice(1)
+  return earTagPattern.exec(earTag.replace(/\s+/g, '').toUpperCase())?.slice(1)
 }
 
 /**
