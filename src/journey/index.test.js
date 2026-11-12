@@ -406,4 +406,46 @@ describe('createJourney()', () => {
     // Assert
     expect(result).toBeUndefined()
   })
+
+  test('it counts a required answer saved as null as answered', () => {
+    // Arrange
+    const notesStep = {
+      page: 'notes',
+      schema: Joi.object({ notes: Joi.string().allow(null).required() })
+    }
+    const journey = createJourney([notesStep, ageStep])
+
+    // Act
+    const result = journey.pageOwed('age', { notes: null })
+
+    // Assert
+    expect(result).toBeUndefined()
+  })
+
+  test('it saves an answer given as null as null', () => {
+    // Arrange
+    const notesStep = {
+      page: 'notes',
+      schema: Joi.object({ notes: Joi.string().allow(null).required() })
+    }
+    const journey = createJourney([notesStep])
+
+    // Act
+    const result = journey.withAnswers('notes', {}, { notes: null })
+
+    // Assert
+    expect(result).toEqual({ notes: null })
+  })
+
+  test('it saves a record unchanged for a step that owns no answers', () => {
+    // Arrange
+    const confirmStep = { page: 'confirm', schema: Joi.object() }
+    const journey = createJourney([ageStep, confirmStep])
+
+    // Act
+    const result = journey.withAnswers('confirm', { age: '3' }, {})
+
+    // Assert
+    expect(result).toEqual({ age: '3' })
+  })
 })

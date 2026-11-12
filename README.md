@@ -488,9 +488,10 @@ Typing the steps as `Step<TRecord, TOptions>[]` types the journey: its questions
 | `firstUnansweredPage(record)`                  | the page of the first step the record goes through with an answer yet to be saved; `undefined` when every step has been                                                                    |
 | `firstIncompleteStep(record, options)`         | the first step the record goes through whose answers are missing or wrong; `undefined` when the record is complete                                                                         |
 
-A step is answered once the record has every answer its schema marks `.required()`. An answer left `.optional()` never holds a record back, so `pageOwed` and `firstUnansweredPage` do not send a record to a step for it. For an answer that may be blank but whose page must still be saved, require it and allow the blank: `Joi.string().allow('').required()`. An answer required only by a condition (`.when()`) counts as optional here; `firstIncompleteStep`, which runs the rules, still finds it.
+A step is answered once the record has every answer its schema marks `.required()`. An answer left `.optional()` never holds a record back, so `pageOwed` and `firstUnansweredPage` do not send a record to a step for it. An answer has three states on a record: absent, not yet answered; `null`, answered with nothing given; a string, the answer. For an answer that may be left empty but whose page must still be saved, require it and allow `null`: `Joi.string().allow(null).required()`. An answer required only by a condition (`.when()`) counts as optional here; `firstIncompleteStep`, which runs the rules, still finds it.
 
 - `trimAnswers(answers)` returns a page's answers with surrounding spaces removed, for passing to `validateStep`. It takes strings only.
+- `blankAsNull(answers)` returns a page's answers with each blank one given as `null`, as a form posts an answer left empty as `''`: `blankAsNull(trimAnswers(request.payload))`. It takes strings only.
 - A rule with no message of its own gives Joi's wording as its code.
 - The questions that take a page throw for a page no step has.
 

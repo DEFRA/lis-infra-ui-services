@@ -13,6 +13,7 @@ import { previousPage } from './previous-page.js'
 import { validateStep } from './validate-step.js'
 import { withAnswers } from './with-answers.js'
 
+export { blankAsNull } from './blank-as-null.js'
 export { trimAnswers } from './trim-answers.js'
 
 /**
