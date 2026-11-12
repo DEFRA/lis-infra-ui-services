@@ -488,9 +488,8 @@ Typing the steps as `Step<TRecord, TOptions>[]` types the journey: its questions
 | `firstUnansweredPage(record)`                  | the page of the first step the record goes through with an answer yet to be saved; `undefined` when every step has been                                                                    |
 | `firstIncompleteStep(record, options)`         | the first step the record goes through whose answers are missing or wrong; `undefined` when the record is complete                                                                         |
 
-A record is flat and every answer in it is a string:
+A step is answered once the record has every answer its schema marks `.required()`. An answer left `.optional()` never holds a record back, so `pageOwed` and `firstUnansweredPage` do not send a record to a step for it. For an answer that may be blank but whose page must still be saved, require it and allow the blank: `Joi.string().allow('').required()`. An answer required only by a condition (`.when()`) counts as optional here; `firstIncompleteStep`, which runs the rules, still finds it.
 
-- A page must give `validateStep` and `withAnswers` a string for every answer its step owns, a blank one as `''`. An answer left out is saved as absent, and its step then counts as unanswered: `pageOwed` and `firstUnansweredPage` keep sending the record back to it.
 - `trimAnswers(answers)` returns a page's answers with surrounding spaces removed, for passing to `validateStep`. It takes strings only.
 - A rule with no message of its own gives Joi's wording as its code.
 - The questions that take a page throw for a page no step has.

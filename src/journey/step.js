@@ -15,6 +15,19 @@ export function keysOf(step) {
  * @template TRecord
  * @template TOptions
  * @param {Step<TRecord, TOptions>} step
+ * @returns {string[]} the answers the step's rules mark as required; one
+ *   required only by a condition is not among them
+ */
+function requiredKeysOf(step) {
+  return Object.entries(step.schema.describe().keys ?? {})
+    .filter(([, rules]) => rules.flags?.presence === 'required')
+    .map(([key]) => key)
+}
+
+/**
+ * @template TRecord
+ * @template TOptions
+ * @param {Step<TRecord, TOptions>} step
  * @param {TRecord} record
  * @returns {boolean} whether the record goes through the step
  */
@@ -27,10 +40,11 @@ export function applies(step, record) {
  * @template TOptions
  * @param {Step<TRecord, TOptions>} step
  * @param {TRecord} record
- * @returns {boolean} whether any of the step's answers has yet to be saved
+ * @returns {boolean} whether an answer the step's rules require has yet to
+ *   be saved; one they leave optional never holds a record back
  */
 export function isUnanswered(step, record) {
-  return keysOf(step).some((key) => record[key] === undefined)
+  return requiredKeysOf(step).some((key) => record[key] === undefined)
 }
 
 /**

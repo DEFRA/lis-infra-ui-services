@@ -355,4 +355,55 @@ describe('createJourney()', () => {
     // Assert
     expect(result).toBe('age')
   })
+
+  test('it counts a step as answered when only an optional answer is absent', () => {
+    // Arrange
+    const petStep = {
+      page: 'pet',
+      schema: Joi.object({
+        pet: Joi.string().required(),
+        petName: Joi.string().optional()
+      })
+    }
+    const journey = createJourney([petStep, ageStep])
+
+    // Act
+    const result = journey.firstUnansweredPage({ pet: 'dog' })
+
+    // Assert
+    expect(result).toBe('age')
+  })
+
+  test('it counts a step as unanswered when a required answer is absent', () => {
+    // Arrange
+    const petStep = {
+      page: 'pet',
+      schema: Joi.object({
+        pet: Joi.string().required(),
+        petName: Joi.string().optional()
+      })
+    }
+    const journey = createJourney([petStep, ageStep])
+
+    // Act
+    const result = journey.firstUnansweredPage({ petName: 'Rex' })
+
+    // Assert
+    expect(result).toBe('pet')
+  })
+
+  test('it counts a required answer saved blank as answered', () => {
+    // Arrange
+    const notesStep = {
+      page: 'notes',
+      schema: Joi.object({ notes: Joi.string().allow('').required() })
+    }
+    const journey = createJourney([notesStep, ageStep])
+
+    // Act
+    const result = journey.pageOwed('age', { notes: '' })
+
+    // Assert
+    expect(result).toBeUndefined()
+  })
 })
