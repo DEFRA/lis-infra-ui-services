@@ -87,7 +87,7 @@
     "@defra/lis-hubs-infra-access": "^0.45.7",
     "@defra/lis-hubs-infra-core": "^0.33.3",
     "@defra/lis-hubs-infra-registry": "^0.13.6",
-    "@defra/lis-infra-eslint-config": "^0.12.4",
+    "@defra/lis-infra-eslint-config": "^0.12.7",
     "@hapi/hapi": "^21.4.10",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.8",
