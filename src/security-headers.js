@@ -1,4 +1,4 @@
-/** @import { Plugin } from '@hapi/hapi' */
+/** @import { Plugin, Server } from '@hapi/hapi' */
 
 const HSTS_MAX_AGE_SECONDS = 31536000 // one year
 
@@ -22,6 +22,10 @@ const SECURITY_HEADERS = {
 export const securityHeaders = {
   plugin: {
     name: 'lis-security-headers',
+    /**
+     * Registers the onPreResponse hook that sets the security headers.
+     * @param {Server} server - the Hapi server the plugin is registered on
+     */
     register(server) {
       server.ext('onPreResponse', (request, h) => {
         const { response } = request

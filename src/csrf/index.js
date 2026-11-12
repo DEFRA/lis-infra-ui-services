@@ -1,4 +1,4 @@
-/** @import { Plugin, Request, ResponseToolkit } from '@hapi/hapi' */
+/** @import { Plugin, Request, ResponseToolkit, Server } from '@hapi/hapi' */
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 
 import Boom from '@hapi/boom'
@@ -229,6 +229,12 @@ export function clearCsrfToken(request) {
  */
 export const csrfPlugin = {
   name: CSRF_PLUGIN_NAME,
+  /**
+   * Registers the CSRF token handling for the configured token source.
+   * @param {Server} server - the Hapi server the plugin is registered on
+   * @param {CsrfPluginOptions} [options] - plugin options
+   * @param {'session' | 'header'} options.tokenSource - where the CSRF token is read from
+   */
   register(server, { tokenSource } = {}) {
     if (!Object.hasOwn(tokenResolvers, tokenSource ?? '')) {
       throw new Error(
