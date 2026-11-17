@@ -241,6 +241,18 @@ import { catchAll } from '@defra/lis-infra-ui-services/errors'
 server.ext('onPreResponse', catchAll)
 ```
 
+hapi answers a path that matches no route from its built-in not-found route, which neither parses cookies nor runs auth, so the page would show the cookie banner and a signed-out header to a signed-in user who has accepted cookies. Register `createNotFoundRoute` so those paths go through the normal request lifecycle. It uses the server's default auth unless given `auth`; a hub passes `{ mode: 'try' }`, so a signed-out visitor sees the page rather than being sent to sign in. A request the default auth refuses gets that answer rather than a 404, as on any other route. The route opts out of the CSRF plugin and leaves the body unread, so an unrouted `POST` is a 404 too.
+
+```js
+import { createNotFoundRoute } from '@defra/lis-infra-ui-services/errors'
+
+// A spoke
+server.route(createNotFoundRoute())
+
+// A hub
+server.route(createNotFoundRoute({ auth: { mode: 'try' } }))
+```
+
 The contact link on these pages comes from the `errorPages` option of `createNunjucksConfig` (or `createNunjucksContextBuilder`), exposed to templates as `errorPages`. The key is optional:
 
 ```js

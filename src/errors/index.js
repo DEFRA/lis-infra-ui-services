@@ -1,5 +1,7 @@
-/** @import { Request, ResponseToolkit, Lifecycle } from '@hapi/hapi' */
+/** @import { Request, ResponseToolkit, Lifecycle, RouteOptionsAccess, ServerRoute } from '@hapi/hapi' */
+import Boom from '@hapi/boom'
 import { logger } from '@defra/lis-hubs-infra-core'
+import { CSRF_PLUGIN_NAME } from '../csrf/constants.js'
 
 import { isAnsweredByMaintenance } from '../maintenance.js'
 import {
@@ -96,4 +98,32 @@ export function catchAll(request, h) {
   }
   const { view, pageTitle } = errorPageFor(statusCode)
   return h.view(view, { pageTitle }).code(statusCode)
+}
+
+/**
+ * A route for every path no other route matches. Without it hapi answers from
+ * its built-in not-found route, which neither parses cookies nor runs auth, so
+ * the page not found page shows the cookie banner and a signed-out header.
+ * @param {object} [options]
+ * @param {RouteOptionsAccess | false} [options.auth] - the route's auth; the
+ * server default when omitted. A hub passes `{ mode: 'try' }`, so a signed-out
+ * visitor sees the page rather than being sent to sign in.
+ * @returns {ServerRoute}
+ */
+export function createNotFoundRoute({ auth } = {}) {
+  return {
+    method: '*',
+    path: '/{unroutedPath*}',
+    options: {
+      ...(auth !== undefined && { auth }),
+      // Left unread, so a malformed or oversized body is a 404 too.
+      payload: { parse: false, output: 'stream' },
+      // Nothing here changes state, and a refused check would turn the 404
+      // into a 403.
+      plugins: { [CSRF_PLUGIN_NAME]: false }
+    },
+    handler() {
+      throw Boom.notFound()
+    }
+  }
 }
