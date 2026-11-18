@@ -406,7 +406,7 @@ While `availableFrom` is set, every request except the health check and assets u
 
 ### Cookies
 
-The base layout shows the GOV.UK cookie banner until the visitor has made a choice, and its footer links to a cookies page at `/cookies`. The choice is kept for a year in a `cookies_policy` cookie (URL-encoded JSON, readable by client-side scripts so analytics can check it before loading), set by the banner's JavaScript or, without JavaScript, by posting the banner's form to `/cookies`. Each hub registers the page with the essential cookies it sets, which the page lists:
+When the hub has a Google Tag Manager container id, the base layout shows the GOV.UK cookie banner until the visitor has made a choice; without one there are no analytics to ask about and no banner. Its footer always links to a cookies page at `/cookies`. The choice is kept for a year in a `cookies_policy` cookie (URL-encoded JSON, readable by client-side scripts so analytics can check it before loading), set by the banner's JavaScript or, without JavaScript, by posting the banner's form to `/cookies`. Each hub registers the page with the essential cookies it sets, which the page lists:
 
 ```js
 // server.js, after @hapi/vision is registered

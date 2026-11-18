@@ -104,6 +104,40 @@ describe('base layout', () => {
     expect(html).not.toContain('google-tag.js')
   })
 
+  test('shows the cookie banner when the hub has a container id and no choice has been made', () => {
+    // Act
+    const html = render({
+      gtmId: 'GTM-ABC1234',
+      cookiesPolicy: null,
+      cookiesPath: '/cookies'
+    })
+
+    // Assert
+    expect(html).toContain('data-module="lis-cookie-banner"')
+    expect(html).toContain('action="/cookies"')
+  })
+
+  test.each([
+    ['the hub has no container id', { gtmId: null, cookiesPolicy: null }],
+    [
+      'a choice has been made',
+      {
+        gtmId: 'GTM-ABC1234',
+        cookiesPolicy: { essential: true, analytics: false }
+      }
+    ],
+    [
+      'the page is the cookies page',
+      { gtmId: 'GTM-ABC1234', cookiesPolicy: null, isCookiesPage: true }
+    ]
+  ])('leaves the cookie banner out when %s', (_case, context) => {
+    // Act
+    const html = render(context)
+
+    // Assert
+    expect(html).not.toContain('govuk-cookie-banner')
+  })
+
   test('renders one footer landmark wrapping the footer', () => {
     // Act
     const html = render()

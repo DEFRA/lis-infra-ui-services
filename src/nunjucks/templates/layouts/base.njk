@@ -48,7 +48,8 @@
 {% endblock %}
 
 {% block bodyStart %}
-  {% if not cookiesPolicy and not isCookiesPage %}
+  {# There is nothing to ask about until the hub has analytics to load. #}
+  {% if gtmId and not cookiesPolicy and not isCookiesPage %}
     {{ lisCookieBanner({ cookiesPath: cookiesPath }) }}
   {% endif %}
 {% endblock %}
