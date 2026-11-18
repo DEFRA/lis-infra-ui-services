@@ -61,6 +61,49 @@ describe('base layout', () => {
     expect(html).not.toContain('Steel Thread')
   })
 
+  test('loads the data layer script then Google Tag Manager, ahead of the stylesheet, once analytics cookies are accepted', () => {
+    // Act
+    const html = render({
+      gtmId: 'GTM-ABC1234',
+      cookiesPolicy: { essential: true, analytics: true }
+    })
+
+    // Assert
+    const dataLayerScript = html.indexOf(
+      '<script src="/google-tag.js"></script>'
+    )
+    const googleTagManager = html.indexOf(
+      '<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-ABC1234"></script>'
+    )
+    const stylesheet = html.indexOf('rel="stylesheet"')
+    expect(dataLayerScript).toBeGreaterThan(-1)
+    expect(googleTagManager).toBeGreaterThan(dataLayerScript)
+    expect(stylesheet).toBeGreaterThan(googleTagManager)
+    expect(html).not.toContain('dataLayer')
+  })
+
+  test.each([
+    ['no choice has been made', { gtmId: 'GTM-ABC1234', cookiesPolicy: null }],
+    [
+      'analytics cookies are rejected',
+      {
+        gtmId: 'GTM-ABC1234',
+        cookiesPolicy: { essential: true, analytics: false }
+      }
+    ],
+    [
+      'there is no container id',
+      { gtmId: null, cookiesPolicy: { essential: true, analytics: true } }
+    ]
+  ])('leaves the Google Tag Manager snippet out when %s', (_case, context) => {
+    // Act
+    const html = render(context)
+
+    // Assert
+    expect(html).not.toContain('googletagmanager.com')
+    expect(html).not.toContain('google-tag.js')
+  })
+
   test('renders one footer landmark wrapping the footer', () => {
     // Act
     const html = render()

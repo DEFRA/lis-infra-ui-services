@@ -35,6 +35,14 @@
 {% endblock %}
 
 {% block head %}
+  {% if gtmId and cookiesPolicy and cookiesPolicy.analytics %}
+    {# Google Tag Manager, only once analytics cookies are accepted, and
+       ahead of everything else so its measurements start with the page. The
+       first script stands in for the inline half of Google's snippet, which
+       the content security policy would block. #}
+    <script src="{{ getAssetPath('google-tag.js') }}"></script>
+    <script async src="https://www.googletagmanager.com/gtm.js?id={{ gtmId }}"></script>
+  {% endif %}
   <link href="{{ getAssetPath('src/client/stylesheets/application.scss') }}" rel="stylesheet">
 {% endblock %}
 

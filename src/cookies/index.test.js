@@ -205,6 +205,60 @@ describe('createCookiesPlugin()', () => {
     expect(response.headers.location).toBe('/cookies?saved=true&returnPath=%2F')
   })
 
+  test('POST /cookies removes the Google Analytics cookies on refusal', async () => {
+    // Arrange
+    await createServer()
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: {
+        'sec-fetch-site': 'same-origin',
+        host: 'front-office.lis.defra',
+        cookie: '_ga=GA1.1.1; _ga_ABC123=GS1.1.1; front-office-session=abc'
+      },
+      payload: { analytics: 'no' }
+    })
+
+    // Assert
+    const expired = 'Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/'
+    const setCookies = response.headers['set-cookie']
+    expect(setCookies).toHaveLength(7)
+    expect(setCookies).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('cookies_policy=%7B%22essential'),
+        `_ga=; ${expired}`,
+        `_ga=; ${expired}; Domain=front-office.lis.defra`,
+        `_ga=; ${expired}; Domain=lis.defra`,
+        `_ga_ABC123=; ${expired}`,
+        `_ga_ABC123=; ${expired}; Domain=front-office.lis.defra`,
+        `_ga_ABC123=; ${expired}; Domain=lis.defra`
+      ])
+    )
+  })
+
+  test('POST /cookies keeps the Google Analytics cookies on acceptance', async () => {
+    // Arrange
+    await createServer()
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: {
+        'sec-fetch-site': 'same-origin',
+        host: 'front-office.lis.defra',
+        cookie: '_ga=GA1.1.1'
+      },
+      payload: { analytics: 'yes' }
+    })
+
+    // Assert
+    expect(response.headers['set-cookie']).toHaveLength(1)
+    expect(response.headers['set-cookie'][0]).toContain('cookies_policy=')
+  })
+
   test('POST /cookies with an invalid choice sets nothing and returns to the page', async () => {
     // Arrange
     await createServer()

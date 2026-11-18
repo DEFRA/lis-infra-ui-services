@@ -3,6 +3,7 @@ import path from 'node:path'
 import { hasPermission } from '@defra/lis-hubs-infra-access/authorization'
 import { HUBS, getModuleById } from '@defra/lis-hubs-infra-registry'
 
+import { GTM_ID_HEADER, parseGtmId } from '../analytics/gtm.js'
 import { getAssetRoot } from '../asset-path.js'
 
 import { COOKIES_PATH, getCookiesPolicy } from '../cookies/cookies-policy.js'
@@ -60,7 +61,10 @@ function createPermissionCheck(request) {
  */
 
 /**
- * @param {{ config: object, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks }} options
+ * A hub passes its Google Tag Manager container id as gtmId. A spoke, which
+ * has a moduleId, takes the id of the hub that called it from the header the
+ * hub proxy sets, so a hub never reads the id from a header a browser sent.
+ * @param {{ config: object, logger: object, readFileSync: Function, moduleId?: string, errorPages?: ErrorPageLinks, gtmId?: string }} options
  * @returns {Function}
  */
 export function createNunjucksContextBuilder({
@@ -68,8 +72,10 @@ export function createNunjucksContextBuilder({
   logger,
   readFileSync,
   moduleId,
-  errorPages = {}
+  errorPages = {},
+  gtmId
 }) {
+  const hubGtmId = parseGtmId(gtmId)
   const errorPageLinks = {
     contactHref: errorPages.contactHref ?? BCMS_CONTACT_HREF
   }
@@ -118,6 +124,9 @@ export function createNunjucksContextBuilder({
       cookiesPolicy: getCookiesPolicy(request),
       isCookiesPage: request?.path === COOKIES_PATH,
       csrfToken: request?.plugins?.[CSRF_PLUGIN_NAME]?.token,
+      gtmId: moduleId
+        ? parseGtmId(request?.headers?.[GTM_ID_HEADER])
+        : hubGtmId,
       errorPages: errorPageLinks,
       getAssetPath(asset) {
         const viteAssetPath = viteManifest?.[asset]?.file
