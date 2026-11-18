@@ -92,7 +92,7 @@ describe('createCookiesPlugin()', () => {
 
   test('GET /cookies lists the essential cookies with analytics unchecked by default', async () => {
     // Arrange
-    await createServer()
+    await createServer({ gtmId: 'GTM-ABC1234' })
 
     // Act
     const response = await server.inject({ method: 'GET', url: '/cookies' })
@@ -108,7 +108,7 @@ describe('createCookiesPlugin()', () => {
     expect(response.result).not.toContain('govuk-notification-banner')
   })
 
-  test('GET /cookies says no analytics cookies are set when the hub has no Google Tag Manager container', async () => {
+  test('GET /cookies has no analytics section when the hub has no Google Tag Manager container', async () => {
     // Arrange
     await createServer()
 
@@ -116,11 +116,12 @@ describe('createCookiesPlugin()', () => {
     const response = await server.inject({ method: 'GET', url: '/cookies' })
 
     // Assert
-    expect(response.result).toContain(
-      'We do not currently set any analytics cookies.'
-    )
+    expect(response.statusCode).toBe(200)
+    expect(response.result).toContain('front-office-session')
+    expect(response.result).not.toContain('Analytics cookies (optional)')
     expect(response.result).not.toContain('Google Analytics')
     expect(response.result).not.toContain('_ga')
+    expect(response.result).not.toContain('name="analytics"')
   })
 
   test('GET /cookies lists the Google Analytics cookies when the hub has a Google Tag Manager container', async () => {
@@ -139,14 +140,13 @@ describe('createCookiesPlugin()', () => {
     expect(response.result).toContain(
       'If you choose not to accept analytics cookies, we remove any that have already been set.'
     )
-    expect(response.result).not.toContain(
-      'We do not currently set any analytics cookies.'
-    )
+    expect(response.result).toContain('Analytics cookies (optional)')
+    expect(response.result).toMatch(/value="no"[^>]*checked/)
   })
 
   test('GET /cookies reflects an accepted policy from the cookie', async () => {
     // Arrange
-    await createServer()
+    await createServer({ gtmId: 'GTM-ABC1234' })
 
     // Act
     const response = await server.inject({
