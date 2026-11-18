@@ -99,10 +99,16 @@ function buildNunjucksEnvironment({
 
 /**
  * @import { ErrorPageLinks } from './context.js'
- * @param {{ config: object, logger: object, moduleId?: string, errorPages?: ErrorPageLinks }} options
+ * @param {{ config: object, logger: object, moduleId?: string, errorPages?: ErrorPageLinks, gtmId?: string }} options - gtmId is a hub's Google Tag Manager container id; a spoke leaves it out
  * @returns {object}
  */
-export function createNunjucksConfig({ config, logger, moduleId, errorPages }) {
+export function createNunjucksConfig({
+  config,
+  logger,
+  moduleId,
+  errorPages,
+  gtmId
+}) {
   const projectRoot = config.get('root')
   const infrastructureRoot = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -121,7 +127,8 @@ export function createNunjucksConfig({ config, logger, moduleId, errorPages }) {
     logger,
     readFileSync,
     moduleId,
-    errorPages
+    errorPages,
+    gtmId
   })
 
   const nunjucksConfig = {

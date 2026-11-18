@@ -47,13 +47,14 @@ import { createNunjucksConfig } from '@defra/lis-infra-ui-services/nunjucks/plug
 const nunjucksConfig = createNunjucksConfig({
   config, // reads root, assetPath, serviceName, isProduction, nunjucks.watch, nunjucks.noCache
   logger,
-  moduleId: 'cattle-home' // spokes only
+  moduleId: 'cattle-home', // spokes only
+  gtmId: config.get('gtmId') // hubs only, see Google Tag Manager
 })
 
 await server.register(nunjucksConfig)
 ```
 
-The template components are `appHeading`, `appAutocomplete`, `lisDatePicker`, `lisSubNavigation`, plus the search form,
+The template components are `appHeading`, `appAutocomplete`, `lisCookieBanner`, `lisDatePicker`, `lisSubNavigation`, plus the search form,
 sortable paginated table and date templates. `createNunjucksContextBuilder` (also exported from
 `/nunjucks-context`) builds just the view context. The filters `formatAge`, `formatDate`,
 `formatEarTag`, `formatCurrency` and `queryString` are also exported from `/nunjucks/filters`, and the
@@ -93,7 +94,8 @@ const serveStaticFiles = createStaticFilesPlugin({
 })
 ```
 
-It serves `/favicon.ico` and the files under each asset path. `/status-codes` exports `statusCodes`.
+It serves `/favicon.ico`, the files under each asset path and, at `google-tag.js` under each asset
+path, this package's own script for [Google Tag Manager](#google-tag-manager). `/status-codes` exports `statusCodes`.
 `/duration` exports the `milliseconds` and `seconds` lookups and `unixEpoch()`.
 
 ### Config formats
@@ -156,6 +158,23 @@ import { securityHeaders } from '@defra/lis-infra-ui-services/security-headers'
 
 await server.register(securityHeaders)
 ```
+
+### Content security policy
+
+`contentSecurityPolicy` is the [Blankie](https://github.com/nlf/blankie) registration for hubs and
+spokes to share, so they all send the same policy. It allows scripts, styles and images from the service
+itself, GOV.UK Frontend's inline script by its hash, and the Google hosts that
+[Google Tag Manager](#google-tag-manager) and Google Analytics need. It allows no inline styles and
+no other inline scripts. Register `@hapi/scooter` before it.
+
+```js
+import Scooter from '@hapi/scooter'
+import { contentSecurityPolicy } from '@defra/lis-infra-ui-services/content-security-policy'
+
+await server.register([Scooter, contentSecurityPolicy])
+```
+
+A page gets the policy of the app that rendered it: a spoke's pages get the spoke's, not the hub's.
 
 ### Session cache
 
@@ -387,7 +406,7 @@ While `availableFrom` is set, every request except the health check and assets u
 
 ### Cookies
 
-The base layout shows the GOV.UK cookie banner until the visitor has made a choice, and its footer links to a cookies page at `/cookies`. The choice is kept for a year in a `cookies_policy` cookie (URL-encoded JSON, readable by client-side scripts so analytics can check it before loading), set by the banner's JavaScript or, without JavaScript, by posting the banner's form to `/cookies`. Each hub registers the page with the essential cookies it sets, which the page lists:
+When the hub has a Google Tag Manager container id, the base layout shows the GOV.UK cookie banner until the visitor has made a choice; without one there are no analytics to ask about and no banner. Its footer always links to a cookies page at `/cookies`. The choice is kept for a year in a `cookies_policy` cookie (URL-encoded JSON, readable by client-side scripts so analytics can check it before loading), set by the banner's JavaScript or, without JavaScript, by posting the banner's form to `/cookies`. Each hub registers the page with the essential cookies it sets, which the page lists:
 
 ```js
 // server.js, after @hapi/vision is registered
@@ -407,6 +426,18 @@ await server.register(
 ```
 
 `GET /cookies` shows the page, with a form to change the choice. `POST /cookies` records a choice (`analytics=yes|no`), ignoring any post that is not same-origin (it opts out of the CSRF plugin, as a signed-out visitor has no token), and redirects to the page with a confirmation and a link back to the same-host page the visitor came from. The `CookieBanner` component is part of `layoutComponents` (see [Layout scripts](#layout-scripts)), so a hub that already initialises those needs no further client-side change. `getCookiesPolicy(request)` from `@defra/lis-infra-ui-services/cookies/cookies-policy` reads the recorded choice server-side.
+
+The page's analytics section, with the list of Google Analytics cookies and the form to change the choice, only shows when the hub has a Google Tag Manager container id; the list is kept by hand in `cookies/index.njk`.
+
+Refusing analytics at `POST /cookies` also removes the Google Analytics cookies the browser sent (`_ga`, `_ga_<id>`, `_gid`, `_gat`). Google chooses the domain it sets them for, so each is expired for the host and for every parent domain.
+
+### Google Tag Manager
+
+The base layout loads Google Tag Manager once analytics cookies are accepted, and writes nothing about Google into the page before then. A choice made on the banner takes effect from the next page.
+
+A hub passes its container id as `gtmId` to `createNunjucksConfig` (or `createNunjucksContextBuilder`) and to `createProxyPlugin` from `@defra/lis-hubs-infra-core`, which sends it to spokes in the `x-lis-gtm-id` header. A spoke passes nothing: its pages use the id of the hub they were reached through, so each hub can report to its own container. An id that is missing, or is not of the form `GTM-XXXXXXX`, turns analytics off.
+
+The layout loads two scripts first in the `head`: `google-tag.js`, served by `createStaticFilesPlugin` from this package, and Google's `gtm.js`. The first stands in for the inline half of Google's snippet, which the [content security policy](#content-security-policy) would block.
 
 ### CSRF protection
 

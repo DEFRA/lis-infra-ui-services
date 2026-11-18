@@ -39,29 +39,54 @@
         rows: essentialCookieRows
       }) }}
 
-      <h2 class="govuk-heading-m">Analytics cookies (optional)</h2>
+      {% if gtmId %}
+        <h2 class="govuk-heading-m">Analytics cookies (optional)</h2>
 
-      <p class="govuk-body">With your permission, we may use analytics software to collect anonymised information about how you use this service, for example which pages you visit and how long you spend on them. This helps us improve the service.</p>
+        <p class="govuk-body">With your permission, we may use analytics software to collect anonymised information about how you use this service, for example which pages you visit and how long you spend on them. This helps us improve the service.</p>
 
-      <p class="govuk-body">We do not currently set any analytics cookies. Your choice is saved so that, if we add analytics later, it is respected from the start.</p>
+        <p class="govuk-body">We use Google Analytics to do this. If you accept analytics cookies, it sets the following cookies.</p>
 
-      <form method="post" action="{{ cookiesPath }}" novalidate>
-        {{ govukRadios({
-          name: "analytics",
-          fieldset: {
-            legend: {
-              text: "Do you want to accept analytics cookies?",
-              classes: "govuk-fieldset__legend--s"
-            }
-          },
-          items: [
-            { value: "yes", text: "Yes", checked: analytics },
-            { value: "no", text: "No", checked: not analytics }
+        {{ govukTable({
+          firstCellIsHeader: false,
+          head: [
+            { text: "Name" },
+            { text: "Purpose" },
+            { text: "Expires" }
+          ],
+          rows: [
+            [
+              { text: "_ga" },
+              { text: "Checks if you have visited this service before, which helps us count how many people use it" },
+              { text: "After 2 years" }
+            ],
+            [
+              { text: "Names starting _ga_" },
+              { text: "Keeps track of your visit, such as which pages you have viewed" },
+              { text: "After 2 years" }
+            ]
           ]
         }) }}
 
-        {{ govukButton({ text: "Save cookie settings" }) }}
-      </form>
+        <p class="govuk-body">If you choose not to accept analytics cookies, we remove any that have already been set.</p>
+
+        <form method="post" action="{{ cookiesPath }}" novalidate>
+          {{ govukRadios({
+            name: "analytics",
+            fieldset: {
+              legend: {
+                text: "Do you want to accept analytics cookies?",
+                classes: "govuk-fieldset__legend--s"
+              }
+            },
+            items: [
+              { value: "yes", text: "Yes", checked: analytics },
+              { value: "no", text: "No", checked: not analytics }
+            ]
+          }) }}
+
+          {{ govukButton({ text: "Save cookie settings" }) }}
+        </form>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

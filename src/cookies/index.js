@@ -2,6 +2,7 @@
 import { CSRF_PLUGIN_NAME } from '../csrf/constants.js'
 import { isSameOriginRequest } from '../csrf/same-origin.js'
 import { getSameHostReferrerPath } from '../referrer-link.js'
+import { expireAnalyticsCookies } from './analytics-cookies.js'
 import {
   COOKIES_PATH,
   COOKIES_POLICY_COOKIE_NAME,
@@ -120,9 +121,17 @@ function postConsent(request, h) {
     returnPath: getReturnPath(request)
   })
 
-  return h
+  const response = h
     .redirect(`${COOKIES_PATH}?${query}`)
     .state(COOKIES_POLICY_COOKIE_NAME, serialiseCookiesPolicy(policy))
+
+  if (!policy.analytics) {
+    for (const expiredCookie of expireAnalyticsCookies(request)) {
+      response.header('set-cookie', expiredCookie, { append: true })
+    }
+  }
+
+  return response
 }
 
 /**

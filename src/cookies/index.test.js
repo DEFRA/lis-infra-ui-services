@@ -41,7 +41,7 @@ const essentialCookies = [
 
 let server
 
-async function createServer({ withCsrf = false } = {}) {
+async function createServer({ withCsrf = false, gtmId = null } = {}) {
   server = hapi.server()
   await server.register({
     plugin: hapiVision,
@@ -55,7 +55,7 @@ async function createServer({ withCsrf = false } = {}) {
         }
       },
       path: path.join(packageRoot, 'src/nunjucks/routes'),
-      context: { cookiesPath: '/cookies' }
+      context: { cookiesPath: '/cookies', gtmId }
     }
   })
   server.auth.scheme('none', () => ({
@@ -92,7 +92,7 @@ describe('createCookiesPlugin()', () => {
 
   test('GET /cookies lists the essential cookies with analytics unchecked by default', async () => {
     // Arrange
-    await createServer()
+    await createServer({ gtmId: 'GTM-ABC1234' })
 
     // Act
     const response = await server.inject({ method: 'GET', url: '/cookies' })
@@ -108,9 +108,45 @@ describe('createCookiesPlugin()', () => {
     expect(response.result).not.toContain('govuk-notification-banner')
   })
 
-  test('GET /cookies reflects an accepted policy from the cookie', async () => {
+  test('GET /cookies has no analytics section when the hub has no Google Tag Manager container', async () => {
     // Arrange
     await createServer()
+
+    // Act
+    const response = await server.inject({ method: 'GET', url: '/cookies' })
+
+    // Assert
+    expect(response.statusCode).toBe(200)
+    expect(response.result).toContain('front-office-session')
+    expect(response.result).not.toContain('Analytics cookies (optional)')
+    expect(response.result).not.toContain('Google Analytics')
+    expect(response.result).not.toContain('_ga')
+    expect(response.result).not.toContain('name="analytics"')
+  })
+
+  test('GET /cookies lists the Google Analytics cookies when the hub has a Google Tag Manager container', async () => {
+    // Arrange
+    await createServer({ gtmId: 'GTM-ABC1234' })
+
+    // Act
+    const response = await server.inject({ method: 'GET', url: '/cookies' })
+
+    // Assert
+    expect(response.result).toContain('We use Google Analytics to do this.')
+    expect(response.result).toMatch(
+      /<td class="govuk-table__cell">\s*_ga\s*<\/td>/
+    )
+    expect(response.result).toContain('Names starting _ga_')
+    expect(response.result).toContain(
+      'If you choose not to accept analytics cookies, we remove any that have already been set.'
+    )
+    expect(response.result).toContain('Analytics cookies (optional)')
+    expect(response.result).toMatch(/value="no"[^>]*checked/)
+  })
+
+  test('GET /cookies reflects an accepted policy from the cookie', async () => {
+    // Arrange
+    await createServer({ gtmId: 'GTM-ABC1234' })
 
     // Act
     const response = await server.inject({
@@ -203,6 +239,60 @@ describe('createCookiesPlugin()', () => {
       'cookies_policy=%7B%22essential%22%3Atrue%2C%22analytics%22%3Afalse%7D'
     )
     expect(response.headers.location).toBe('/cookies?saved=true&returnPath=%2F')
+  })
+
+  test('POST /cookies removes the Google Analytics cookies on refusal', async () => {
+    // Arrange
+    await createServer()
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: {
+        'sec-fetch-site': 'same-origin',
+        host: 'front-office.lis.defra',
+        cookie: '_ga=GA1.1.1; _ga_ABC123=GS1.1.1; front-office-session=abc'
+      },
+      payload: { analytics: 'no' }
+    })
+
+    // Assert
+    const expired = 'Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/'
+    const setCookies = response.headers['set-cookie']
+    expect(setCookies).toHaveLength(7)
+    expect(setCookies).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('cookies_policy=%7B%22essential'),
+        `_ga=; ${expired}`,
+        `_ga=; ${expired}; Domain=front-office.lis.defra`,
+        `_ga=; ${expired}; Domain=lis.defra`,
+        `_ga_ABC123=; ${expired}`,
+        `_ga_ABC123=; ${expired}; Domain=front-office.lis.defra`,
+        `_ga_ABC123=; ${expired}; Domain=lis.defra`
+      ])
+    )
+  })
+
+  test('POST /cookies keeps the Google Analytics cookies on acceptance', async () => {
+    // Arrange
+    await createServer()
+
+    // Act
+    const response = await server.inject({
+      method: 'POST',
+      url: '/cookies',
+      headers: {
+        'sec-fetch-site': 'same-origin',
+        host: 'front-office.lis.defra',
+        cookie: '_ga=GA1.1.1'
+      },
+      payload: { analytics: 'yes' }
+    })
+
+    // Assert
+    expect(response.headers['set-cookie']).toHaveLength(1)
+    expect(response.headers['set-cookie'][0]).toContain('cookies_policy=')
   })
 
   test('POST /cookies with an invalid choice sets nothing and returns to the page', async () => {
