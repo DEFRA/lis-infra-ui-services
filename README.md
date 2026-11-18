@@ -54,7 +54,7 @@ const nunjucksConfig = createNunjucksConfig({
 await server.register(nunjucksConfig)
 ```
 
-The template components are `appHeading`, `appAutocomplete`, `lisDatePicker`, `lisSubNavigation`, plus the search form,
+The template components are `appHeading`, `appAutocomplete`, `lisCookieBanner`, `lisDatePicker`, `lisSubNavigation`, plus the search form,
 sortable paginated table and date templates. `createNunjucksContextBuilder` (also exported from
 `/nunjucks-context`) builds just the view context. The filters `formatAge`, `formatDate`,
 `formatEarTag`, `formatCurrency` and `queryString` are also exported from `/nunjucks/filters`, and the
