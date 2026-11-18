@@ -41,7 +41,7 @@ const essentialCookies = [
 
 let server
 
-async function createServer({ withCsrf = false } = {}) {
+async function createServer({ withCsrf = false, gtmId = null } = {}) {
   server = hapi.server()
   await server.register({
     plugin: hapiVision,
@@ -55,7 +55,7 @@ async function createServer({ withCsrf = false } = {}) {
         }
       },
       path: path.join(packageRoot, 'src/nunjucks/routes'),
-      context: { cookiesPath: '/cookies' }
+      context: { cookiesPath: '/cookies', gtmId }
     }
   })
   server.auth.scheme('none', () => ({
@@ -106,6 +106,42 @@ describe('createCookiesPlugin()', () => {
     expect(response.result).toContain('Keeps you signed in')
     expect(response.result).toMatch(/value="no"[^>]*checked/)
     expect(response.result).not.toContain('govuk-notification-banner')
+  })
+
+  test('GET /cookies says no analytics cookies are set when the hub has no Google Tag Manager container', async () => {
+    // Arrange
+    await createServer()
+
+    // Act
+    const response = await server.inject({ method: 'GET', url: '/cookies' })
+
+    // Assert
+    expect(response.result).toContain(
+      'We do not currently set any analytics cookies.'
+    )
+    expect(response.result).not.toContain('Google Analytics')
+    expect(response.result).not.toContain('_ga')
+  })
+
+  test('GET /cookies lists the Google Analytics cookies when the hub has a Google Tag Manager container', async () => {
+    // Arrange
+    await createServer({ gtmId: 'GTM-ABC1234' })
+
+    // Act
+    const response = await server.inject({ method: 'GET', url: '/cookies' })
+
+    // Assert
+    expect(response.result).toContain('We use Google Analytics to do this.')
+    expect(response.result).toMatch(
+      /<td class="govuk-table__cell">\s*_ga\s*<\/td>/
+    )
+    expect(response.result).toContain('Names starting _ga_')
+    expect(response.result).toContain(
+      'If you choose not to accept analytics cookies, we remove any that have already been set.'
+    )
+    expect(response.result).not.toContain(
+      'We do not currently set any analytics cookies.'
+    )
   })
 
   test('GET /cookies reflects an accepted policy from the cookie', async () => {

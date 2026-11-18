@@ -427,6 +427,8 @@ await server.register(
 
 `GET /cookies` shows the page, with a form to change the choice. `POST /cookies` records a choice (`analytics=yes|no`), ignoring any post that is not same-origin (it opts out of the CSRF plugin, as a signed-out visitor has no token), and redirects to the page with a confirmation and a link back to the same-host page the visitor came from. The `CookieBanner` component is part of `layoutComponents` (see [Layout scripts](#layout-scripts)), so a hub that already initialises those needs no further client-side change. `getCookiesPolicy(request)` from `@defra/lis-infra-ui-services/cookies/cookies-policy` reads the recorded choice server-side.
 
+When the hub has a Google Tag Manager container id, the page lists the Google Analytics cookies in place of saying that none are set; the list is kept by hand in `cookies/index.njk`.
+
 Refusing analytics at `POST /cookies` also removes the Google Analytics cookies the browser sent (`_ga`, `_ga_<id>`, `_gid`, `_gat`). Google chooses the domain it sets them for, so each is expired for the host and for every parent domain.
 
 ### Google Tag Manager
