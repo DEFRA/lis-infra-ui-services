@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -10,10 +11,15 @@ import { queryString } from '../../query-string.js'
 
 const componentRoot = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(componentRoot, '../../../..')
+const govukFrontendRoot = path.dirname(
+  createRequire(import.meta.url).resolve('govuk-frontend/package.json')
+)
 const environment = new nunjucks.Environment(
   new nunjucks.FileSystemLoader([
     path.join(projectRoot, 'test/fixtures/nunjucks'),
-    path.dirname(componentRoot)
+    path.dirname(componentRoot),
+    // after the fixtures, for govukAttributes in the scrollable pane
+    path.join(govukFrontendRoot, 'dist')
   ]),
   { autoescape: true, trimBlocks: true, lstripBlocks: true }
 )
@@ -156,7 +162,7 @@ test('renders no caption, and a generic region label, when no caption is given',
   })
 
   assert.doesNotMatch(html, /<caption/)
-  assert.match(html, /role="region" aria-label="Table">/)
+  assert.match(html, /role="region" tabindex="0" aria-label="Table">/)
 })
 
 test('wraps the table in a focusable, labelled region so it can be scrolled by keyboard', () => {
@@ -169,21 +175,22 @@ test('wraps the table in a focusable, labelled region so it can be scrolled by k
 
   assert.match(
     html,
-    /<div class="lis-sortable-table__wrapper" data-module="lis-scrollable-table" tabindex="0" role="region" aria-label="Animals table">\s*<table/
+    /<div class="lis-scrollable-pane" data-module="lis-scrollable-pane" role="region" tabindex="0" aria-label="Animals table">\s*<table class="govuk-table lis-sortable-table">/
   )
 })
 
-test('marks the wrapper as a lis-scrollable-table module', () => {
+test('adds the given classes to the table after its own', () => {
   const html = render({
     caption: 'Animals',
     columns,
     rows,
-    baseHref: '/animals'
+    baseHref: '/animals',
+    classes: 'lis-sortable-table--no-wrap'
   })
 
   assert.match(
     html,
-    /<div class="lis-sortable-table__wrapper" data-module="lis-scrollable-table"/
+    /<table class="govuk-table lis-sortable-table lis-sortable-table--no-wrap">/
   )
 })
 
