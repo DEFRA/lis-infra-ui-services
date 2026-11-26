@@ -1,0 +1,18 @@
+{#
+  Arguments follow the scrollable pane in MoJ Frontend
+  (https://github.com/ministryofjustice/moj-frontend), MIT licence.
+  Copyright (c) 2019 Ministry of Justice
+#}
+{% from "govuk/macros/attributes.njk" import govukAttributes %}
+
+{#- a region needs a name, so it is only a focusable region when labelled -#}
+{%- set regionAttributes = {} -%}
+{%- if params.label -%}
+  {%- set regionAttributes = { role: "region", tabindex: "0", "aria-label": params.label } -%}
+{%- elif params.labelledBy -%}
+  {%- set regionAttributes = { role: "region", tabindex: "0", "aria-labelledby": params.labelledBy } -%}
+{%- endif -%}
+
+<div class="lis-scrollable-pane{{ (" " ~ params.classes) if params.classes }}" data-module="lis-scrollable-pane"{{ govukAttributes(regionAttributes) }}{{ govukAttributes(params.attributes) }}>
+  {{ caller() if caller else params.html | safe }}
+</div>

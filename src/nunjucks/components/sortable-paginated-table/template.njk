@@ -1,5 +1,6 @@
 {% from "govuk/components/table/macro.njk" import govukTable %}
 {% from "govuk/components/pagination/macro.njk" import govukPagination %}
+{% from "scrollable-pane/macro.njk" import lisScrollablePane %}
 
 {%- set query = params.query or {} -%}
 
@@ -46,16 +47,16 @@
   {{ params.caption }}{% if sortableColumns | length %}<span class="govuk-visually-hidden"> (column headers with links are sortable).</span>{% endif %}
 {%- endset -%}
 
-<div class="lis-sortable-table__wrapper" data-module="lis-scrollable-table" tabindex="0" role="region" aria-label="{{ (params.caption ~ ' table') if params.caption else 'Table' }}">
+{% call lisScrollablePane({ label: (params.caption ~ ' table') if params.caption else 'Table' }) %}
   {{ govukTable({
     caption: (captionHtml | safe) if params.caption else undefined,
     captionClasses: params.captionClasses or "govuk-visually-hidden",
-    classes: params.classes,
+    classes: ("lis-sortable-table " ~ params.classes) if params.classes else "lis-sortable-table",
     firstCellIsHeader: params.firstCellIsHeader,
     head: head,
     rows: params.rows
   }) }}
-</div>
+{% endcall %}
 
 {%- if params.pagination -%}
   {%- set currentPage = params.pagination.currentPage -%}

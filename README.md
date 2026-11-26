@@ -291,24 +291,42 @@ createNunjucksConfig({
 
 `errorPageComponents` from `@defra/lis-infra-ui-services/components/error-pages` is the list the shared error pages render (Button, for the not-authorised sign-in button). Every app that serves the shared error pages must add it.
 
-Start each with `createAll`, alongside any page-level components (see the full example under [Scrollable table](#scrollable-table)).
+Start each with `createAll`, alongside any page-level components (see the full example under [Scrollable pane](#scrollable-pane)).
 
 Wrap the combined list in a `Set`, so a component that appears in more than one list (or that the app also lists itself) is only initialised once: govuk's base class logs an InitError on double init.
 
-#### Scrollable table
+#### Scrollable pane
 
-Apps that render the sortable paginated table macro also start `ScrollableTable` from `@defra/lis-infra-ui-services/components/scrollable-table`. It drops the tab stop (and the region role and label) from a table wrapper that fits, and restores them when the table overflows, re-checking whenever the wrapper or table changes size. Without JavaScript the wrapper stays focusable.
+The `lisScrollablePane` template component wraps content that can be wider than the screen, usually a table, in a pane that scrolls sideways on its own rather than making the whole page scroll. Its arguments follow the [MoJ Frontend scrollable pane](https://design-patterns.service.justice.gov.uk/components/scrollable-pane) (MIT licence, see [LICENCE-moj-frontend.txt](./LICENCE-moj-frontend.txt)):
+
+- `label`: the pane's accessible name (`aria-label`)
+- `labelledBy`: the id of the element that names the pane (`aria-labelledby`), ignored when `label` is given
+- `classes` and `attributes`: added to the pane
+- `html`: the content, when not used with `{% call %}`
+
+Give it a `label` or `labelledBy`: only then is it a focusable `region`, so keyboard users can reach it to scroll it. The sortable paginated table already renders its table inside one, labelled "<caption> table".
+
+```njk
+{% from "govuk/components/table/macro.njk" import govukTable %}
+{% from "scrollable-pane/macro.njk" import lisScrollablePane %}
+
+{% call lisScrollablePane({ label: "Animals on this holding" }) %}
+  {{ govukTable({ head: head, rows: rows }) }}
+{% endcall %}
+```
+
+Import its styles from `components/scrollable-pane.scss` (`components/sortable-paginated-table.scss` includes them), and start `ScrollablePane` from `@defra/lis-infra-ui-services/components/scrollable-pane`. It drops the tab stop (and the region role and label) from a pane whose content fits, and restores them when the content overflows, re-checking whenever the pane or its content changes size. Without JavaScript the pane stays focusable. `ScrollableTable` from `components/scrollable-table` is a deprecated alias of `ScrollablePane`.
 
 ```js
 import { createAll, Tabs } from 'govuk-frontend'
 import { errorPageComponents } from '@defra/lis-infra-ui-services/components/error-pages'
 import { layoutComponents } from '@defra/lis-infra-ui-services/components/layout'
-import { ScrollableTable } from '@defra/lis-infra-ui-services/components/scrollable-table'
+import { ScrollablePane } from '@defra/lis-infra-ui-services/components/scrollable-pane'
 
 for (const component of new Set([
   ...layoutComponents,
   ...errorPageComponents,
-  ScrollableTable,
+  ScrollablePane,
   Tabs
 ])) {
   createAll(component)
@@ -368,8 +386,9 @@ The `lisForm` template component renders a `novalidate` form with the CSRF token
 ### Styles
 
 Import the Sass files you need from your app's stylesheet: `components/autocomplete.scss`,
-`components/date-picker.scss`, `components/search-form.scss`, `components/service-navigation.scss`,
-`components/sortable-paginated-table.scss` and `components/sub-navigation.scss`.
+`components/date-picker.scss`, `components/scrollable-pane.scss`, `components/search-form.scss`,
+`components/service-navigation.scss`, `components/sortable-paginated-table.scss` (which includes the
+scrollable pane's) and `components/sub-navigation.scss`.
 
 ```scss
 @use 'pkg:@defra/lis-infra-ui-services/components/service-navigation.scss';
