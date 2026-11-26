@@ -7,7 +7,6 @@ node_modules
 tools
 npm-debug.log
 coverage
-.cake
 artifacts
 .cache
 .envrc
